@@ -9,6 +9,7 @@ activate virtualenv
 install requirements
 
     pip install -r requirements.txt
+    apt install phantomjs
 
 # Config file
 
@@ -38,3 +39,4 @@ Run the print_commands.py script and answer the questions. The script needs to k
 
 * Fix up the enum4linux file.
 * ~Move the pentest base folder to the config file and update the print_commands file~
+* Fix up web_commands script
