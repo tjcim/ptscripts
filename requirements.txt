@@ -1,0 +1,12 @@
+certifi==2017.7.27.1
+chardet==3.0.4
+idna==2.6
+nessrest==0.40
+olefile==0.44
+Pillow==4.2.1
+pkg-resources==0.0.0
+python-owasp-zap-v2.4==0.0.12
+requests==2.18.4
+selenium==3.6.0
+six==1.11.0
+urllib3==1.22
