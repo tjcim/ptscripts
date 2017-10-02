@@ -2,16 +2,23 @@ import os
 import time
 
 import config
-from utils import dir_exists, get_ips_with_port_open
+from utils import dir_exists
 
 
-def create_command_file(command_file, pentest_dir_name):
+def create_command_file(command_file, pentest_dir_name, proxy):
     """ Creates a new command file. """
+    if proxy:
+        proxy_text = ' -- using proxy'
+    else:
+        proxy_text = ' no proxy'
     with open(command_file, "w") as f:
-        f.write('Pentest commands for {} created {}\r\n'.format(
+        statement = 'Pentest commands for {} created {} {}\r\n'.format(
             pentest_dir_name,
-            time.strftime('%I:%M%p %Z on %b %d, %Y')))
-        f.write('*' * 50 + '\r\n\r\n')
+            time.strftime('%I:%M%p %Z on %b %d, %Y'),
+            proxy_text
+        )
+        f.write(statement)
+        f.write('*' * len(statement) + '\r\n\r\n')
 
 
 def write_comment_to_file(comment, command_file):
@@ -33,17 +40,18 @@ def get_pentest_info():
     pentest_dir_name = input('Pentest directory name? ')  # noqa: F821
     domain_name = input('Domain for dnsrecon? ')  # noqa: F821
     ip_file_name = input('Name of ip file [ips.txt]: ') or "ips.txt"  # noqa: F821
-    return (pentest_dir_name, domain_name, ip_file_name)
+    use_proxy = bool(input('Use proxy [False]: '))
+    return (pentest_dir_name, domain_name, ip_file_name, use_proxy)
 
 
-def run_print_commands():  # pylint: disable=too-many-locals,too-many-statements
+def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-statements
     """ Print commands to file. """
-    pentest_dir_name, domain_name, ip_file_name = get_pentest_info()  # pylint: disable=unused-variable
+    pentest_dir_name, domain_name, ip_file_name, use_proxy = get_pentest_info()  # pylint: disable=unused-variable
 
     pentest_path = os.path.join(config.BASE_PATH, pentest_dir_name)
     resource_path = os.path.join(pentest_path, 'rc_files')
     command_file = os.path.join(pentest_path, 'commands.txt')
-    create_command_file(command_file, pentest_dir_name)
+    create_command_file(command_file, pentest_dir_name, use_proxy)
 
     def write_command(command):
         write_command_to_file(command, command_file)
@@ -55,14 +63,20 @@ def run_print_commands():  # pylint: disable=too-many-locals,too-many-statements
         """ Shorthand script for path.join """
         return os.path.join(config.SCRIPTS_PATH, script)
 
-    def pyscript(script, in_file, out_dir=None, aha=False):
+    def pyscript(script, in_file, out_dir=None, aha=False, use_proxy=False):
         """ Shorthand function to return python <script> in out """
         if out_dir:
             if aha:
+                if use_proxy:
+                    return "python {} {} --proxy | tee /dev/tty | aha -b > {}".format(pj(script), in_file, out_dir)
                 return "python {} {} | tee /dev/tty | aha -b > {}".format(pj(script), in_file, out_dir)
             else:
+                if use_proxy:
+                    return "python {} {} {} --proxy".format(pj(script), in_file, out_dir)
                 return "python {} {} {}".format(pj(script), in_file, out_dir)
         else:
+            if use_proxy:
+                return "python {} {} --proxy".format(pj(script), in_file)
             return "python {} {}".format(pj(script), in_file)
 
     # Create directories
@@ -98,7 +112,7 @@ def run_print_commands():  # pylint: disable=too-many-locals,too-many-statements
 
     # webserver screenshots
     screenshot_path = os.path.join(pentest_path, "website_screenshots")
-    screenshot_command = pyscript("website_screenshot.py", webserver_path, screenshot_path)
+    screenshot_command = pyscript("website_screenshot.py", webserver_path, screenshot_path, use_proxy=use_proxy)
     write_command(screenshot_command)
 
     # metasploit workspace and import nmap
@@ -121,11 +135,15 @@ def run_print_commands():  # pylint: disable=too-many-locals,too-many-statements
 
     # yasuo
     yasuo_html = os.path.join(pentest_path, "yasuo.html")
-    yasuo_command = "yasuo.rb -s /opt/yasuo/signatures.yaml -f {} -t 10 | tee /dev/tty | aha -b > {}".format(nmap_xml, yasuo_html)
+    if use_proxy:
+        yasuo_command = "yasuo.rb -s /opt/yasuo/signatures.yaml -f {} -t 10 | tee /dev/tty | aha -b > {}".format(nmap_xml, yasuo_html)
+    else:
+        yasuo_command = "proxychains yasuo.rb -s /opt/yasuo/signatures.yaml -f {} -t 10 | tee /dev/tty | aha -b > {}".format(nmap_xml, yasuo_html)
     write_command(yasuo_command)
 
     # multi_enum4linux
-    enum4linux_command = pyscript("multi_enum4linux.py", ips_text)
+    enum4linux_html = os.path.join(pentest_path, "enum4linux.html")
+    enum4linux_command = pyscript("multi_enum4linux.py", csv_path, enum4linux_html, aha=True, use_proxy=use_proxy)
     write_command(enum4linux_command)
 
     # multi_wpscan
@@ -137,7 +155,7 @@ def run_print_commands():  # pylint: disable=too-many-locals,too-many-statements
 
     # multi_nikto
     nikto_dir_path = os.path.join(pentest_path, "nikto")
-    nikto_command = pyscript("multi_nikto.py", csv_path, nikto_dir_path)
+    nikto_command = pyscript("multi_nikto.py", csv_path, nikto_dir_path, use_proxy=use_proxy)
     write_command(nikto_command)
 
     # endpointmapper
@@ -196,9 +214,9 @@ def run_print_commands():  # pylint: disable=too-many-locals,too-many-statements
     write_command(ike_command)
 
     # hydra ftp
-    ftp_ips = get_ips_with_port_open(csv_path, 21)
-    for ip in ftp_ips:
-        write_command("hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt -v {} ftp".format(ip))
+    # ftp_ips = get_ips_with_port_open(csv_path, 21)
+    # for ip in ftp_ips:
+    # write_command("hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt -v {} ftp".format(ip))
 
 
 if __name__ == '__main__':

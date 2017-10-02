@@ -40,3 +40,9 @@ Run the print_commands.py script and answer the questions. The script needs to k
 * Fix up the enum4linux file.
 * ~Move the pentest base folder to the config file and update the print_commands file~
 * Fix up web_commands script
+* Create script to run after ports.csv has been created for things like ike_scan
+* Add ability to use proxy in print_commands
+  * Change nmap command to the appropriate settings
+* Add ability to do something like starr/internal for when I am doing both an internal and external pentest
+  * This causes a problem right now for things like db_import where I use the foldername directly
+* Rewrite the website_screenshots script to take a picture when redirected and the end_url is in the url_list. Then skip it when it comes up. This way we don't connect to the non-https version get redirected to the https version and then drop it.
