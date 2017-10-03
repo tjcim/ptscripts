@@ -53,6 +53,15 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     command_file = os.path.join(pentest_path, 'commands.txt')
     create_command_file(command_file, pentest_dir_name, use_proxy)
 
+    # This allows the user to put the pentest_dir_name as something like company/external
+    # and another as company/internal. All commands will work the same except for the
+    # metasploit workspace and the nessus scan name will be company_external and
+    # company_internal.
+    if '/' in pentest_dir_name:
+        workspace_name = pentest_dir_name.replace('/', '_')
+    else:
+        workspace_name = pentest_dir_name
+
     def write_command(command):
         write_command_to_file(command, command_file)
 
@@ -90,7 +99,7 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
 
     # nessus scan
     write_comment('Make sure nessus is accessible via {} (configurable through config file)'.format(config.NESSUS_URL))
-    nessus_command = pyscript('nessus_scan.py', ips_text, pentest_dir_name)
+    nessus_command = pyscript('nessus_scan.py', ips_text, workspace_name)
     write_command(nessus_command)
 
     # nmap
@@ -103,25 +112,29 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     # csv file
     csv_path = os.path.join(pentest_path, 'ports.csv')
     csv_command = pyscript('nmap_to_csv.py', nmap_xml, pentest_path)
+    write_comment('Creates a ports.csv file with just the open ports.')
     write_command(csv_command)
 
     # webservers list
     webserver_path = os.path.join(pentest_path, "webservers.txt")
     webserver_command = pyscript("create_webserver_list.py", csv_path, pentest_path)
+    write_comment('Creates a webservers.txt file with a list of every URL found.')
     write_command(webserver_command)
 
     # webserver screenshots
     screenshot_path = os.path.join(pentest_path, "website_screenshots")
     screenshot_command = pyscript("website_screenshot.py", webserver_path, screenshot_path, use_proxy=use_proxy)
+    write_comment('Uses phantomjs to open each URL found and takes a picture of it and saves it in the website_screenshots folder.')
     write_command(screenshot_command)
 
     # metasploit workspace and import nmap
     workspace_import_path = os.path.join(resource_path, "db_import.rc")
     with open(workspace_import_path, "w") as f:
-        f.write("workspace -a {}\n".format(pentest_dir_name))
+        f.write("workspace -a {}\n".format(workspace_name))
         f.write("db_import {}\n".format(nmap_xml))
         f.write("hosts")
     metasploit_workspace_command = 'msfconsole -r {}'.format(workspace_import_path)
+    write_comment('Creates a metasploit workspace and imports the hosts found using the nmap.xml file.')
     write_command(metasploit_workspace_command)
 
     # dnsrecon
@@ -144,6 +157,7 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     # multi_enum4linux
     enum4linux_html = os.path.join(pentest_path, "enum4linux.html")
     enum4linux_command = pyscript("multi_enum4linux.py", csv_path, enum4linux_html, aha=True, use_proxy=use_proxy)
+    write_comment('Runs the enum4linux command on each IP.')
     write_command(enum4linux_command)
 
     # multi_wpscan
@@ -151,11 +165,13 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     wpscan_update_command = "wpscan --update"
     wpscan_command = pyscript("multi_wpscan.py", webserver_path, wpscan_html, aha=True)
     write_command(wpscan_update_command)
+    write_comment('Runs the wpscan command for every URL found.')
     write_command(wpscan_command)
 
     # multi_nikto
     nikto_dir_path = os.path.join(pentest_path, "nikto")
     nikto_command = pyscript("multi_nikto.py", csv_path, nikto_dir_path, use_proxy=use_proxy)
+    write_comment('Runs nikto for every URL found.')
     write_command(nikto_command)
 
     # endpointmapper
@@ -173,6 +189,7 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     # multi_testssl
     testssl_path = os.path.join(pentest_path, "testssl")
     testssl_command = pyscript("multi_testssl.py", webserver_path, testssl_path)
+    write_comment('Runs testssl for every URL found.')
     write_command(testssl_command)
 
     # smtp_relay
@@ -189,11 +206,13 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     # multi_whatweb
     whatweb_path = os.path.join(pentest_path, "whatweb")
     whatweb_command = pyscript("multi_whatweb.py", webserver_path, whatweb_path)
+    write_comment('Runs whatweb for every URL found.')
     write_command(whatweb_command)
 
     # zap_attack
     zap_path = os.path.join(pentest_path, "zap")
     zap_command = pyscript("zap_attack.py", webserver_path, zap_path)
+    write_comment('Make sure ZAP is up and running first.')
     write_command(zap_command)
 
     # burp requests

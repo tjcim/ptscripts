@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-
-# example string: 110536896.20480.0000
-
 import struct
-import sys
+import argparse
 
-if len(sys.argv) != 2:
-    print("Usage: %s encoded_string" % sys.argv[0])
-    exit(1)
 
-encoded_string = sys.argv[1]
-print("\n[*] String to decode: %s\n" % encoded_string)
+def run_big_ip_decoder(encoded_string):
+    print("\n[*] String to decode: {}\n".format(encoded_string))
+    (host, port, _) = encoded_string.split('.')
+    (a, b, c, d) = [i for i in struct.pack("<I", int(host))]
+    (e) = [e for e in struct.pack("<H", int(port))]
+    port = "0x{:02x}{:02x}".format(e[0], e[1])
+    print("[*] Decoded Host and Port: {}.{}.{}.{}:{}".format(a, b, c, d, int(port, 16)))
 
-(host, port, end) = encoded_string.split('.')
 
-(a, b, c, d) = [ord(i) for i in struct.pack("<I", int(host))]
+def parse_args():
+    parser = argparse.ArgumentParser(prog='big_ip_decoder.py')
+    parser.add_argument('input', help='Cookie string (eg: 110536896.20480.0000 )')
+    return parser.parse_args()
 
-(e) = [ord(e) for e in struct.pack("<H", int(port))]
-port = "0x%02X%02X" % (e[0],e[1])
 
-print("[*] Decoded Host and Port: %s.%s.%s.%s:%s\n" % (a,b,c,d, int(port,16)))
+if __name__ == '__main__':
+    run_big_ip_decoder(parse_args().input)

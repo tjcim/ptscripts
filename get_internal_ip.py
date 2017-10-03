@@ -1,21 +1,21 @@
-import csv
 import telnetlib
 import argparse
-from urllib.parse import urlparse
+from urllib.parse import urlparse  # pylint: disable=no-name-in-module, import-error
+
 from bs4 import BeautifulSoup
 
-
-import os
-dir = os.path.normpath(os.path.join(os.path.abspath(__file__), '../'))
+from utils import parse_csv_for_webservers
 
 
-def mytelnet(host, port):
+def run_get_internal_ip(webserver):
+    host = webserver['ip_addr']
+    port = webserver['port']
     tn = telnetlib.Telnet(host, port)
     tn.write(b'GET /images\r\n')
     tn.write(b'exit\r\n')
     try:
         html_resp = tn.read_all()
-    except:
+    except:  # pylint: disable=bare-except
         return
     soup = BeautifulSoup(html_resp)
     redirect_tag = soup.find('a')
@@ -23,34 +23,22 @@ def mytelnet(host, port):
         href = redirect_tag.get('href')
         url_parts = urlparse(href)
         if not host == url_parts.netloc:
-            f = open('internal_ips.txt', 'a')
-            f.write('{0}:{1}\n'.format(host, url_parts.netloc))
             print("Possible internal ip: {0}:{1}".format(host, url_parts.netloc))
     except AttributeError:
         return
 
 
-def read_targets(input_file):
-    # Read input file
-    targets = []
-    with open(input_file, 'rt') as f:
-        reader = csv.reader(f)
-        for row in reader:
-            if int(row[1]) == 80:
-                p = row[0], row[1]
-                targets.append(p)
-    return targets
+def run_get_internal_ip_on_webservers(csv_input):
+    webservers = parse_csv_for_webservers(csv_input)
+    for webserver in webservers:
+        run_get_internal_ip(webserver)
 
 
-def main():
-    parser = argparse.ArgumentParser(prog='ip_disc.py')
-    parser.add_argument('input', help='List of hosts to check.  Format:(hostname/ip,port)')
-    args = parser.parse_args()
-    input_file = os.path.normpath(os.path.join(dir, args.input))
-    target_list = read_targets(input_file)
-    for target in target_list:
-        mytelnet(target[0], int(target[1]))
+def parse_args():
+    parser = argparse.ArgumentParser(prog='get_internal_ip.py')
+    parser.add_argument('input', help='File with a list of urls to check)')
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
-    main()
+    run_get_internal_ip_on_webservers(parse_args().input)
