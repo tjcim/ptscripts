@@ -5,6 +5,7 @@ env/
 .ropeproject
 hydra.restore
 ghostdriver.log
+config.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

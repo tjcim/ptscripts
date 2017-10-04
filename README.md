@@ -13,6 +13,8 @@ install requirements
 
 # Config file
 
+Copy the config.py.sample to config.py
+
 Edit the config.py file and replace with the correct information for your environment.
 
 # Pentest folder prep
