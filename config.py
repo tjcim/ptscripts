@@ -7,6 +7,9 @@ SCRIPTS_PATH = os.path.abspath(os.path.dirname(__file__))
 # Set this to where your pentests are stored
 BASE_PATH = '/root/pentests/'
 
+# Should the print_commands.py file print command comments? Comments are useful if this is your first time using the scripts.
+PRINT_COMMENTS = False
+
 PROXY_PORT = '9050'
 # When using a proxy, how long should we wait before taking screenshot?
 PROXY_SLEEP = 10

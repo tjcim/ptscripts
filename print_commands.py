@@ -23,9 +23,10 @@ def create_command_file(command_file, pentest_dir_name, proxy):
 
 def write_comment_to_file(comment, command_file):
     """ Writes a comment about the following command. """
-    com = "# " + comment + '\r\n'
-    with open(command_file, "a") as f:
-        f.write(com)
+    if config.PRINT_COMMENTS:
+        com = "# " + comment + '\r\n'
+        with open(command_file, "a") as f:
+            f.write(com)
 
 
 def write_command_to_file(command, command_file):
