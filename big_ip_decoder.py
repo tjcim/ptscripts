@@ -8,7 +8,10 @@ def run_big_ip_decoder(encoded_string):
     (a, b, c, d) = [i for i in struct.pack("<I", int(host))]
     (e) = [e for e in struct.pack("<H", int(port))]
     port = "0x{:02x}{:02x}".format(e[0], e[1])
-    print("[*] Decoded Host and Port: {}.{}.{}.{}:{}".format(a, b, c, d, int(port, 16)))
+    decoded_host = '{}.{}.{}.{}'.format(a, b, c, d)
+    decoded_port = str(int(port, 16))
+    print("[*] Decoded Host and Port: {}:{}".format(decoded_host, decoded_port))
+    return decoded_host, decoded_port
 
 
 def parse_args():

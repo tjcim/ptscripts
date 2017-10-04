@@ -10,6 +10,7 @@ def uses_encryption(url):
 
 
 def parse_webserver_urls(url_file):
+    """ Reads in a file and returns a list of each line. """
     webserver_urls = []
     with open(url_file) as fp:
         for line in fp:
