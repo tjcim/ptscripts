@@ -1,8 +1,8 @@
 import os
 import time
 
-import config
-from utils import dir_exists
+import ptscripts.config as config
+from ptscripts.utils import dir_exists
 
 
 def create_command_file(command_file, pentest_dir_name, proxy):
@@ -217,6 +217,7 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
 
     # burp requests
     burp_command = pyscript("burp_requests.py", webserver_path)
+    write_comment("Make sure burp is running and is listening on port {}".format(config.BURP_PORT))
     write_command(burp_command)
 
     # open_websites

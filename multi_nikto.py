@@ -2,7 +2,7 @@ import os
 import argparse
 import subprocess
 
-from utils import parse_csv_for_webservers, dir_exists
+from ptscripts.utils import parse_csv_for_webservers, dir_exists
 
 
 def run_nikto(webserver, output_dir, proxy):

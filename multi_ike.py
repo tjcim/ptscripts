@@ -1,7 +1,7 @@
 import argparse
 import subprocess
 
-from utils import get_ips_with_port_open
+from ptscripts.utils import get_ips_with_port_open
 
 
 def run_ike(ike_ips):

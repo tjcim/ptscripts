@@ -4,7 +4,7 @@ from urllib.parse import urlparse  # pylint: disable=no-name-in-module, import-e
 
 from bs4 import BeautifulSoup
 
-from utils import parse_csv_for_webservers
+from ptscripts.utils import parse_csv_for_webservers
 
 
 def run_get_internal_ip(webserver):

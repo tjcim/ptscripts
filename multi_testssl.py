@@ -3,7 +3,7 @@ import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from utils import parse_webserver_urls, uses_encryption, dir_exists
+from ptscripts.utils import parse_webserver_urls, uses_encryption, dir_exists
 
 
 def run_testssl(url, output_dir):

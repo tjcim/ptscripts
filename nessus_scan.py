@@ -2,7 +2,7 @@ import argparse
 
 from nessrest import ness6rest  # pylint: disable=import-error
 
-import config
+import ptscripts.config as config
 
 
 def run_nessus_scan(ips, scan_name):

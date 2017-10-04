@@ -1,7 +1,7 @@
 import argparse
 import subprocess
 
-from utils import parse_webserver_urls
+from ptscripts.utils import parse_webserver_urls
 
 
 def run_wpscan(webservers):

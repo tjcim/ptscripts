@@ -9,8 +9,8 @@ from PIL import Image
 from selenium import webdriver  # pylint: disable=import-error
 from selenium.common.exceptions import TimeoutException  # pylint: disable=import-error
 
-import config
-from utils import parse_webserver_urls, dir_exists
+import ptscripts.config as config
+from ptscripts.utils import parse_webserver_urls, dir_exists
 
 
 def take_screenshot(url, output_dir, url_list=None, proxy=False):
