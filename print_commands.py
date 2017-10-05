@@ -1,8 +1,8 @@
 import os
 import time
 
-import ptscripts.config as config
-from ptscripts.utils import dir_exists
+import config
+from utils import dir_exists
 
 
 def create_command_file(command_file, pentest_dir_name, proxy):
@@ -73,21 +73,18 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
         """ Shorthand script for path.join """
         return os.path.join(config.SCRIPTS_PATH, script)
 
-    def pyscript(script, in_file, out_dir=None, aha=False, use_proxy=False):
+    def pyscript(script, in_file, out_dir=None, aha=False, use_proxy=False, line_fix=False):  # pylint: disable=too-many-arguments
         """ Shorthand function to return python <script> in out """
-        if out_dir:
-            if aha:
-                if use_proxy:
-                    return "python {} {} --proxy | tee /dev/tty | aha -b > {}".format(pj(script), in_file, out_dir)
-                return "python {} {} | tee /dev/tty | aha -b > {}".format(pj(script), in_file, out_dir)
-            else:
-                if use_proxy:
-                    return "python {} {} {} --proxy".format(pj(script), in_file, out_dir)
-                return "python {} {} {}".format(pj(script), in_file, out_dir)
-        else:
-            if use_proxy:
-                return "python {} {} --proxy".format(pj(script), in_file)
-            return "python {} {}".format(pj(script), in_file)
+        command = "python {script} {in_file}{out_dir}{proxy}{aha}".format(
+            script=pj(script), in_file=in_file,
+            out_dir=" " + out_dir if out_dir else "",
+            proxy=" --proxy" if use_proxy else "",
+            aha=" | tee /dev/tty | aha -b {} > {}".format(
+                "--line-fix" if line_fix else "",
+                out_dir if out_dir else ""
+            ) if aha else "",
+        )
+        return command
 
     # Create directories
     dir_exists(resource_path, True)
@@ -157,7 +154,7 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
 
     # multi_enum4linux
     enum4linux_html = os.path.join(pentest_path, "enum4linux.html")
-    enum4linux_command = pyscript("multi_enum4linux.py", csv_path, enum4linux_html, aha=True, use_proxy=use_proxy)
+    enum4linux_command = pyscript("multi_enum4linux.py", csv_path, enum4linux_html, aha=True, use_proxy=use_proxy, line_fix=True)
     write_comment('Runs the enum4linux command on each IP.')
     write_command(enum4linux_command)
 

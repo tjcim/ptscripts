@@ -3,7 +3,7 @@ import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from ptscripts.utils import parse_webserver_urls, dir_exists
+from utils import parse_webserver_urls, dir_exists
 
 
 def run_whatweb(url, output_dir):

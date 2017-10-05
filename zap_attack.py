@@ -3,8 +3,8 @@ import argparse
 
 from zapv2 import ZAPv2
 
-import ptscripts.config as config
-from ptscripts.utils import parse_webserver_urls, dir_exists
+import config
+from utils import parse_webserver_urls, dir_exists
 
 
 def run_zap_attack(url, zap):

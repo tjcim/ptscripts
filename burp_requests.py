@@ -3,8 +3,8 @@ import urllib3
 
 import requests
 
-import ptscripts.config as config
-from ptscripts.utils import parse_webserver_urls
+import config
+from utils import parse_webserver_urls
 
 
 def run_burp(url):

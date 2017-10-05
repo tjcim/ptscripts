@@ -1,7 +1,8 @@
 import argparse
 import subprocess
 from urlparse import urlparse
-from ptscripts.iframe import write_iframe
+
+from iframe import write_iframe
 
 
 parser = argparse.ArgumentParser()
