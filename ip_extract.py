@@ -22,13 +22,30 @@ def cidr_to_ip_list(in_cidr):
 def dashed_ips_to_list(in_dashed):
     """ Accept IPs in dashed format and return list of ips """
     ips = []
-    (start, end) = in_dashed.split('-')
-    first_three_octets = start.rsplit('.', 1)[0]
-    last_octet = int(start.split('.')[3])
+    split_by_dash = in_dashed.split('-')
+    if len(split_by_dash[1].split('.')) > 1:
+        print("{} is formatted like this: x.x.x.x-x.x.x.x".format(in_dashed))
+        (start_octets, start_ip) = split_by_dash[0].rsplit('.', 1)
+        (end_octets, end_ip) = split_by_dash[1].rsplit('.', 1)
+        # Check that the third octet of start and end are equal if not raise valueerror
+        # for now.
+        if not start_octets == end_octets:
+            raise ValueError
+
+        print("Starting {}.{} and ending with {}.{}".format(
+            start_octets, start_ip, end_octets, end_ip))
+    else:
+        print("{} is formatted like this: x.x.x.x-x".format(in_dashed))
+        (start_octets, start_ip) = split_by_dash[0].rsplit('.', 1)
+        end_ip = split_by_dash[1]
+
+    start_ip = int(start_ip)
+    end_ip = int(end_ip)
+    start = start_octets + "." + str(start_ip)
     ips.append(start)
-    while last_octet < int(end):
-        last_octet += 1
-        ip = first_three_octets + '.' + str(last_octet)
+    while start_ip < end_ip:
+        start_ip += 1
+        ip = start_octets + "." + str(start_ip)
         ips.append(ip)
     return ips
 
