@@ -33,3 +33,6 @@ ZAP_PROXIES = {
 NESSUS_URL = 'https://10.0.0.29:8834'
 NESSUS_ACCESS_KEY = '8a4b7dac6827c2a9fd9506788810f23611a3f0be3f8e498ee2edcd0d1a033060'
 NESSUS_SECRET_KEY = 'a4f1a47d7dddf2b2d48740472ba04facbae990e32263892c530fcae01e93a475'
+
+# Path to ikebrute - https://github.com/KMGbully/ikebrute
+IKEBRUTE_PATH = '/opt/ikebrute'

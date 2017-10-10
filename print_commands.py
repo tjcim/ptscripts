@@ -12,13 +12,13 @@ def create_command_file(command_file, pentest_dir_name, proxy):
     else:
         proxy_text = ' no proxy'
     with open(command_file, "w") as f:
-        statement = 'Pentest commands for {} created {} {}\r\n'.format(
+        statement = '# Pentest commands for {} created {} {}\r\n'.format(
             pentest_dir_name,
             time.strftime('%I:%M%p %Z on %b %d, %Y'),
             proxy_text
         )
         f.write(statement)
-        f.write('*' * len(statement) + '\r\n\r\n')
+        f.write('# ' + ('*' * len(statement)) + '\r\n\r\n')
 
 
 def write_comment_to_file(comment, command_file):
@@ -76,11 +76,12 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     def pyscript(script, in_file, out_dir=None, aha=False, use_proxy=False, line_fix=False):  # pylint: disable=too-many-arguments
         """ Shorthand function to return python <script> in out """
         command = "python {script} {in_file}{out_dir}{proxy}{aha}".format(
-            script=pj(script), in_file=in_file,
+            script=pj(script),
+            in_file=in_file,
             out_dir=" " + out_dir if out_dir else "",
             proxy=" --proxy" if use_proxy else "",
-            aha=" | tee /dev/tty | aha -b {} > {}".format(
-                "--line-fix" if line_fix else "",
+            aha=" | tee /dev/tty | aha -b {}> {}".format(
+                "--line-fix " if line_fix else "",
                 out_dir if out_dir else ""
             ) if aha else "",
         )
