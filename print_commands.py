@@ -147,9 +147,9 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     # yasuo
     yasuo_html = os.path.join(pentest_path, "yasuo.html")
     if use_proxy:
-        yasuo_command = "yasuo.rb -s /opt/yasuo/signatures.yaml -f {} -t 10 | tee /dev/tty | aha -b > {}".format(nmap_xml, yasuo_html)
-    else:
         yasuo_command = "proxychains yasuo.rb -s /opt/yasuo/signatures.yaml -f {} -t 10 | tee /dev/tty | aha -b > {}".format(nmap_xml, yasuo_html)
+    else:
+        yasuo_command = "yasuo.rb -s /opt/yasuo/signatures.yaml -f {} -t 10 | tee /dev/tty | aha -b > {}".format(nmap_xml, yasuo_html)
     write_command(yasuo_command)
 
     # multi_enum4linux
