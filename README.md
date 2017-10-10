@@ -49,4 +49,4 @@ Run the print_commands.py script and answer the questions. The script needs to k
   * ~This causes a problem right now for things like db_import where I use the foldername directly~
 * get_internal_ip - This only works for http sites. I should filter out ssl sites to start with, then figure out if the same works over ssl.
 * Add tests for nmap_to_csv.py and create_webserver_list.py
-* Add ability to have dashed ips in the form of 192.168.1.5-192.168.1.45
+* ~Add ability to have dashed ips in the form of 192.168.1.5-192.168.1.45~
