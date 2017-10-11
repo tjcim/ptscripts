@@ -72,13 +72,38 @@ def get_ike_aggressive(ips):
     return aggressive_ips
 
 
+def filter_pskcrack_output(results, ip, ip_dir, psk_file):
+    """ Takes the results from run_pskcrack and filters the output to only the result line. """
+    output = ""
+    cracked = ""
+    logger = logging.getLogger('main.filter_pskcrack_output')
+    lines = results.splitlines()
+    for line in lines:
+        if not line.startswith(('Starting', 'Ending', 'Running')):
+            if not line.startswith('no match found'):
+                logger.info('PSK Cracked!: {}'.format(line))
+                cracked = "Cracked psk on ip: {}. PSK file: {}, psk-crack output: {}".format(
+                    ip, os.path.join(ip_dir, psk_file), line)
+            output = line
+    return (output, cracked)
+
+
 def pikebrute_multi(args):  # pylint: disable=too-many-locals
     """ Wrapper for the pikebrute function that runs it once per ip. """
     create_logger(args.verbose)
     logger = logging.getLogger('main.pikebrute_multi')
     output = []
     cracked = []
-    dictionary_path = os.path.join(config.SCRIPTS_PATH, 'psk-crack-dictionary')
+    if args.dictionary:
+        if os.path.isfile(args.dictionary):
+            logger.info('Using dictionary provided in arguments here: {}'.format(args.dictionary))
+            dictionary_path = args.dictionary
+        else:
+            logger.warn('Dictionary provided ({}) cannot be found, using the default.'.format(
+                args.dictionary))
+    else:
+        dictionary_path = os.path.join(config.SCRIPTS_PATH, 'psk-crack-dictionary')
+        logger.info('Using the default dictionary: {}'.format(dictionary_path))
     ike_ips = get_ips_with_port_open(args.input, 500)
     aggressive = get_ike_aggressive(ike_ips)
     vpn_name_list = text_file_lines_to_list(os.path.join(config.SCRIPTS_PATH, 'wordlist.dic'))
@@ -92,15 +117,11 @@ def pikebrute_multi(args):  # pylint: disable=too-many-locals
         for psk_file in psk_files:
             logger.debug('')
             results = run_pskcrack(os.path.join(ip_dir, psk_file), dictionary_path)
-            lines = results.splitlines()
-            for line in lines:
-                if not line.startswith(('Starting', 'Ending', 'Running')):
-                    if not line.startswith('no match found'):
-                        logger.info('PSK Cracked!: {}'.format(line))
-                        cracked.append(
-                            "Cracked psk on ip: {}. PSK file: {}, psk-crap output: {}".format(
-                                ip, os.path.join(ip_dir, psk_file), line))
-                    output.append(line)
+            filtered_out, filtered_cracked = filter_pskcrack_output(results, ip, ip_dir, psk_file)
+            if filtered_out:
+                output.append(filtered_out)
+            if filtered_cracked:
+                cracked.append(filtered_cracked)
     results_file = os.path.join(args.out_dir, "pikebrute_results.txt")
     cracked_file = os.path.join(args.out_dir, "cracked_psks.txt")
     with open(results_file, 'w') as f:
@@ -113,6 +134,10 @@ def parse_args():
     parser = argparse.ArgumentParser(prog='pikebrute.py')
     parser.add_argument('input', help='CSV File created from nmap_to_csv.py.')
     parser.add_argument('out_dir', help='Output directory and working folder.')
+    parser.add_argument(
+        '--dictionary', '-d',
+        help='Dictionary that psk_crack should use. If not provided the script will use the \
+psk-crack-dictionary. Must be the full path to the file.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
     return parser.parse_args()
 
