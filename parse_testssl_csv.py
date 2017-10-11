@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from utils import csv_to_list, write_list_to_csv
+from utils import csv_to_list, write_list_to_csv, find_files
 
 
 class Vulnerability:
@@ -47,15 +47,10 @@ def parse_testssl_output_for_issues(csv_file):
     return results
 
 
-def find_csv_filenames(input_dir, suffix='.csv'):
-    filenames = os.listdir(input_dir)
-    return [filename for filename in filenames if filename.endswith(suffix)]
-
-
 def get_issues(csv_dir):
     """ pull all the issues from the csv files. """
     issues = []
-    csv_files = find_csv_filenames(csv_dir)
+    csv_files = find_files(csv_dir)
     for csv_file in csv_files:
         results = parse_testssl_output_for_issues(os.path.join(csv_dir, csv_file))
         for result in results:

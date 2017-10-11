@@ -95,3 +95,18 @@ def write_list_to_csv(in_list, out_file):
     with open(out_file, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(in_list)
+
+
+def text_file_lines_to_list(in_file):
+    """ Read a text file and return a list of each line item (minus the returns, spaces, etc.)"""
+    lines = []
+    with open(in_file) as fp:
+        for line in fp:
+            line = line.strip(' \t\n\r')
+            lines.append(line)
+    return lines
+
+
+def find_files(input_dir, suffix='.csv'):
+    filenames = os.listdir(input_dir)
+    return [filename for filename in filenames if filename.endswith(suffix)]
