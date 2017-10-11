@@ -78,3 +78,20 @@ def get_ips_with_port_open(csv_file, port):
             if row[1] == str(port):
                 ip_list.append(row[0])
     return ip_list
+
+
+def csv_to_list(csv_file):
+    """ Read csv file and return rows and columns in a list. """
+    results = []
+    with open(csv_file, 'r') as a_csv:
+        a_csvreader = csv.reader(a_csv)
+        for row in a_csvreader:
+            results.append(row)
+    return results
+
+
+def write_list_to_csv(in_list, out_file):
+    """ Write python list to csv file. """
+    with open(out_file, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerows(in_list)
