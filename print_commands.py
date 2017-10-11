@@ -225,11 +225,9 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     write_comment(open_websites_comments)
     write_command(open_websites_command)
 
-    # multi_ike
-    ike_comments = "Creates a ike_scan.html file"
-    ike_scan_html = os.path.join(pentest_path, 'ike_scan.html')
-    ike_command = pyscript("multi_ike.py", csv_path, ike_scan_html, aha=True)
-    write_comment(ike_comments)
+    # pikebrute
+    ike_path = os.path.join(pentest_path, "ike")
+    ike_command = pyscript("pikebrute.py", csv_path, ike_path)
     write_command(ike_command)
 
     # hydra ftp
