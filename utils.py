@@ -20,6 +20,32 @@ ASSESSMENT_TYPES = {
 module_log = logging.getLogger("ptscripts.utils")
 
 
+def sort_vulnerabilities(vulnerabilities):
+    high = []
+    medium = []
+    low = []
+    module_log.debug("Sorting vulnerabilities.")
+    for vuln in vulnerabilities:
+        module_log.debug("{} vuln risk {}".format(vuln.id, vuln.risk_level))
+        if vuln.risk_level == 'H':
+            module_log.debug("Adding {} to high".format(vuln.id))
+            high.append(vuln)
+        elif vuln.risk_level == 'M':
+            module_log.debug("Adding {} to medium".format(vuln.id))
+            medium.append(vuln)
+        else:
+            module_log.debug("Adding {} to low".format(vuln.id))
+            low.append(vuln)
+    sorted_vulns = []
+    for vuln in high:
+        sorted_vulns.append(vuln)
+    for vuln in medium:
+        sorted_vulns.append(vuln)
+    for vuln in low:
+        sorted_vulns.append(vuln)
+    return sorted_vulns
+
+
 def find_vulnerability(vulnerabilities, vuln_id):
     """ Searches the list of Vulnerability objects and returns the first with id == vuln_id else None """
     for vuln in vulnerabilities:

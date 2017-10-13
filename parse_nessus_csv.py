@@ -80,10 +80,6 @@ def add_vulnerability_and_host(vulnerabilities, nessus_vuln):
 def run_parse_nessus_csv(args):
     vulnerabilities = []
     output_vulns = []
-    output_vulns.append([
-        "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
-        "Remediation Procedure", "Resource Required"
-    ])
     # verify file exists
     if not utils.file_exists(args.input_file):
         log.error("Couldn't find csv file at: {}".format(args.input_file))
@@ -94,10 +90,15 @@ def run_parse_nessus_csv(args):
         if nessus_vuln[3] not in ["Critical", "High", "Medium", "Low"]:
             continue
         vulnerabilities = add_vulnerability_and_host(vulnerabilities, nessus_vuln)
-    # Save vulns to csv file
-    for vuln in vulnerabilities:
+    sorted_vulnerabilities = utils.sort_vulnerabilities(vulnerabilities)
+    for vuln in sorted_vulnerabilities:
         output_vulns.append(vuln.list_format())
+    output_vulns.insert(0, [
+        "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
+        "Remediation Procedure", "Resource Required"
+    ])
     out_csv = os.path.join(args.output_dir, "parsed_nessus.csv")
+    # Save vulns to csv file
     utils.write_list_to_csv(output_vulns, out_csv)
 
 
