@@ -51,6 +51,7 @@ def parse_nessus_vuln(nessus_vuln):
         "risk_level": nessus_vuln[3],
         "impact": nessus_vuln[9],
         "remediation": nessus_vuln[10],
+        "host": nessus_vuln[4],
     }
 
 
@@ -62,9 +63,7 @@ def add_vulnerability_and_host(vulnerabilities, nessus_vuln):
     log.debug("Searching vulnerabilities for id: {}".format(parsed['_id']))
     if utils.find_vulnerability(vulnerabilities, parsed['_id']):
         log.debug("Vulnerability exists: {}".format(parsed['_id']))
-        log.debug("Creating vulnerability.")
         vuln = utils.find_vulnerability(vulnerabilities, parsed['_id'])
-        log.debug("Vulnerability created. Adding host.")
         vuln.add_affected(nessus_vuln)
         log.debug("Host added to vulnerability.")
     else:

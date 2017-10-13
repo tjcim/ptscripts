@@ -22,7 +22,6 @@ module_log = logging.getLogger("ptscripts.utils")
 
 def find_vulnerability(vulnerabilities, vuln_id):
     """ Searches the list of Vulnerability objects and returns the first with id == vuln_id else None """
-    module_log.debug(vulnerabilities)
     for vuln in vulnerabilities:
         if vuln.id == vuln_id:
             return vuln

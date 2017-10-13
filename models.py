@@ -52,6 +52,25 @@ class NessusVulnerability(Vulnerability):
         super().__init__(finding, risk_level, _id, impact, remediation)
         risk_levels = {"Critical": "H", "High": "H", "Medium": "M", "Low": "L"}
         self.risk_level = risk_levels[self.risk_level]
+        # The following is to remove nessus' carriage returns in awkward places. This will split
+        # the impact and remediation into lines and if the line is blank it will replace the
+        # carriage return, otherwise it will remove it and use a space.
+        impact_lines = self.impact.splitlines()
+        new_impact = []
+        for line in impact_lines:
+            if line:
+                new_impact.append(line + " ")
+            else:
+                new_impact.append("\r\n")
+        self.impact = "".join(new_impact)
+        remediation_lines = self.impact.splitlines()
+        new_remediation = []
+        for line in remediation_lines:
+            if line:
+                new_remediation.append(line + " ")
+            else:
+                new_remediation.append("\r\n")
+        self.remediation = "".join(new_remediation)
 
     def add_affected(self, nessus_vuln):
         ip = nessus_vuln[4]
