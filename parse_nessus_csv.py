@@ -94,7 +94,7 @@ def run_parse_nessus_csv(args):
     for vuln in sorted_vulnerabilities:
         output_vulns.append(vuln.list_format())
     output_vulns.insert(0, [
-        "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
+        "Index", "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
         "Remediation Procedure", "Resource Required"
     ])
     out_csv = os.path.join(args.output_dir, "parsed_nessus.csv")

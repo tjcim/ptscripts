@@ -23,7 +23,7 @@ class Vulnerability:
     def list_format(self):
         formatted_hosts = ",\r\n".join(self.affected)
         return [
-            self.finding, formatted_hosts, self.risk_level, self.impact, self.remediation,
+            "", self.finding, formatted_hosts, self.risk_level, self.impact, self.remediation,
             self.resource
         ]
 
