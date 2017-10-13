@@ -1,29 +1,38 @@
+"""
+Creates web_commands.txt file with common web app assessment commands.
+
+Formats each command to output both to the screen and to an html file using aha.
+
+Parameters
+----------
+name : string
+    Folder name where the output will be stored. The name is joined to BASE_PATH set in config.py
+url : string
+    URL of the application
+"""
+import logging
 import argparse
-from urlparse import urlparse
+
+import utils
+import logging_config  # noqa pylint: disable=unused-import
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("name")
-parser.add_argument("url")
-args = parser.parse_args()
-url_netloc = urlparse(args.url).netloc
+def parse_args():
+    parser = argparse.ArgumentParser(parents=[utils.parent_argparser()])
+    parser.add_argument("name", help="Pentest folder name. The output will be stored in BASE_PATH/<name> (BASE_PATH) configured in config.py")
+    parser.add_argument("url", help="URL of application")
+    args = parser.parse_args()
+    logger = logging.getLogger("ptscripts")
+    if args.quiet:
+        logger.setLevel('ERROR')
+    elif args.verbose:
+        logger.setLevel('DEBUG')
+    else:
+        logger.setLevel('INFO')
+    return args
 
-folder_path = '/root/pentests/{}/'.format(args.name)
-file_path = '/root/pentests/{}/commands.txt'.format(args.name)
-commands = []
-commands.append("wafw00f -av {} | tee /dev/tty | aha -b >{}wafw00f_{}.html".format(
-    args.url, folder_path, url_netloc))
-commands.append("nmap -v -A {0}| tee /dev/tty | aha -b >{1}nmap_{0}.html".format(
-    url_netloc, folder_path))
-commands.append("whatweb -v -a 4 {}| tee /dev/tty | aha -b >{}whatweb_{}.html".format(
-    args.url, folder_path, url_netloc))
-commands.append("nikto -host {}| tee /dev/tty | aha -b >{}nikto_{}.html".format(
-    args.url, folder_path, url_netloc))
-commands.append("testssl.sh {} | tee /dev/tty | aha -b >{}testssl_{}.html".format(
-    args.url, folder_path, url_netloc))
-commands.append("python /opt/myscripts/iframe.py {} {}".format(
-    args.url, folder_path))
 
-with open(file_path, 'w') as file_handler:
-    for item in commands:
-        file_handler.write("{}\n".format(item))
+if __name__ == "__main__":
+    log = logging.getLogger("ptscripts.web_commands")
+    utils.print_commands(parse_args(), "web")
+    log.info("blah")

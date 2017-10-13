@@ -1,4 +1,25 @@
-""" Pike Brute is a python version of KMGBully's ikebrute."""
+"""
+Pike Brute is a python version of KMGBully's (https://github.com/kmgbully) ikebrute.
+
+This script will run ike-scan on all ips with port 500 open and look for any that are in aggressive mode.
+All aggressive mode VPNs are then run through ike-scan again with each id in the wordlist.dic file and
+the hashes are saved. Once ike-scan is done psk-crack is run on each of the hash files using either a
+provided dictionary or the default psk-crack-dictionary if one is not provided. The output of psk-crack
+is saved to a file pskbrute_results.txt file, if the psk appears to be cracked the script will save that
+entry to the cracked_psks.txt file.
+
+Parameters
+----------
+input : string
+    Required. Path to a csv file in the same format that is provided by the nmap_to_csv.py script.
+out_dir : string
+    Required. Path to the folder where the output is stored.
+--dictionary,d : string
+    Optional. Path to a dictionary file to use. If not supplied the psk-crack-dictionary will be used.
+-v : None
+    Optional. The more v's provided the more verbose the script output will be. Debug is -vvv.
+
+"""
 import os
 import argparse
 import subprocess
@@ -138,7 +159,8 @@ def parse_args():
         '--dictionary', '-d',
         help='Dictionary that psk_crack should use. If not provided the script will use the \
 psk-crack-dictionary. Must be the full path to the file.')
-    parser.add_argument('--verbose', '-v', action='count', default=0)
+    parser.add_argument('-v', action='count', default=0,
+                        help='Verbosity of the application. Max verbosity -vvv.')
     return parser.parse_args()
 
 

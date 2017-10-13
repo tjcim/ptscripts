@@ -137,6 +137,7 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     write_command(metasploit_workspace_command)
 
     # dnsrecon
+    write_comment('This will only run with python < 3 right now. So make sure the virtualenv is deactivated prior to running this command.')
     dnsrecon_html = os.path.join(pentest_path, "dnsrecon_{}_.html".format(domain_name))
     dnsrecon_command = 'dnsrecon -d {0} -D /usr/share/wordlists/dnsmap.txt | tee /dev/tty | aha -b > {1}'.format(domain_name, dnsrecon_html)
     write_command(dnsrecon_command)

@@ -1,3 +1,7 @@
+# Change Log
+
+10/11/2017 - Updated web_commands.py it should work now. Switched multi_ike with pikebrute in print_commands.py
+
 # Getting your environment set up
 
 ## Clone the Repo and install requirements

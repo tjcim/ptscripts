@@ -1,43 +1,25 @@
+"""
+Parse and combine the testssl csv files into combined_issues.csv
+
+Parameters
+----------
+input_dir : string
+    Required - Full path to the directory in which the testssl csvs are located. Make sure no other csvs are present.
+"""
 import os
+import logging
 import argparse
 
-from utils import csv_to_list, write_list_to_csv, find_files
+import utils
+from models import TestSSLVulnerability
 
 
-class Vulnerability:
-    def __init__(self, name, criticality, _id):
-        self.name = name
-        self.criticality = criticality
-        self.id = _id
-        self.hosts = []
-
-    def add_host(self, issue):
-        ip = issue[1].split('/')[1]
-        port = issue[2]
-        self.hosts.append((ip, port))
-
-    def csv_format(self):
-        affected_hosts = []
-        for host in self.hosts:
-            affected_hosts.append("{}:{}".format(host[0], host[1]))
-        formatted_hosts = ", ".join(affected_hosts)
-        return [self.name, formatted_hosts, self.criticality]
-
-    def __repr__(self):
-        return "{} {} {}".format(self.name, self.hosts, self.criticality)
-
-
-def find_vulnerability(vulnerabilities, vuln_id):
-    """ Searches the list of Vulnerability objects and returns the first with id == vuln_id else None """
-    for vuln in vulnerabilities:
-        if vuln.id == vuln_id:
-            return vuln
-    return None
+log = logging.getLogger("ptscripts.parse_testssl_csv")
 
 
 def parse_testssl_output_for_issues(csv_file):
     results = []
-    output = csv_to_list(csv_file)
+    output = utils.csv_to_list(csv_file)
     for row in output:
         try:
             if row[3] not in ['INFO', 'OK', 'severity']:
@@ -50,7 +32,7 @@ def parse_testssl_output_for_issues(csv_file):
 def get_issues(csv_dir):
     """ pull all the issues from the csv files. """
     issues = []
-    csv_files = find_files(csv_dir)
+    csv_files = utils.find_files(csv_dir)
     for csv_file in csv_files:
         results = parse_testssl_output_for_issues(os.path.join(csv_dir, csv_file))
         for result in results:
@@ -58,34 +40,53 @@ def get_issues(csv_dir):
     return issues
 
 
-def parse_testssl(csv_dir):
+def parse_testssl(args):
     # test if combined_issues.csv exists
-    if os.path.isfile(os.path.join(csv_dir, "combined_issues.csv")):
-        print('Remove the combined_issues.csv file in {} before running.'.format(csv_dir))
+    if os.path.isfile(os.path.join(args.input_dir, "combined_issues.csv")):
+        log.error('Remove the combined_issues.csv file in {} before running.'.format(args.input_dir))
         return
     vulnerabilities = []
-    issues = get_issues(csv_dir)
+    issues = get_issues(args.input_dir)
     for issue in issues:
         # Check if we already have a vulnerability for this issue
-        if find_vulnerability(vulnerabilities, issue[0]):
-            vuln = find_vulnerability(vulnerabilities, issue[0])
-            vuln.add_host(issue)
+        log.debug("Processing issue: {}".format(issue))
+        if utils.find_vulnerability(vulnerabilities, issue[0]):
+            log.debug("Vulnerability exists: {}".format(issue[0]))
+            vuln = utils.find_vulnerability(vulnerabilities, issue[0])
+            log.debug("Adding affected host to {} issue: {}".format(vuln, issue))
+            vuln.add_affected(issue)
         else:
-            vuln = Vulnerability(issue[4], issue[3], issue[0])
-            vuln.add_host(issue)
+            log.debug("Vulnerability does not exist: {}".format(issue[0]))
+            log.debug("Creating vulnerability: finding={}, risk_level={}, _id={}".format(issue[4], issue[3], issue[0]))
+            vuln = TestSSLVulnerability(issue[4], issue[3], issue[0])
+            log.debug("Adding affected host {}".format(issue))
+            vuln.add_affected(issue)
             vulnerabilities.append(vuln)
-    output_vulns = []
+    output_vulns = [[
+        "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
+        "Remediation Procedure", "Resource Required",
+    ]]
     for vuln in vulnerabilities:
-        output_vulns.append(vuln.csv_format())
-    out_csv = os.path.join(csv_dir, "combined_issues.csv")
-    write_list_to_csv(output_vulns, out_csv)
+        output_vulns.append(vuln.list_format())
+    out_csv = os.path.join(args.input_dir, "combined_issues.csv")
+    utils.write_list_to_csv(output_vulns, out_csv)
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog='parse_testssl_csv.py')
-    parser.add_argument('input', help='Directory with testssl output.')
-    return parser.parse_args()
+    parser = argparse.ArgumentParser(
+        parents=[utils.parent_argparser()], prog='parse_testssl_csv.py',
+        description='Parses and combines the testssl vulnerabilities.')
+    parser.add_argument('input_dir', help='Directory with testssl output.')
+    args = parser.parse_args()
+    logger = logging.getLogger("ptscripts")
+    if args.quiet:
+        logger.setLevel('ERROR')
+    elif args.verbose:
+        logger.setLevel('DEBUG')
+    else:
+        logger.setLevel('INFO')
+    return args
 
 
 if __name__ == '__main__':
-    parse_testssl(parse_args().input)
+    parse_testssl(parse_args())
