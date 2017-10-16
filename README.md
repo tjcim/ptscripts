@@ -1,7 +1,8 @@
 # Change Log
 
-10/12/2017 - Added parse_nessus_csv.py. Extracts and formats vulnerabilities from the nessus csv file.
-10/11/2017 - Updated web_commands.py it should work now. Switched multi_ike with pikebrute in print_commands.py
+* 10/15/2017 - Added documentation to some scripts and reformatted a couple of scripts to better allow for testing.
+* 10/12/2017 - Added parse_nessus_csv.py. Extracts and formats vulnerabilities from the nessus csv file.
+* 10/11/2017 - Updated web_commands.py it should work now. Switched multi_ike with pikebrute in print_commands.py
 
 # Getting your environment set up
 
@@ -67,9 +68,12 @@ This file will provide default commands that you can copy and paste into the ter
 # TODO
 
 * Add documentation to each script
+  * Information on what the script does
+  * Parameters for running the script
+  * Usage example
 * Add logging to each script
 * Create script to run after ports.csv has been created for things like hydra
 * Add ability to use proxy in print_commands
   * Change nmap command to use sT and no UDP
 * fix get_internal_ip - This only works for http sites. I should filter out ssl sites to start with, then figure out if the same works over ssl.
-* Add tests for nmap_to_csv.py, create_webserver_list.py and parse_nessus_csv.py
+* Add tests for ~nmap_to_csv.py~, ~create_webserver_list.py~ and parse_nessus_csv.py

@@ -1,3 +1,22 @@
+#!/usr/bin/env python
+"""
+Send requests to burp proxy
+
+The script reads in the input file and does a GET request using the burp proxy information from the config file. The script is designed to make it easy to use burp on a large number of websites. Burp must be running and listening on the port specified in the config file.
+
+Usage
+-----
+python burp_requests.py /full/path/to/file.txt
+
+Parameters
+----------
+input : string
+    Required - Full path to file containing a url on each line.
+
+Output
+------
+None.
+"""
 import argparse
 import urllib3
 

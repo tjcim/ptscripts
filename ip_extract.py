@@ -15,6 +15,7 @@ output_dir : string
     Required - Full path to the directory in which the "_ips.txt" file will be saved.
 """
 import os
+import sys
 import struct
 import socket
 import logging.config
@@ -95,14 +96,14 @@ def extract_ips(args):
         f.write('\r\n'.join(out_ips))
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
         description='Extract IPs from IP notation in a file.',
     )
     parser.add_argument('input_file', help='a file with ips listed in cidr or dashed format')
     parser.add_argument('output_dir', help='directory to write ips.txt file')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
         logger.setLevel('ERROR')
@@ -114,4 +115,4 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    extract_ips(parse_args())
+    extract_ips(parse_args(sys.argv[1:]))

@@ -1,5 +1,10 @@
+#!/usr/bin/env python
 """
 Parse nessus scan csv
+
+Usage
+-----
+python <path to script>/parse_nessus_csv.py <input_file> <output_dir>
 
 Parameters
 ----------
@@ -7,6 +12,10 @@ input_file : string
     Required - Full path to the exported nessus scan.
 output_dir : string
     Required - Full path to the directory where the results will be written.
+verbose (-v) : None
+    Optional - Print debug logs to stdout
+quiet (-q) : None
+    Optional - Print error logs to stdout
 
 Output
 ------
@@ -14,11 +23,10 @@ creates the file "nessus_parsed.csv" within the "output_dir"
 
 
 default nessus columns:
-    0          1     2    3     4     5         6     7     8         9            10        11        12
     Plugin ID, CVE, CVSS, Risk, Host, Protocol, Port, Name, Synopsis, Description, Solution, See Also, Plugin Output
 
 result columns:
-    Finding, Affected Device/Technology, Risk Level, Business Impact, Remediation Procedure, Resource Required
+    Index, Finding, Affected Device/Technology, Risk Level, Business Impact, Remediation Procedure, Resource Required
 
 mapping:
     Columns:

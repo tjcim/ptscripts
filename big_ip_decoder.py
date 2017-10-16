@@ -1,3 +1,20 @@
+#!/usr/bin/env python
+"""
+Decode Big IP string
+
+Usage
+-----
+python big_ip_decoder.py "110536896.20480.0000"
+
+Parameters
+----------
+input : string
+    Required - big ip encoded string
+
+Output
+------
+prints the decoded host and port to the console
+"""
 import struct
 import argparse
 

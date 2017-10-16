@@ -1,20 +1,11 @@
 """ Common methods for the scripts. """
 import os
 import csv
-import time
 import logging
 import argparse
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-import config
-from commands import COMMANDS
 import logging_config  # noqa pylint: disable=unused-import
-
-
-ASSESSMENT_TYPES = {
-    "web": "Web Application Assessment",
-    "pentest": "External Pentest",
-}
 
 
 module_log = logging.getLogger("ptscripts.utils")
@@ -52,43 +43,6 @@ def find_vulnerability(vulnerabilities, vuln_id):
         if vuln.id == vuln_id:
             return vuln
     return None
-
-
-def print_commands(args, assessment_type):
-    log = logging.getLogger("ptscripts.utils.print_commands")
-    netloc = urlparse(args.url).netloc
-    log.debug("netloc: " + netloc)
-    folder_path = os.path.join(config.BASE_PATH, args.name)
-    file_path = os.path.join(folder_path, "web_commands.txt")
-    log.debug("file_path: " + file_path)
-    log.info("Writing header information.")
-    with open(file_path, 'w') as file_handler:
-        header = "# {assessment_type} commands created for {pentest_name} on {time} using version {version}\r\n"
-        header_text = header.format(
-            assessment_type=ASSESSMENT_TYPES[assessment_type],
-            pentest_name=args.name, time=time.asctime(), version=config.VERSION
-        )
-        file_handler.write(header_text)
-        file_handler.write("#" + ("*" * len(header)) + "\r\n\r\n")
-    for command_item in COMMANDS:
-        if assessment_type not in command_item["tags"]:
-            log.debug("{} not found in {}.".format(assessment_type, command_item["tags"]))
-            continue
-        log.info("Writing {} command".format(command_item["name"]))
-        formatted_command = command_item["command"].format(
-            url=args.url, output_dir=folder_path, netloc=netloc, scripts_dir=config.SCRIPTS_PATH)
-        with open(file_path, 'a') as file_handler:
-            try:
-                log.debug("Writing comments: {}".format(command_item["comments"]))
-                for comment in command_item["comments"]:
-                    if comment:
-                        file_handler.write("# {}\r\n".format(comment))
-            except KeyError:
-                # No comments
-                pass
-            log.debug("Writing command: {}".format(formatted_command))
-            file_handler.write("{}\r\n\r\n".format(formatted_command))
-    log.info("All commands written.")
 
 
 def parent_argparser():

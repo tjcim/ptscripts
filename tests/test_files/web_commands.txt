@@ -1,0 +1,23 @@
+# Web Application Assessment commands created using version 0.1
+#**************************************************************
+
+wafw00f -av http://www.sample.org | tee /dev/tty | aha -b > /root/pentests/test/wafw00f_www.sample.org.html
+
+nmap -v -A http://www.sample.org | tee /dev/tty | aha -b > /root/pentests/test/nmap_www.sample.org.html
+
+whatweb -v -a 4 http://www.sample.org | tee /dev/tty | aha -b > /root/pentests/test/whatweb_www.sample.org.html
+
+nikto -host http://www.sample.org | tee /dev/tty | aha -b > /root/pentests/test/nikto_www.sample.org.html
+
+testssl.sh http://www.sample.org | tee /dev/tty | aha -b > /root/pentests/test/testssl_www.sample.org.html
+
+python /opt/ptscripts/iframe.py http://www.sample.org /root/pentests/test
+
+uniscan -u http://www.sample.org -qweds | tee /dev/tty | aha -b > /root/pentests/test/uniscan_www.sample.org.html
+
+dirb /usr/share/dirbuster/wordlists/directory-list-lowercase-2.3-small.txt -w | tee /dev/tty | aha -b > /root/pentests/test/dirb_www.sample.org.html
+
+wpscan --update
+
+wpscan --batch --url http://www.sample.org --enumerate at,tt,t,ap,u[1-100] | tee /dev/tty | aha -b > /root/pentests/test/wpscan_www.sample.org.html
+
