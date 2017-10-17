@@ -12,29 +12,8 @@ module_log = logging.getLogger("ptscripts.utils")
 
 
 def sort_vulnerabilities(vulnerabilities):
-    high = []
-    medium = []
-    low = []
-    module_log.debug("Sorting vulnerabilities.")
-    for vuln in vulnerabilities:
-        module_log.debug("{} vuln risk {}".format(vuln.id, vuln.risk_level))
-        if vuln.risk_level == 'H':
-            module_log.debug("Adding {} to high".format(vuln.id))
-            high.append(vuln)
-        elif vuln.risk_level == 'M':
-            module_log.debug("Adding {} to medium".format(vuln.id))
-            medium.append(vuln)
-        else:
-            module_log.debug("Adding {} to low".format(vuln.id))
-            low.append(vuln)
-    sorted_vulns = []
-    for vuln in high:
-        sorted_vulns.append(vuln)
-    for vuln in medium:
-        sorted_vulns.append(vuln)
-    for vuln in low:
-        sorted_vulns.append(vuln)
-    return sorted_vulns
+    sort_order = {"H": 0, "M": 1, "L": 2}
+    return sorted(vulnerabilities, key=lambda v: sort_order[v.risk_level])
 
 
 def find_vulnerability(vulnerabilities, vuln_id):
@@ -60,6 +39,16 @@ def uses_encryption(url):
     return url_parsed.scheme == 'https'
 
 
+def csv_to_dict(csv_file):
+    """ Reads the csv file into a dictionary. """
+    results = []
+    with open(csv_file, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            results.append(row)
+    return results
+
+
 def parse_webserver_urls(url_file):
     """ Reads in a file and returns a list of each line. """
     webserver_urls = []
@@ -72,17 +61,10 @@ def parse_webserver_urls(url_file):
 
 def parse_csv_for_webservers(csv_file):
     webservers = []
-    with open(csv_file, 'r') as f:
-        reader = csv.reader(f)
-        host_ports = list(reader)
-        for row in host_ports:
-            if row[2] and (row[2] == 'http' or row[2] == 'https'):
-                webservers.append({
-                    'ip_addr': row[0],
-                    'port': row[1],
-                    'service_name': row[2],
-                    'tunnel': row[3],
-                })
+    hosts = csv_to_dict(csv_file)
+    for host in hosts:
+        if host['service_name'] and host['service_name'] in ["http", "https"]:
+            webservers.append(host)
     return webservers
 
 
@@ -118,16 +100,11 @@ def dir_exists(dir_path, make=True):
 
 def get_ips_with_port_open(csv_file, port):
     """ Returns list of ips with the specified port open """
-    # open csv_file and yield row
-    # compare port to column and add to list if it matches
-    # return list
     ip_list = []
-    with open(csv_file, 'r') as f:
-        reader = csv.reader(f)
-        host_ports = list(reader)
-        for row in host_ports:
-            if row[1] == str(port):
-                ip_list.append(row[0])
+    hosts = csv_to_dict(csv_file)
+    for host in hosts:
+        if host['port'] == str(port):
+            ip_list.append(host)
     return ip_list
 
 

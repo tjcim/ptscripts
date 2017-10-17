@@ -1,43 +1,52 @@
+import os
+import csv
 import pytest
 
 import ptscripts.utils as utils
 
 
 @pytest.fixture
-def ports_file(tmpdir):
-    # Create csv file
-    csv_file = tmpdir.join('ports.csv').strpath
-    test_data = """10.10.2.1,123,ntp,None,udp
-10.10.2.5,80,tcpwrapped,None,tcp
-10.10.2.5,139,tcpwrapped,None,tcp
-10.10.2.5,443,tcpwrapped,None,tcp
-10.10.2.5,445,tcpwrapped,None,tcp
-10.10.2.5,515,tcpwrapped,None,tcp
-10.10.2.5,631,tcpwrapped,None,tcp
-10.10.2.5,3910,prnrequest,None,tcp
-10.10.2.5,3911,prnstatus,None,tcp
-10.10.2.5,6839,tcpwrapped,None,tcp
-10.10.2.5,7435,tcpwrapped,None,tcp
-10.10.2.5,8080,tcpwrapped,None,tcp
-10.10.2.5,9100,jetdirect,None,tcp
-10.10.2.5,9220,tcpwrapped,None,tcp
-10.10.2.5,137,netbios-ns,None,udp
-10.10.2.5,161,snmp,None,udp
-10.10.2.5,5353,mdns,None,udp
-10.10.2.6,21,ftp,None,tcp
-10.10.2.6,80,http,None,tcp
-10.10.2.6,443,http,ssl,tcp
-10.10.2.6,515,printer,None,tcp
-10.10.2.6,631,ipp,None,tcp"""
-    with open(csv_file, 'w') as f:
-        f.write(test_data)
-    return csv_file
+def ports_dict():
+    expected = [
+        {"port": "22", "protocol": "tcp", "ipv4": "10.0.0.1", "mac": "00:78:2A:E8:35:29", "hostnames": "", "service_name": "ssh", "service_tunnel": "", "product_name": "OpenSSH", "product_version": "7.2", "banner": "SSH-2.0-OpenSSH_7.2"},
+        {"port": "53", "protocol": "tcp", "ipv4": "10.0.0.1", "mac": "00:78:2A:E8:35:29", "hostnames": "", "service_name": "domain", "service_tunnel": "", "product_name": "dnsmasq", "product_version": "2.76", "banner": ""},
+        {"port": "80", "protocol": "tcp", "ipv4": "10.0.0.1", "mac": "00:78:2A:E8:35:29", "hostnames": "", "service_name": "http", "service_tunnel": "", "product_name": "nginx", "product_version": "", "banner": ""},
+        {"port": "443", "protocol": "tcp", "ipv4": "10.0.0.1", "mac": "00:78:2A:E8:35:29", "hostnames": "", "service_name": "http", "service_tunnel": "ssl", "product_name": "nginx", "product_version": "", "banner": ""},
+        {"port": "3000", "protocol": "tcp", "ipv4": "10.0.0.1", "mac": "00:78:2A:E8:35:29", "hostnames": "", "service_name": "http", "service_tunnel": "ssl", "product_name": "Mongoose httpd", "product_version": "", "banner": ""},
+        {"port": "53", "protocol": "udp", "ipv4": "10.0.0.1", "mac": "00:78:2A:E8:35:29", "hostnames": "", "service_name": "domain", "service_tunnel": "", "product_name": "dnsmasq", "product_version": "2.76", "banner": ""},
+        {"port": "80", "protocol": "tcp", "ipv4": "10.0.0.7", "mac": "B8:AE:ED:EC:16:23", "hostnames": "", "service_name": "http", "service_tunnel": "", "product_name": "nginx", "product_version": "1.11.10", "banner": ""},
+        {"port": "2376", "protocol": "tcp", "ipv4": "10.0.0.7", "mac": "B8:AE:ED:EC:16:23", "hostnames": "", "service_name": "docker", "service_tunnel": "ssl", "product_name": "", "product_version": "", "banner": ""},
+        {"port": "5000", "protocol": "tcp", "ipv4": "10.0.0.7", "mac": "B8:AE:ED:EC:16:23", "hostnames": "", "service_name": "http", "service_tunnel": "", "product_name": "Werkzeug httpd", "product_version": "0.11.11", "banner": ""},
+        {"port": "5355", "protocol": "tcp", "ipv4": "10.0.0.7", "mac": "B8:AE:ED:EC:16:23", "hostnames": "", "service_name": "llmnr", "service_tunnel": "", "product_name": "", "product_version": "", "banner": ""},
+        {"port": "32768", "protocol": "tcp", "ipv4": "10.0.0.7", "mac": "B8:AE:ED:EC:16:23", "hostnames": "", "service_name": "http", "service_tunnel": "", "product_name": "MochiWeb Erlang HTTP library", "product_version": "1", "banner": ""},
+    ]
+    return expected
+
+
+@pytest.fixture
+def ports_csv(ports_dict, tmpdir):  # pylint: disable=redefined-outer-name
+    output_dir = tmpdir.strpath
+    output_file = os.path.join(output_dir, "output.csv")
+    with open(output_file, 'w') as csvfile:
+        fieldnames = [
+            "port", "protocol", "ipv4", "mac", "hostnames", "service_name", "service_tunnel",
+            "product_name", "product_version", "banner"
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in ports_dict:
+            writer.writerow(row)
+    return output_file
 
 
 def test_uses_encryption():
     assert utils.uses_encryption('https://www.google.com')
     assert utils.uses_encryption('http://www.google.com') is False
     assert utils.uses_encryption('https://blah.com:8443')
+
+
+def test_csv_to_dict(ports_dict, ports_csv):  # pylint: disable=redefined-outer-name
+    assert utils.csv_to_dict(ports_csv) == ports_dict
 
 
 def test_parse_webserver_urls(tmpdir):
@@ -53,22 +62,3 @@ def test_parse_webserver_urls(tmpdir):
     webservers = utils.parse_webserver_urls(tmp_input.strpath)
 
     assert expected_webservers == webservers
-
-
-def test_parse_csv_for_webservers(ports_file):  # pylint: disable=redefined-outer-name
-    results = utils.parse_csv_for_webservers(ports_file)
-    expected = [
-        {'ip_addr': '10.10.2.6', 'port': '80', 'service_name': 'http', 'tunnel': 'None'},
-        {'ip_addr': '10.10.2.6', 'port': '443', 'service_name': 'http', 'tunnel': 'ssl'},
-    ]
-    assert results == expected
-
-
-def test_get_ips_with_port_open(ports_file):  # pylint: disable=redefined-outer-name
-    expected_port_80 = ['10.10.2.5', '10.10.2.6']
-    results_80 = utils.get_ips_with_port_open(ports_file, 80)
-    assert expected_port_80 == results_80
-
-    expected_port_445 = ['10.10.2.5']
-    results_445 = utils.get_ips_with_port_open(ports_file, 445)
-    assert expected_port_445 == results_445

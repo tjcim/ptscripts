@@ -43,6 +43,7 @@ mapping:
         Low -> L
 """
 import os
+import sys
 import argparse
 import logging.config
 
@@ -98,6 +99,7 @@ def run_parse_nessus_csv(args):
         if nessus_vuln[3] not in ["Critical", "High", "Medium", "Low"]:
             continue
         vulnerabilities = add_vulnerability_and_host(vulnerabilities, nessus_vuln)
+    print(vulnerabilities)
     sorted_vulnerabilities = utils.sort_vulnerabilities(vulnerabilities)
     for vuln in sorted_vulnerabilities:
         output_vulns.append(vuln.list_format())
@@ -110,7 +112,7 @@ def run_parse_nessus_csv(args):
     utils.write_list_to_csv(output_vulns, out_csv)
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser(
         prog='parse_nessus_csv.py',
         parents=[utils.parent_argparser()],
@@ -118,7 +120,7 @@ def parse_args():
     )
     parser.add_argument('input_file', help='Nessus CSV file.')
     parser.add_argument('output_dir', help='Directory where the output file "parsed_nessus.csv"')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
         logger.setLevel('ERROR')
@@ -130,4 +132,4 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    run_parse_nessus_csv(parse_args())
+    run_parse_nessus_csv(parse_args(sys.argv[1:]))

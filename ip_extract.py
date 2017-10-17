@@ -79,13 +79,13 @@ def extract_ips(args):
     out_ips = []
     with open(args.input_file, 'r') as f:
         for line in f:
-            if len(line.strip().split('-')) > 1:
+            if "-" in line:
                 log.info("{} - dashed".format(line.strip()))
                 try:
                     out_ips.extend(dashed_ips_to_list(line.strip()))
                 except TypeError:
                     break
-            elif len(line.strip().split('/')) > 1:
+            elif "/" in line:
                 log.info("{} - cidr".format(line.strip()))
                 out_ips.extend(cidr_to_ip_list(line.strip()))
             else:

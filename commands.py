@@ -11,14 +11,20 @@ A command is a dictionary object with the following entries: name, tags, command
         Optional - A list of strings that will be printed before the command if config.PRINT_COMMENTS is True.
 
 Formatting a command. The available variables are:
-    {output_dir} - This is BASE_PATH/PENTEST_NAME and will store the output of the commands.
+    {pentest_path} - This is BASE_PATH/PENTEST_NAME and will store the output of the commands.
     {url} - The url to be tested.
     {netloc} - The netloc of the url... for example the url: https://www.google.com will have a netloc of www.google.com.
     {scripts_dir} - The path to the ptscripts directory
+    {ips_name} - The name of the file that contains the ips. This file will be used as input to ip_extract.py
 
 If comments are turned on (from config.py) any comments included are printed before the command.
 """
 COMMANDS = [
+    {
+        "name": "ip_extract", "tags": ["pentest"],
+        "command": "python {scripts_dir}/ip_extract.py {pentest_path}/{ips_file} {pentest_path}",
+        "comments": [""],
+    },
     {
         "name": "wafw00f", "tags": ["web"],
         "command": "wafw00f -av {url} | tee /dev/tty | aha -b > {output_dir}/wafw00f_{netloc}.html",

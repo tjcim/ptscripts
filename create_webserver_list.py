@@ -30,21 +30,27 @@ import logging_config  # noqa pylint: disable=unused-import
 log = logging.getLogger("ptscripts.create_webserver_list")
 
 
-def get_webserver_list(nmap_list):
+def get_webserver_list(nmap_dict):
     webservers = []
-    for host_port in nmap_list:
-        if host_port[2] and "http" in host_port[2]:
-            port = ""
-            if host_port[3] == 'ssl':
+    for host in nmap_dict:
+        if host['service_name'] and host['service_name'] in ["http", "https"]:
+            # scheme
+            if host['service_tunnel'] == 'ssl':
                 scheme = 'https'
             else:
                 scheme = 'http'
-            if not host_port[1] == "80":
-                port = ":" + host_port[1]
-            # if https and port 443 don't add the port info
-            if (host_port[1] == '443') and (scheme == 'https'):
-                port = ''
-            formatted_url = scheme + "://" + host_port[0] + port + '/'
+
+            # if scheme is http and it is not on port 80, add port info.
+            if scheme == 'http' and str(host['port']) != '80':
+                port = ":" + str(host['port'])
+            # if scheme is https and it is not on port 443, add port info.
+            elif scheme == 'https' and str(host['port']) != '443':
+                port = ":" + str(host["port"])
+            # scheme is http and port is 80 or scheme is https and port is 443.
+            else:
+                port = ""
+
+            formatted_url = scheme + "://" + host['ipv4'] + port + '/'
             log.debug("Adding url: {}".format(formatted_url))
             webservers.append(formatted_url)
     return webservers
@@ -52,8 +58,8 @@ def get_webserver_list(nmap_list):
 
 def build_webservers_file(args):
     log.info("Starting to extract urls from {}".format(args.input))
-    host_ports = utils.csv_to_list(args.input)
-    webservers = get_webserver_list(host_ports)
+    hosts = utils.csv_to_dict(args.input)
+    webservers = get_webserver_list(hosts)
     output_file = os.path.join(args.output, "webservers.txt")
     log.info("Writing urls to {}".format(output_file))
 
@@ -67,8 +73,8 @@ def parse_args(args):
         parents=[utils.parent_argparser()],
         description='Extract URLs from ports.csv to a file.',
     )
-    parser.add_argument('input')
-    parser.add_argument('output')
+    parser.add_argument('input', help="full path to ports.csv file.")
+    parser.add_argument('output', help="full path to where the 'webservers.txt' file will be saved.")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

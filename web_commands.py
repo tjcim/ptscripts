@@ -26,10 +26,10 @@ import logging
 import argparse
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from ptscripts import utils
-import ptscripts.logging_config  # noqa pylint: disable=unused-import
-from ptscripts import config
-from ptscripts.commands import COMMANDS
+import utils
+import logging_config  # noqa pylint: disable=unused-import
+import config
+from commands import COMMANDS
 
 
 ASSESSMENT_TYPES = {
@@ -53,7 +53,7 @@ def print_commands(args, assessment_type):
             version=config.VERSION
         )
         file_handler.write(header_text)
-        file_handler.write("#" + ("*" * len(header)) + "\r\n\r\n")
+        file_handler.write("#" + ("*" * len(header)))
     for command_item in COMMANDS:
         if assessment_type not in command_item["tags"]:
             log.debug("{} not found in {}.".format(assessment_type, command_item["tags"]))
@@ -61,17 +61,18 @@ def print_commands(args, assessment_type):
         log.info("Writing {} command".format(command_item["name"]))
         formatted_command = command_item["command"].format(
             url=args.url, output_dir=folder_path, netloc=netloc, scripts_dir=config.SCRIPTS_PATH)
-        with open(file_path, 'a') as file_handler:
-            try:
-                log.debug("Writing comments: {}".format(command_item["comments"]))
-                for comment in command_item["comments"]:
-                    if comment:
+        try:
+            log.debug("Writing comments: {}".format(command_item["comments"]))
+            for comment in command_item["comments"]:
+                if comment:
+                    with open(file_path, 'a') as file_handler:
                         file_handler.write("# {}\r\n".format(comment))
-            except KeyError:
-                # No comments
-                pass
-            log.debug("Writing command: {}".format(formatted_command))
-            file_handler.write("{}\r\n\r\n".format(formatted_command))
+        except KeyError:
+            # No comments
+            pass
+        log.debug("Writing command: {}".format(formatted_command))
+        with open(file_path, 'a') as file_handler:
+            file_handler.write("\r\n\r\n{}".format(formatted_command))
     log.info("All commands written.")
 
 
