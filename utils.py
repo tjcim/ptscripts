@@ -3,6 +3,7 @@ import os
 import csv
 import logging
 import argparse
+import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
 import logging_config  # noqa pylint: disable=unused-import
@@ -68,44 +69,36 @@ def parse_csv_for_webservers(csv_file):
     return webservers
 
 
-def file_exists(file_path):
-    """ Check that file_path exists and is a file returns True else False """
-    if os.path.exists(file_path):
-        return bool(os.path.isfile(file_path))
-    else:
-        return False
-
-
 def dir_exists(dir_path, make=True):
     """ Check that dir_path exists and is a directory
     if make is True it will try to make the dir"""
     if os.path.exists(dir_path):
-        if os.path.isdir(dir_path):
-            return True
-        else:
-            if make:
-                os.mkdir(dir_path)
-                return True
-            return False
+        return os.path.isdir(dir_path)
     else:
         if make:
-            print("    Directory {} doesn't exist, going to try and create it.".format(dir_path))
+            module_log.info("Directory {} doesn't exist, going to try and create it.".format(dir_path))
             os.mkdir(dir_path)
-            print("    Directory created.")
+            module_log.info("Directory created.")
             return True
         else:
-            print("    Directory {} doesn't exist and was not created.")
+            module_log.info("Directory {} doesn't exist and was not created.".format(dir_path))
             return False
+
+
+def get_hosts_with_port_open(csv_file, port):
+    hosts = []
+    ports_dict = csv_to_dict(csv_file)
+    for row in ports_dict:
+        if row['port'] == str(port):
+            hosts.append(row)
+    return hosts
 
 
 def get_ips_with_port_open(csv_file, port):
     """ Returns list of ips with the specified port open """
-    ip_list = []
-    hosts = csv_to_dict(csv_file)
-    for host in hosts:
-        if host['port'] == str(port):
-            ip_list.append(host)
-    return ip_list
+    hosts = get_hosts_with_port_open(csv_file, port)
+    ips = [host['ipv4'] for host in hosts]
+    return ips
 
 
 def csv_to_list(csv_file):
@@ -138,3 +131,16 @@ def text_file_lines_to_list(in_file):
 def find_files(input_dir, suffix='.csv'):
     filenames = os.listdir(input_dir)
     return [filename for filename in filenames if filename.endswith(suffix)]
+
+
+def run_command_tee_aha(command, html_output):
+    module_log.debug("Running command {}".format(command))
+    p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)
+    p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)
+    p1.stdout.close()
+    p2.stdout.close()
+    output = p3.communicate()[0]
+    module_log.debug("Writing output to {}".format(html_output))
+    with open(html_output, 'wb') as h:
+        h.write(output)

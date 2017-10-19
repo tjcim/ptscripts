@@ -1,6 +1,7 @@
 # Functional test
 import os
 
+from ptscripts import config
 from ptscripts import web_commands as wc
 
 
@@ -8,12 +9,11 @@ def test_web_command(tmpdir):
     # Arguments
     url = "http://www.sample.org"
     output_dir = tmpdir.strpath
-    output_file = os.path.join(output_dir, "web_commands.txt")
-    args = wc.parse_args([output_dir, output_file, url])
+    args = wc.parse_args([output_dir, url])
 
     # Expected
     expected_list = [
-        "# Web Application Assessment commands created using version 0.1",
+        "# Web Application Assessment commands created using version {}".format(config.VERSION),
         "#**************************************************************",
         "wafw00f -av http://www.sample.org | tee /dev/tty | aha -b > {}/wafw00f_www.sample.org.html".format(output_dir),
         "nmap -v -A http://www.sample.org | tee /dev/tty | aha -b > {}/nmap_www.sample.org.html".format(output_dir),
@@ -31,6 +31,7 @@ def test_web_command(tmpdir):
     wc.main(args)
 
     # Compare
+    output_file = os.path.join(output_dir, "web_commands.txt")
     contents = []
     with open(output_file, "r") as f:
         for line in f:

@@ -4,20 +4,28 @@ import subprocess
 from utils import get_ips_with_port_open
 
 
-def run_enum4linux(ips, proxy):
-    for ip in ips:
-        if proxy:
-            enum_command = 'proxychains enum4linux -a {}'.format(ip)
-        else:
-            enum_command = 'enum4linux -a {}'.format(ip)
-        subprocess.call(enum_command.split())
+def create_command(ip, proxy):
+    if proxy:
+        enum_command = 'proxychains enum4linux -a {}'.format(ip)
+    else:
+        enum_command = 'enum4linux -a {}'.format(ip)
+    return enum_command
+
+
+def get_ips(csv_import):
+    ips_139 = get_ips_with_port_open(csv_import, 139)
+    ips_445 = get_ips_with_port_open(csv_import, 445)
+    return ips_139 + ips_445
+
+
+def run_enum4linux(enum_command):
+    subprocess.call(enum_command.split())
 
 
 def run_enum4linux_on_ips(csv_import, proxy):
-    ips_139 = get_ips_with_port_open(csv_import, 139)
-    ips_445 = get_ips_with_port_open(csv_import, 445)
-    ips = ips_139 + ips_445
-    run_enum4linux(ips, proxy)
+    for ip in get_ips(csv_import):
+        command = create_command(ip, proxy)
+        run_enum4linux(command)
 
 
 def parse_args():

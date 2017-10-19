@@ -23,17 +23,22 @@ COMMANDS = [
     {
         "name": "ip_extract", "tags": ["pentest"],
         "command": "python {scripts_dir}/ip_extract.py {pentest_path}/{ips_file} {pentest_path}",
-        "comments": [""],
+        "comments": [],
+    },
+    {
+        "name": "nessus_scan", "tags": ["pentest"],
+        "command": "python {scripts_dir}/nessus_scan.py {pentest_path}/{ips_file} {pentest_name}",
+        "comments": ["Make sure nessus is configured in the config file."],
     },
     {
         "name": "wafw00f", "tags": ["web"],
         "command": "wafw00f -av {url} | tee /dev/tty | aha -b > {output_dir}/wafw00f_{netloc}.html",
-        "comments": [""],
+        "comments": [],
     },
     {
         "name": "nmap", "tags": ["pentest"],
         "command": "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {output_dir}/nmap -iL {ips_file} --min-hostgroup 128 --defeat-rst-ratelimit | tee /dev/tty | aha -b > {output_dir}/nmap.html",
-        "comments": [""],
+        "comments": [],
     },
     {
         "name": "nmap", "tags": ["web"],

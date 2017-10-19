@@ -117,6 +117,22 @@ def nmap_xml(tmpdir):
 </ports>
 <times srtt="363" rttvar="193" to="100000"/>
 </host>
+<host starttime="1507085206" endtime="1507090329"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.0.0.63" addrtype="ipv4"/>
+<address addr="00:11:32:73:03:38" addrtype="mac" vendor="Elitegroup Computer Systems"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="8312">
+<extrareasons reason="resets" count="8291"/>
+<extrareasons reason="port-unreaches" count="21"/>
+</extraports>
+<extraports state="open|filtered" count="29">
+<extrareasons reason="no-responses" count="29"/>
+</extraports>
+<port protocol="udp" portid="500"><state state="open" reason="syn-ack" reason_ttl="63"/><service name="ike vpn" product="Cisco VPN" version="" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx:1.11.10</cpe></service></port>
+</ports>
+<times srtt="508" rttvar="101" to="100000"/>
+</host>
 <taskbegin task="NSE" time="1507090362"/>
 <taskend task="NSE" time="1507090362"/>
 <taskbegin task="NSE" time="1507090362"/>

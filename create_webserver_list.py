@@ -20,7 +20,6 @@ Output
 webservers.txt - created within the directory specified in output.
 """
 import os
-import sys
 import logging
 import argparse
 
@@ -56,7 +55,7 @@ def get_webserver_list(nmap_dict):
     return webservers
 
 
-def build_webservers_file(args):
+def main(args):
     log.info("Starting to extract urls from {}".format(args.input))
     hosts = utils.csv_to_dict(args.input)
     webservers = get_webserver_list(hosts)
@@ -87,4 +86,5 @@ def parse_args(args):
 
 
 if __name__ == '__main__':
-    build_webservers_file(parse_args(sys.argv[1:]))
+    import sys
+    main(parse_args(sys.argv[1:]))

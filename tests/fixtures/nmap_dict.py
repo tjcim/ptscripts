@@ -95,5 +95,8 @@ def nmap_dict():
          'hostnames': '', 'product_version': '', 'service_name': 'netbios-ns'},
         {'ipv4': '10.0.0.45', 'banner': '', 'product_name': 'DNS-based service discovery',
          'protocol': 'udp', 'port': '5353', 'mac': '00:11:32:73:03:38', 'service_tunnel': '',
-         'hostnames': '', 'product_version': '', 'service_name': 'mdns'}
+         'hostnames': '', 'product_version': '', 'service_name': 'mdns'},
+        {'ipv4': '10.0.0.63', 'banner': '', 'product_name': 'Cisco VPN',
+         'protocol': 'udp', 'port': '500', 'mac': '00:11:32:73:03:38', 'service_tunnel': '',
+         'hostnames': '', 'product_version': '', 'service_name': 'ike vpn'}
     ]

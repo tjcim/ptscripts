@@ -1,48 +1,64 @@
 import os
+import logging
 import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from utils import parse_webserver_urls, uses_encryption, dir_exists
+import utils
 
 
-def run_testssl(url, output_dir):
-    if not uses_encryption(url):
+def create_command(url, output_dir):
+    if not utils.uses_encryption(url):
         return
-    print('Starting testssl for {}'.format(url))
     url_parsed = urlparse(url)
     port = '443'
     if url_parsed.port:
         port = str(url_parsed.port)
-    results_html_file = os.path.join(
+    html_output = os.path.join(
         output_dir, 'testssl_{}_{}.html'.format(url_parsed.netloc, port))
-    results_csv_file = os.path.join(
+    csv_output = os.path.join(
         output_dir, 'testssl_{}_{}.csv'.format(url_parsed.netloc, port))
-    testssl_command = 'testssl.sh --csvfile {} {}'.format(results_csv_file, url)
-    print('The command: ' + testssl_command)
-    p1 = subprocess.Popen(testssl_command.split(), stdout=subprocess.PIPE)
+    testssl_command = 'testssl.sh --csvfile {} {}'.format(csv_output, url)
+    return testssl_command, html_output
+
+
+def run_testssl(command, html_output):
+    p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
     p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)
     p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)
     p1.stdout.close()
     p2.stdout.close()
     output = p3.communicate()[0]
-    with open(results_html_file, 'wb') as h:
+    with open(html_output, 'wb') as h:
         h.write(output)
 
 
-def run_testssl_on_webservers(url_file, output_dir):
-    dir_exists(output_dir, True)
-    urls = parse_webserver_urls(url_file)
-    for url in urls:
-        run_testssl(url, output_dir)
+def main(args):
+    utils.dir_exists(args.output_dir, True)
+    for url in utils.parse_webserver_urls(args.input):
+        testssl_command, html_output = create_command(url, args.output_dir)
+        run_testssl(testssl_command, html_output)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(prog='multi_testssl.py')
+def parse_args(args):
+    parser = argparse.ArgumentParser(
+        parents=[utils.parent_argparser()],
+        description='Run testssl on multiple urls.',
+        prog='multi_testssl.py',
+    )
     parser.add_argument('input', help='File with a URL each line.')
     parser.add_argument('output', help='Output directory where testssl reports will be created.')
-    return parser.parse_args()
+    args = parser.parse_args(args)
+    logger = logging.getLogger("ptscripts")
+    if args.quiet:
+        logger.setLevel('ERROR')
+    elif args.verbose:
+        logger.setLevel('DEBUG')
+    else:
+        logger.setLevel('INFO')
+    return args
 
 
 if __name__ == '__main__':
-    run_testssl_on_webservers(parse_args().input, parse_args().output)
+    import sys
+    main(parse_args(sys.argv[1:]))

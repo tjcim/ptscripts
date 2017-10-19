@@ -4,13 +4,13 @@ Parse nessus scan csv
 
 Usage
 -----
-python <path to script>/parse_nessus_csv.py <input_file> <output_dir>
+python <path to script>/parse_nessus_csv.py <input> <output>
 
 Parameters
 ----------
-input_file : string
+input : string
     Required - Full path to the exported nessus scan.
-output_dir : string
+output : string
     Required - Full path to the directory where the results will be written.
 verbose (-v) : None
     Optional - Print debug logs to stdout
@@ -19,7 +19,7 @@ quiet (-q) : None
 
 Output
 ------
-creates the file "nessus_parsed.csv" within the "output_dir"
+creates the file "nessus_parsed.csv" within the "output"
 
 
 default nessus columns:
@@ -43,7 +43,9 @@ mapping:
         Low -> L
 """
 import os
+import csv
 import sys
+import errno
 import argparse
 import logging.config
 
@@ -53,63 +55,81 @@ from models import NessusVulnerability
 log = logging.getLogger("ptscripts.parse_nessus_csv")
 
 
-def parse_nessus_vuln(nessus_vuln):
-    return {
-        "_id": nessus_vuln[0],
-        "finding": nessus_vuln[7],
-        "risk_level": nessus_vuln[3],
-        "impact": nessus_vuln[9],
-        "remediation": nessus_vuln[10],
-        "host": nessus_vuln[4],
-    }
-
-
 def add_vulnerability_and_host(vulnerabilities, nessus_vuln):
     """ Check if vulnerability is already in 'vulnerabilities' if it is
-    add host.
-    if not, create vulnerability, add host and return vulnerabilities."""
-    parsed = parse_nessus_vuln(nessus_vuln)
-    log.debug("Searching vulnerabilities for id: {}".format(parsed['_id']))
-    if utils.find_vulnerability(vulnerabilities, parsed['_id']):
-        log.debug("Vulnerability exists: {}".format(parsed['_id']))
-        vuln = utils.find_vulnerability(vulnerabilities, parsed['_id'])
+    add host. if not, create vulnerability, add host and return vulnerabilities."""
+    log.debug("Searching vulnerabilities for id: {}".format(nessus_vuln['Plugin ID']))
+    if utils.find_vulnerability(vulnerabilities, nessus_vuln['Plugin ID']):
+        log.debug("Vulnerability exists: {}".format(nessus_vuln['Plugin ID']))
+        vuln = utils.find_vulnerability(vulnerabilities, nessus_vuln['Plugin ID'])
         vuln.add_affected(nessus_vuln)
         log.debug("Host added to vulnerability.")
     else:
-        log.debug("Vulnerability does not exist: {}".format(parsed['_id']))
+        log.debug("Vulnerability does not exist: {}".format(nessus_vuln['Plugin ID']))
         vuln = NessusVulnerability(
-            parsed['finding'], parsed['risk_level'],
-            parsed['_id'], parsed['impact'], parsed['remediation'])
-        log.debug("Adding affected host to vulnerability: {}".format(parsed['_id']))
+            nessus_vuln['Name'], nessus_vuln['Risk'],
+            nessus_vuln['Plugin ID'], nessus_vuln['Description'], nessus_vuln['Solution'])
+        log.debug("Adding affected host to vulnerability: {}".format(nessus_vuln['Plugin ID']))
         vuln.add_affected(nessus_vuln)
         vulnerabilities.append(vuln)
     return vulnerabilities
 
 
-def run_parse_nessus_csv(args):
-    vulnerabilities = []
-    output_vulns = []
+def filter_vulns(vulns):
+    risk_filter = ["Critical", "High", "Medium", "Low"]
+    return [vuln for vuln in vulns if vuln['Risk'] in risk_filter]
+
+
+def main(args):
     # verify file exists
-    if not utils.file_exists(args.input_file):
-        log.error("Couldn't find csv file at: {}".format(args.input_file))
-    # CSV to list
-    log.info("Reading nessus output.")
-    nessus_vulns = utils.csv_to_list(args.input_file)
-    for nessus_vuln in nessus_vulns:
-        if nessus_vuln[3] not in ["Critical", "High", "Medium", "Low"]:
-            continue
-        vulnerabilities = add_vulnerability_and_host(vulnerabilities, nessus_vuln)
-    print(vulnerabilities)
+    if not os.path.isfile(args.input):
+        log.error("Couldn't find csv file at: {}".format(args.input))
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.input)  # pylint: disable=undefined-variable
+    log.info("Reading nessus output: {}".format(args.input))
+
+    # read nessus file into a dict.
+    nessus_dict = utils.csv_to_dict(args.input)
+    found_issues = len(nessus_dict)
+    log.info("Found {} issues.".format(len(nessus_dict)))
+
+    # filter dict
+    log.info("Filtering issues.")
+    nessus_dict = filter_vulns(nessus_dict)
+    filtered_issues = found_issues - len(nessus_dict)
+    log.info("{} issues were filtered out.".format(filtered_issues))
+
+    # Create vulnerabilities
+    vulnerabilities = []
+    for row in nessus_dict:
+        add_vulnerability_and_host(vulnerabilities, row)
+
+    log.info("{} vulnerabilities rated High".format(
+        len([vuln for vuln in vulnerabilities if vuln.risk_level == 'H'])))
+    log.info("{} vulnerabilities rated Medium".format(
+        len([vuln for vuln in vulnerabilities if vuln.risk_level == 'M'])))
+    log.info("{} vulnerabilities rated Low".format(
+        len([vuln for vuln in vulnerabilities if vuln.risk_level == 'L'])))
+
+    # sort vulnerabilities based on criticality
+    log.info("Sorting vulnerabilities by risk.")
     sorted_vulnerabilities = utils.sort_vulnerabilities(vulnerabilities)
-    for vuln in sorted_vulnerabilities:
-        output_vulns.append(vuln.list_format())
-    output_vulns.insert(0, [
-        "Index", "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
-        "Remediation Procedure", "Resource Required"
-    ])
-    out_csv = os.path.join(args.output_dir, "parsed_nessus.csv")
-    # Save vulns to csv file
-    utils.write_list_to_csv(output_vulns, out_csv)
+    log.info("Vulnerabilities sorted.")
+
+    # format vulnerabilities
+    formatted = [vuln.dict_format() for vuln in sorted_vulnerabilities]
+
+    # write dict to csv
+    fieldnames = ["index", "finding", "affected", "risk_level", "impact", "remediation", "resource"]
+    header = ["Index", "Finding", "Affected Device/Technology", "Risk Level", "Business Impact",
+              "Remediation Procedure", "Resource Required"]
+    out_csv = os.path.join(args.output, "parsed_nessus.csv")
+    log.info("Writing output.")
+    with open(out_csv, "w") as f:
+        dwriter = csv.DictWriter(f, fieldnames=fieldnames)
+        dwriter.writer.writerow(header)
+        for row in formatted:
+            dwriter.writerow(row)
+    log.info("Wrote the parsed output to: {}".format(out_csv))
 
 
 def parse_args(args):
@@ -118,8 +138,8 @@ def parse_args(args):
         parents=[utils.parent_argparser()],
         description='Parse an exported nessus scan.',
     )
-    parser.add_argument('input_file', help='Nessus CSV file.')
-    parser.add_argument('output_dir', help='Directory where the output file "parsed_nessus.csv"')
+    parser.add_argument('input', help='Nessus CSV file.')
+    parser.add_argument('output', help='Directory where the output file "parsed_nessus.csv"')
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
@@ -132,4 +152,4 @@ def parse_args(args):
 
 
 if __name__ == '__main__':
-    run_parse_nessus_csv(parse_args(sys.argv[1:]))
+    main(parse_args(sys.argv[1:]))

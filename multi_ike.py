@@ -2,23 +2,25 @@ import sys
 import argparse
 import subprocess
 
-from utils import get_ips_with_port_open
+import utils
 
 
-def run_ike(ike_ips):
-    for ip in ike_ips:
-        command_text = 'ike-scan -M -A --id=test {}'.format(ip)
-        command = command_text.split()
-        try:
-            subprocess.call(command)
-        except KeyboardInterrupt:
-            return
+def create_command(ip):
+    return 'ike-scan -M -A --id=test {}'.format(ip)
+
+
+def run_ike(command):
+    try:
+        subprocess.call(command.split())
+    except KeyboardInterrupt:
+        return
 
 
 def run_ike_on_ips(args):
     """ Select ips with open ports 500 and then run ike_scan """
-    ike_ips = get_ips_with_port_open(args.input, 500)
-    run_ike(ike_ips)
+    for ip in utils.get_ips_with_port_open(args.input, 500):
+        command = create_command(ip)
+        run_ike(command)
 
 
 def parse_args(args):

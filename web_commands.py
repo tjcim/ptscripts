@@ -21,7 +21,7 @@ Usage
 python web_commands.py /root/pentests/test /root/pentests/test/web_commands.txt http://www.sample.org
 
 """
-import sys
+import os
 import logging
 import argparse
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
@@ -38,52 +38,65 @@ ASSESSMENT_TYPES = {
 }
 
 
-def print_commands(args, assessment_type):
-    log = logging.getLogger("ptscripts.web_commands.print_commands")
-    netloc = urlparse(args.url).netloc
-    log.debug("netloc: " + netloc)
-    folder_path = args.output_dir
-    file_path = args.output_file
-    log.debug("file_path: " + file_path)
-    log.info("Writing header information.")
+def write_header(file_path, assessment_type, version):
+    """ Writes the header informatoin to the file. """
+    header = [
+        "# {} commands created using version {}".format(ASSESSMENT_TYPES[assessment_type], version),
+        "#**************************************************************\r\n",
+    ]
     with open(file_path, 'w') as file_handler:
-        header = "# {assessment_type} commands created using version {version}\r\n"
-        header_text = header.format(
-            assessment_type=ASSESSMENT_TYPES[assessment_type],
-            version=config.VERSION
+        file_handler.write("\r\n".join(header))
+
+
+def filter_commands(cmds, assessment_type):
+    commands = [c for c in cmds if assessment_type in c["tags"]]
+    return commands
+
+
+def format_commands(commands, url, output_dir, netloc):
+    for command in commands:
+        command["formatted"] = command["command"].format(
+            url=url, output_dir=output_dir, netloc=netloc,
+            scripts_dir=config.SCRIPTS_PATH
         )
-        file_handler.write(header_text)
-        file_handler.write("#" + ("*" * len(header)))
-    for command_item in COMMANDS:
-        if assessment_type not in command_item["tags"]:
-            log.debug("{} not found in {}.".format(assessment_type, command_item["tags"]))
-            continue
-        log.info("Writing {} command".format(command_item["name"]))
-        formatted_command = command_item["command"].format(
-            url=args.url, output_dir=folder_path, netloc=netloc, scripts_dir=config.SCRIPTS_PATH)
-        try:
-            log.debug("Writing comments: {}".format(command_item["comments"]))
-            for comment in command_item["comments"]:
-                if comment:
-                    with open(file_path, 'a') as file_handler:
-                        file_handler.write("# {}\r\n".format(comment))
-        except KeyError:
-            # No comments
-            pass
-        log.debug("Writing command: {}".format(formatted_command))
-        with open(file_path, 'a') as file_handler:
-            file_handler.write("\r\n\r\n{}".format(formatted_command))
-    log.info("All commands written.")
+    return commands
+
+
+def print_format_commands(commands):
+    print_formatted = ""
+    for command in commands:
+        # Blank line before the command
+        print_formatted += "\r\n\r\n"
+        if "comments" in command and command["comments"]:
+            for comment in command["comments"]:
+                # Comments start with a '#' and are right above command.
+                print_formatted += "# {}\r\n".format(comment)
+        print_formatted += command["formatted"]
+    return print_formatted
 
 
 def main(args):
-    print_commands(args, "web")
+    assessment_type = "web"
+    log = logging.getLogger("ptscripts.web_commands.print_commands")
+    netloc = urlparse(args.url).netloc
+    log.debug("netloc: " + netloc)
+    file_path = os.path.join(args.output_dir, "{}_commands.txt".format(assessment_type))
+    log.debug("file_path: " + file_path)
+    log.info("Writing header information.")
+    write_header(file_path, assessment_type, config.VERSION)
+    # Filter for assessment type
+    commands = filter_commands(COMMANDS, assessment_type)
+    # Format command
+    commands = format_commands(commands, args.url, args.output_dir, netloc)
+    # Print format commands
+    print_ready = print_format_commands(commands)
+    with open(file_path, 'a') as f:
+        f.write(print_ready)
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser(parents=[utils.parent_argparser()])
     parser.add_argument("output_dir", help="Full path to where the output of the commands should be saved.")
-    parser.add_argument("output_file", help="Full path and name of the output from this script.")
     parser.add_argument("url", help="URL of application")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
@@ -97,4 +110,5 @@ def parse_args(args):
 
 
 if __name__ == "__main__":
+    import sys
     main(parse_args(sys.argv[1:]))
