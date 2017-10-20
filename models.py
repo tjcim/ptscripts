@@ -71,7 +71,7 @@ class NessusVulnerability(Vulnerability):
             else:
                 new_impact.append("\r\n")
         self.impact = "".join(new_impact)
-        remediation_lines = self.impact.splitlines()
+        remediation_lines = self.remediation.splitlines()
         new_remediation = []
         for line in remediation_lines:
             if line:
@@ -85,5 +85,6 @@ class NessusVulnerability(Vulnerability):
         port = nessus_vuln["Port"]
         protocol = nessus_vuln["Protocol"]
         host = "{}:{} ({})".format(ip, port, protocol)
-        log.debug("Adding host {} to vulnerability {}".format(host, self.id))
-        self.affected.append(host)
+        if host not in self.affected:
+            log.debug("Adding host {} to vulnerability {}".format(host, self.id))
+            self.affected.append(host)
