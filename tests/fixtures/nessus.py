@@ -8,57 +8,59 @@ def parsed_nessus_dict():
     return [
         {
             'Business Impact': "The 'commonName' (CN) attribute of the SSL certificate presented for this service is for a different machine. ",
-            'Finding': 'SSL Certificate with Wrong Hostname',
-            'Risk Level': 'H',
-            'Remediation Procedure': "The 'commonName' (CN) attribute of the SSL certificate presented for this service is for a different machine.  ",
-            'Resource Required': '',
+            'Index': '',
             'Affected Device/Technology': '10.0.0.45:443 (tcp)',
-            'Index': ''
+            'Remediation Procedure': 'Purchase or generate a proper certificate for this service. ',
+            'Resource Required': '',
+            'Risk Level': 'H',
+            'Finding': 'SSL Certificate with Wrong Hostname'
         },
         {
             'Business Impact': 'The remote host has IP forwarding enabled. An attacker can exploit this to route packets through the host and potentially bypass some firewalls / routers / NAC filtering.  \nUnless the remote host is a router, it is recommended that you disable IP forwarding. ',
-            'Finding': 'IP Forwarding Enabled',
-            'Risk Level': 'H',
-            'Remediation Procedure': 'The remote host has IP forwarding enabled. An attacker can exploit this to route packets through the host and potentially bypass some firewalls / routers / NAC filtering.   Unless the remote host is a router, it is recommended that you disable IP forwarding.  ',
-            'Resource Required': '',
+            'Index': '',
             'Affected Device/Technology': '10.0.0.45:0 (tcp)',
-            'Index': ''
+            'Remediation Procedure': "On Linux, you can disable IP forwarding by doing : \necho 0 > /proc/sys/net/ipv4/ip_forward \nOn Windows, set the key 'IPEnableRouter' to 0 under \nHKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters \nOn Mac OS X, you can disable IP forwarding by executing the command : \nsysctl -w net.inet.ip.forwarding=0 \nFor other systems, check with your vendor. ",
+            'Resource Required': '',
+            'Risk Level': 'H',
+            'Finding': 'IP Forwarding Enabled'
         },
         {
             'Business Impact': 'The X.509 certificate chain for this service is not signed by a recognized certificate authority.  If the remote host is a public host in production, this nullifies the use of SSL as anyone could establish a man-in-the-middle attack against the remote host.  \nNote that this plugin does not check for certificate chains that end in a certificate that is not self-signed, but is signed by an unrecognized certificate authority. ',
-            'Finding': 'SSL Self-Signed Certificate',
-            'Risk Level': 'M',
-            'Remediation Procedure': 'The X.509 certificate chain for this service is not signed by a recognized certificate authority.  If the remote host is a public host in production, this nullifies the use of SSL as anyone could establish a man-in-the-middle attack against the remote host.   Note that this plugin does not check for certificate chains that end in a certificate that is not self-signed, but is signed by an unrecognized certificate authority.  ',
-            'Resource Required': '',
+            'Index': '',
             'Affected Device/Technology': '10.0.0.20:8443 (tcp)',
-            'Index': ''
+            'Remediation Procedure': 'Purchase or generate a proper certificate for this service. ',
+            'Resource Required': '',
+            'Risk Level': 'M',
+            'Finding': 'SSL Self-Signed Certificate'
         },
         {
             'Business Impact': 'This plugin checks expiry dates of certificates associated with SSL- enabled services on the target and reports whether any have already expired. ',
-            'Finding': 'SSL Certificate Expiry',
-            'Risk Level': 'M',
-            'Remediation Procedure': 'This plugin checks expiry dates of certificates associated with SSL- enabled services on the target and reports whether any have already expired.  ',
-            'Resource Required': '',
+            'Index': '',
             'Affected Device/Technology': '10.0.0.21:443 (tcp)',
-            'Index': ''
+            'Remediation Procedure': 'Purchase or generate a new SSL certificate to replace the existing one. ',
+            'Resource Required': '',
+            'Risk Level': 'M',
+            'Finding': 'SSL Certificate Expiry'
         },
         {
             'Business Impact': 'This script contacts the remote DHCP server (if any) and attempts to retrieve information about the network layout.  \nSome DHCP servers provide sensitive information such as the NIS domain name, or network layout information such as the list of the network web servers, and so on.  \nIt does not demonstrate any vulnerability, but a local attacker may use DHCP to become intimately familiar with the associated network. ',
-            'Finding': 'DHCP Server Detection',
-            'Risk Level': 'L',
-            'Remediation Procedure': 'This script contacts the remote DHCP server (if any) and attempts to retrieve information about the network layout.   Some DHCP servers provide sensitive information such as the NIS domain name, or network layout information such as the list of the network web servers, and so on.   It does not demonstrate any vulnerability, but a local attacker may use DHCP to become intimately familiar with the associated network.  ',
-            'Resource Required': '',
+            'Index': '',
             'Affected Device/Technology': '10.0.0.1:67 (udp)',
-            'Index': ''
+            'Remediation Procedure': 'Apply filtering to keep this information off the network and remove any options that are not in use. ',
+            'Resource Required': '',
+            'Risk Level': 'L',
+            'Finding': 'DHCP Server Detection'
         },
         {
             'Business Impact': 'The remote host supports the use of RC4 in one or more cipher suites. The RC4 cipher is flawed in its generation of a pseudo-random stream of bytes so that a wide variety of small biases are introduced into the stream, decreasing its randomness. \nIf plaintext is repeatedly encrypted (e.g., HTTP cookies), and an attacker is able to obtain many (i.e., tens of millions) ciphertexts, the attacker may be able to derive the plaintext. ',
-            'Finding': 'SSL RC4 Cipher Suites Supported (Bar Mitzvah)',
-            'Risk Level': 'L',
-            'Remediation Procedure': 'The remote host supports the use of RC4 in one or more cipher suites. The RC4 cipher is flawed in its generation of a pseudo-random stream of bytes so that a wide variety of small biases are introduced into the stream, decreasing its randomness.  If plaintext is repeatedly encrypted (e.g., HTTP cookies), and an attacker is able to obtain many (i.e., tens of millions) ciphertexts, the attacker may be able to derive the plaintext.  ',
+            'Index': '',
+            'Affected Device/Technology': '10.0.0.1:3000 (tcp)',
+            'Remediation Procedure': 'Reconfigure the affected application, if possible, to avoid use of RC4 ciphers. Consider using TLS 1.2 with AES-GCM suites subject to browser and web server support. ',
             'Resource Required': '',
-            'Affected Device/Technology': '10.0.0.1:3000 (tcp)', 'Index': ''
-        }]
+            'Risk Level': 'L',
+            'Finding': 'SSL RC4 Cipher Suites Supported (Bar Mitzvah)'
+        }
+    ]
 
 
 @pytest.fixture

@@ -22,17 +22,14 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):
     driver = webdriver.PhantomJS(service_args=service_args)
 
     # Set Timeouts
-    print('timeouts')
     driver.implicitly_wait(config.PROXY_SLEEP)
     driver.set_page_load_timeout(config.PROXY_SLEEP)
 
     # Set browser size
-    print('size')
     driver.set_window_size(1024, 768)  # set the window size that you need
 
     # Get the page
     try:
-        print('get')
         driver.get(url)
     except TimeoutException:
         print('    Timeout occurred moving on')
