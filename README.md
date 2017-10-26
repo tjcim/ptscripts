@@ -1,5 +1,6 @@
 # Change Log
 
+* 10/26/2017 - Changed website_screenshot to use requests first, if a response is provied other than a 404/403 error than it is passed to selenium
 * 10/18/2017 - Refactored multi scripts and added unit tests
 * 10/16/2017 - Added function test for parse_nessus_csv.py, changed nmap to output a ton more info.
 * 10/15/2017 - Added documentation to some scripts and reformatted a couple of scripts to better allow for testing.
@@ -78,3 +79,9 @@ This file will provide default commands that you can copy and paste into the ter
 * Add ability to use proxy in print_commands
   * Change nmap command to use sT and no UDP
 * fix get_internal_ip - This only works for http sites. I should filter out ssl sites to start with, then figure out if the same works over ssl.
+* Parse nikto csvs to combine them and pull out vulnerabilities to one file.
+* Parse through wpscan results to pull out vulnerabilities identified.
+* fierce
+* ARIN/ICANN
+* DNSDumpster
+* imgkit to take images of output

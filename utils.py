@@ -6,9 +6,12 @@ import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
+import urllib3
+import requests
 import logging_config  # noqa pylint: disable=unused-import
 
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 module_log = logging.getLogger("ptscripts.utils")
 
 
@@ -146,3 +149,26 @@ def run_command_tee_aha(command, html_output):
     module_log.debug("Writing output to {}".format(html_output))
     with open(html_output, 'wb') as h:
         h.write(output)
+
+
+def check_url(url, timeout=10):
+    """ Uses python requests library first for speed and to get the response code. """
+    module_log.info("Checking url: {}".format(url))
+    try:
+        resp = requests.get(url, timeout=timeout, verify=False)
+    except requests.exceptions.ConnectTimeout:
+        module_log.info("Requests timed out. Moving on.")
+        return False
+    except requests.exceptions.ReadTimeout:
+        module_log.info("Requests timed out. Moving on.")
+        return False
+    except requests.exceptions.ConnectionError:
+        module_log.info("Connection error. Moving on.")
+        return False
+
+    if resp.status_code in [404, 408]:
+        module_log.info("Response status code {}, skipping.".format(resp.status_code))
+        return False
+    else:
+        module_log.info("Response status code {}, its good to go.".format(resp.status_code))
+        return True

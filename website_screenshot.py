@@ -1,6 +1,7 @@
 """ From list of webservers create a screenshot of each website """
 import os
 import time
+import logging
 import argparse
 from io import BytesIO
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module, import-error
@@ -12,14 +13,15 @@ from selenium.common.exceptions import TimeoutException, WebDriverException  # p
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities  # pylint: disable=import-error
 
 import config
-from utils import parse_webserver_urls, dir_exists
+import utils
+import logging_config  # noqa pylint: disable=unused-import
 
 
-def take_screenshot(url, output_dir, url_list=None, proxy=False):  # pylint: disable=too-many-locals
-    # service_args = ['--ignore-ssl-errors=true', '--ssl-protocol=any', '--web-security=false']
-    # if proxy:
-        # service_args.append('--proxy=127.0.0.1:{}'.format(config.PROXY_PORT))
-        # service_args.append('--proxy-type=socks5')
+LOG = logging.getLogger("ptscripts.website_screenshot")
+
+
+def take_screenshot(url, output_dir, url_list=None, proxy=False):  # noqa pylint: disable=too-many-locals,too-many-statements,too-many-return-statements
+    LOG.info("Taking a screenshot of {}".format(url))
     display = Display(visible=0, size=(1200, 1800))
     display.start()
 
@@ -33,25 +35,18 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):  # pylint: dis
     driver = webdriver.Firefox(
         firefox_profile=profile, capabilities=fc, executable_path=gd_path)
     driver.set_page_load_timeout(10)
-    print('Connecting to {}'.format(url))
-
-    # Set Timeouts
-    # driver.implicitly_wait(config.PROXY_SLEEP)
-    # driver.set_page_load_timeout(config.PROXY_SLEEP)
-
-    # Set browser size
-    # driver.set_window_size(1024, 768)  # set the window size that you need
+    LOG.info('Selenium is connecting to {}'.format(url))
 
     # Get the page
     try:
         driver.get(url)
     except TimeoutException:
-        print('    Timeout occurred moving on')
+        LOG.info("Selenium timeout occured, moving on.")
         driver.close()
         display.stop()
         return
     except WebDriverException:
-        print('    Webdriver Exception occurred moving on')
+        LOG.info("Selenium WebDriverException, moving on.")
         driver.close()
         display.stop()
         return
@@ -62,10 +57,10 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):  # pylint: dis
         # If we are redirected, check if current url is in list of urls to check
         # If it is then no need to take a picture.
         if end_url in url_list:
-            print('    redirected to {} going to look at it later'.format(end_url))
+            LOG.info('redirected to {} going to look at it later'.format(end_url))
             return
         else:
-            print('    redirected from {} to {}'.format(url, end_url))
+            LOG.info('redirected from {} to {}'.format(url, end_url))
             if end_url == 'about:blank':
                 return
     url_parsed = urlparse(url)
@@ -77,10 +72,10 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):  # pylint: dis
         port = '443'
     if proxy:
         # give it a bit more time if using proxy
-        print('    Sleeping for {} seconds before taking screenshot.'.format(config.PROXY_SLEEP))
+        LOG.info('Sleeping for {} seconds before taking screenshot.'.format(config.PROXY_SLEEP))
         time.sleep(config.PROXY_SLEEP)
     file_name = os.path.join(output_dir, '{}_{}.jpg'.format(domain, port))
-    print('    Taking screenshot and saving it to {}'.format(file_name))
+    LOG.info('Taking screenshot and saving it to {}'.format(file_name))
 
     # We are going to save it as jpg to get rid of the transparency of png
     screen = driver.get_screenshot_as_png()
@@ -92,10 +87,11 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):  # pylint: dis
 
 
 def run_website_screenshot(url_file, output_dir, proxy):
-    dir_exists(output_dir, True)
-    urls = parse_webserver_urls(url_file)
+    utils.dir_exists(output_dir, True)
+    urls = utils.parse_webserver_urls(url_file)
     for url in urls:
-        take_screenshot(url, output_dir, urls, proxy)
+        if utils.check_url(url):
+            take_screenshot(url, output_dir, urls, proxy)
 
 
 def parse_args():
