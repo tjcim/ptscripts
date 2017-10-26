@@ -5,6 +5,10 @@ import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
 import utils
+import logging_config  # noqa pylint: disable=unused-import
+
+
+LOG = logging.getLogger("ptscripts.multi_testssl")
 
 
 def create_command(url, output_dir):
@@ -23,6 +27,7 @@ def create_command(url, output_dir):
 
 
 def run_testssl(command, html_output):
+    LOG.debug("Running command: {}".format(command))
     p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
     p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)
     p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)
@@ -34,9 +39,14 @@ def run_testssl(command, html_output):
 
 
 def main(args):
-    utils.dir_exists(args.output_dir, True)
+    utils.dir_exists(args.output, True)
     for url in utils.parse_webserver_urls(args.input):
-        testssl_command, html_output = create_command(url, args.output_dir)
+        if not utils.uses_encryption(url):
+            LOG.debug("Skipping, no encryption: {}".format(url))
+            continue
+        LOG.info("Testing url: {}".format(url))
+        testssl_command, html_output = create_command(url, args.output)
+        LOG.debug("Saving output to {}".format(html_output))
         run_testssl(testssl_command, html_output)
 
 

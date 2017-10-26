@@ -7,13 +7,23 @@ from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-er
 import utils
 
 
-def run_wpscan(command, html_output):
-    p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)
-    p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)
-    p1.stdout.close()
-    p2.stdout.close()
-    output = p3.communicate()[0]
+LOG = logging.getLogger("ptscripts.multi_wpscan")
+
+
+def run_command_tee_aha(command, html_output):
+    LOG.debug("Running command {}".format(command))
+    try:
+        process = subprocess.run(command.split(), stdout=subprocess.PIPE, timeout=60 * 5)  # pylint: disable=no-member
+        p2 = subprocess.run(['tee', '/dev/tty'], input=process.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    except subprocess.TimeoutExpired:  # pylint: disable=no-member
+        LOG.warn("Timeout error occurred for url.")
+        return
+    if "The remote website is up, but" or "seems to be down. Maybe" in str(p2.stdout, 'utf-8'):
+        LOG.info("No Wordpress found at URL.")
+        return
+    p3 = subprocess.run(['aha', '-b'], input=p2.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    output = p3.stdout
+    LOG.debug("Writing output to {}".format(html_output))
     with open(html_output, 'wb') as h:
         h.write(output)
 
@@ -35,8 +45,9 @@ def create_command(url, output_dir):
 def main(args):
     utils.dir_exists(args.output_dir, True)
     for url in utils.parse_webserver_urls(args.input):
+        LOG.info("Checking URL: {}".format(url))
         command, html_output = create_command(url, args.output_dir)
-        run_wpscan(command, html_output)
+        run_command_tee_aha(command, html_output)
 
 
 def parse_args(args):
@@ -46,7 +57,7 @@ def parse_args(args):
         prog='multi_wpscan.py',
     )
     parser.add_argument('input', help='File with a URL each line.')
-    parser.add_argument('output', help='Output directory where wpscan reports will be created.')
+    parser.add_argument('output_dir', help='Output directory where wpscan reports will be created.')
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

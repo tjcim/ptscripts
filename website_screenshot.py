@@ -6,34 +6,54 @@ from io import BytesIO
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module, import-error
 
 from PIL import Image
+from pyvirtualdisplay import Display  # pylint: disable=import-error
 from selenium import webdriver  # pylint: disable=import-error
-from selenium.common.exceptions import TimeoutException  # pylint: disable=import-error
+from selenium.common.exceptions import TimeoutException, WebDriverException  # pylint: disable=import-error
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities  # pylint: disable=import-error
 
 import config
 from utils import parse_webserver_urls, dir_exists
 
 
-def take_screenshot(url, output_dir, url_list=None, proxy=False):
-    service_args = ['--ignore-ssl-errors=true', '--ssl-protocol=any', '--web-security=false']
-    if proxy:
-        service_args.append('--proxy=127.0.0.1:{}'.format(config.PROXY_PORT))
-        service_args.append('--proxy-type=socks5')
+def take_screenshot(url, output_dir, url_list=None, proxy=False):  # pylint: disable=too-many-locals
+    # service_args = ['--ignore-ssl-errors=true', '--ssl-protocol=any', '--web-security=false']
+    # if proxy:
+        # service_args.append('--proxy=127.0.0.1:{}'.format(config.PROXY_PORT))
+        # service_args.append('--proxy-type=socks5')
+    display = Display(visible=0, size=(1200, 1800))
+    display.start()
+
+    fc = DesiredCapabilities.FIREFOX
+    fc['handleAlerts'] = True
+    fc['acceptSslCerts'] = True
+    fc['acceptInsecureCerts'] = True
+    profile = webdriver.FirefoxProfile()
+    profile.accept_untrusted_certs = True
+    gd_path = os.path.join(config.SCRIPTS_PATH, 'geckodriver')
+    driver = webdriver.Firefox(
+        firefox_profile=profile, capabilities=fc, executable_path=gd_path)
+    driver.set_page_load_timeout(10)
     print('Connecting to {}'.format(url))
-    driver = webdriver.PhantomJS(service_args=service_args)
 
     # Set Timeouts
-    driver.implicitly_wait(config.PROXY_SLEEP)
-    driver.set_page_load_timeout(config.PROXY_SLEEP)
+    # driver.implicitly_wait(config.PROXY_SLEEP)
+    # driver.set_page_load_timeout(config.PROXY_SLEEP)
 
     # Set browser size
-    driver.set_window_size(1024, 768)  # set the window size that you need
+    # driver.set_window_size(1024, 768)  # set the window size that you need
 
     # Get the page
     try:
         driver.get(url)
     except TimeoutException:
         print('    Timeout occurred moving on')
-        driver.quit()
+        driver.close()
+        display.stop()
+        return
+    except WebDriverException:
+        print('    Webdriver Exception occurred moving on')
+        driver.close()
+        display.stop()
         return
 
     # Check for redirections
@@ -46,6 +66,8 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):
             return
         else:
             print('    redirected from {} to {}'.format(url, end_url))
+            if end_url == 'about:blank':
+                return
     url_parsed = urlparse(url)
     domain = url_parsed.netloc.split(':')[0]
     port = url_parsed.port
@@ -65,7 +87,8 @@ def take_screenshot(url, output_dir, url_list=None, proxy=False):
     im = Image.open(BytesIO(screen))
     rgb_im = im.convert('RGB')
     rgb_im.save(file_name)
-    driver.quit()
+    driver.close()
+    display.stop()
 
 
 def run_website_screenshot(url_file, output_dir, proxy):

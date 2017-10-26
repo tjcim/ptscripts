@@ -49,6 +49,7 @@ def main(args):
     LOG.info("Getting webservers from {}".format(args.input_file))
     webservers = get_webservers(args.input_file)
     for webserver in webservers:
+        LOG.debug("Working on url: {}:{}".format(webserver['host'], webserver['port']))
         command, html_output = create_command(webserver, args.output_dir, args.proxy)
         utils.run_command_tee_aha(command, html_output)
 

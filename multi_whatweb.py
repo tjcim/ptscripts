@@ -18,7 +18,7 @@ def run_whatweb(command, html_output):
         h.write(output)
 
 
-def create_command(url, output_dir):
+def create_command(url, output):
     url_parsed = urlparse(url)
     if url_parsed.scheme == 'http':
         port = '80'
@@ -27,15 +27,15 @@ def create_command(url, output_dir):
     if url_parsed.port:
         port = str(url_parsed.port)
     html_output = os.path.join(
-        output_dir, 'whatweb_{}_{}.html'.format(url_parsed.netloc, port))
+        output, 'whatweb_{}_{}.html'.format(url_parsed.netloc, port))
     whatweb_command = 'whatweb -v -a 3 {}'.format(url)
     return (whatweb_command, html_output)
 
 
 def main(args):
-    utils.dir_exists(args.output_dir, True)
+    utils.dir_exists(args.output, True)
     for url in utils.parse_webserver_urls(args.input):
-        command, html_output = create_command(url, args.output_dir)
+        command, html_output = create_command(url, args.output)
         run_whatweb(command, html_output)
 
 

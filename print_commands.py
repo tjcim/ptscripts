@@ -161,9 +161,9 @@ def run_print_commands():  # noqa pylint: disable=too-many-locals,too-many-state
     write_command(enum4linux_command)
 
     # multi_wpscan
-    wpscan_html = os.path.join(pentest_path, "wpscan.html")
+    wpscan_html = os.path.join(pentest_path, "wpscan")
     wpscan_update_command = "wpscan --update"
-    wpscan_command = pyscript("multi_wpscan.py", webserver_path, wpscan_html, aha=True)
+    wpscan_command = pyscript(script="multi_wpscan.py", in_file=webserver_path, out_dir=wpscan_html)
     write_command(wpscan_update_command)
     write_comment('Runs the wpscan command for every URL found.')
     write_command(wpscan_command)

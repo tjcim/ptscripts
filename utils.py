@@ -135,12 +135,14 @@ def find_files(input_dir, suffix='.csv'):
 
 def run_command_tee_aha(command, html_output):
     module_log.debug("Running command {}".format(command))
-    p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)
-    p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)
-    p1.stdout.close()
-    p2.stdout.close()
-    output = p3.communicate()[0]
+    try:
+        p1 = subprocess.run(command.split(), stdout=subprocess.PIPE, timeout=60 * 5)  # pylint: disable=no-member
+    except subprocess.TimeoutExpired:  # pylint: disable=no-member
+        module_log.warn("Timeout error occurred.")
+        return
+    p2 = subprocess.run(['tee', '/dev/tty'], input=p1.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    p3 = subprocess.run(['aha', '-b'], input=p2.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    output = p3.stdout
     module_log.debug("Writing output to {}".format(html_output))
     with open(html_output, 'wb') as h:
         h.write(output)
