@@ -1,7 +1,7 @@
 import os
 # import filecmp
 
-from ptscripts import create_webserver_list as cwl
+from ptscripts.enumeration import create_webserver_list as cwl
 from ptscripts.tests.test_utilities import two_files_contain_same_info
 
 

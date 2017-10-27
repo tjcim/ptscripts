@@ -1,4 +1,4 @@
-from ptscripts import multi_whatweb as mw
+from ptscripts.enumeration import multi_whatweb as mw
 
 
 def test_create_command():

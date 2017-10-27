@@ -1,6 +1,6 @@
 import os
 
-from ptscripts import iframe
+from ptscripts.exploitation import iframe
 
 
 def test_iframe(tmpdir):

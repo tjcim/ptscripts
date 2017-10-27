@@ -1,4 +1,4 @@
-from ptscripts import multi_enum4linux as me
+from ptscripts.enumeration import multi_enum4linux as me
 
 
 def test_get_ips(ports_csv):

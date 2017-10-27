@@ -21,8 +21,8 @@ import socket
 import logging.config
 import argparse
 
-import utils
-import logging_config  # noqa pylint: disable=unused-import
+from ptscripts.utils import utils
+from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
 
 log = logging.getLogger("ptscripts.ip_extract")
 

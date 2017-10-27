@@ -1,8 +1,8 @@
 import os
 import unittest
 
-import ptscripts.utils as utils
-import ptscripts.models as models
+from ptscripts.utils import utils
+from ptscripts.models import models
 
 
 class TestVulnerabilities(unittest.TestCase):

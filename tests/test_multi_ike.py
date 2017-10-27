@@ -1,4 +1,4 @@
-from ptscripts import multi_ike as mi
+from ptscripts.exploitation import multi_ike as mi
 
 
 def test_create_command():

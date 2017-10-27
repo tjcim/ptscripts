@@ -4,7 +4,7 @@ import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-import utils
+from ptscripts.utils import utils
 
 
 def run_whatweb(command, html_output):

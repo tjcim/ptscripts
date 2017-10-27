@@ -8,7 +8,8 @@ from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-er
 
 import urllib3
 import requests
-import logging_config  # noqa pylint: disable=unused-import
+
+from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

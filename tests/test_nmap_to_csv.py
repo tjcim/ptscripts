@@ -1,7 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
 
-from ptscripts import nmap_to_csv as ntc
+from ptscripts.parsing import nmap_to_csv as ntc
 from ptscripts.tests.test_utilities import two_files_contain_same_info
 
 

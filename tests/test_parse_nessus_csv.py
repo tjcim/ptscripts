@@ -3,8 +3,8 @@ import unittest
 
 import pytest
 
-from ptscripts import models
-from ptscripts import parse_nessus_csv as pnc
+from ptscripts.models import models
+from ptscripts.parsing import parse_nessus_csv as pnc
 from ptscripts.tests.test_utilities import two_csvs_contain_same_info
 
 

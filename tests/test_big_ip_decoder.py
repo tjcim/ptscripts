@@ -1,4 +1,4 @@
-from ptscripts.big_ip_decoder import run_big_ip_decoder
+from ptscripts.exploitation.big_ip_decoder import run_big_ip_decoder
 
 
 def test_run_big_ip_decoder():

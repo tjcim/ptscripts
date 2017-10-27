@@ -49,9 +49,9 @@ import errno
 import argparse
 import logging.config
 
-import utils
-import logging_config  # noqa pylint: disable=unused-import
-from models import NessusVulnerability
+from ptscripts.utils import utils
+from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
+from ptscripts.models.models import NessusVulnerability
 log = logging.getLogger("ptscripts.parse_nessus_csv")
 
 

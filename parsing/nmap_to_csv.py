@@ -27,7 +27,7 @@ import logging
 import argparse
 import xml.etree.ElementTree as etree
 
-import logging_config  # noqa pylint: disable=unused-import
+from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
 
 LOG = logging.getLogger("ptscripts.nmap_to_csv")
 
