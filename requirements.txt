@@ -1,6 +1,7 @@
 certifi==2017.7.27.1
 chardet==3.0.4
 coverage==4.4.1
+EasyProcess==0.2.3
 idna==2.6
 nessrest==0.40
 olefile==0.44
@@ -10,6 +11,8 @@ py==1.4.34
 pytest==3.2.3
 pytest-cov==2.5.1
 python-owasp-zap-v2.4==0.0.12
+PyVirtualDisplay==0.2.1
+PyYAML==3.12
 requests==2.18.4
 selenium==3.6.0
 six==1.11.0
