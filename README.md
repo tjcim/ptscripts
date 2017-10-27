@@ -1,5 +1,6 @@
 # Change Log
 
+* 10/27/2017 - Restructured scripts to oranize them in PTES phases
 * 10/26/2017 - Changed website_screenshot to use requests first, if a response is provied other than a 404/403 error than it is passed to selenium
 * 10/18/2017 - Refactored multi scripts and added unit tests
 * 10/16/2017 - Added function test for parse_nessus_csv.py, changed nmap to output a ton more info.
