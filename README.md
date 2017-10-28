@@ -14,7 +14,7 @@
 
 Make sure you have python3-venv installed.
 
-    apt install python3-venv phantomjs -y
+    apt install python3-venv phantomjs aha -y
 
 Clone this repo and then cd into the created directory. The commands below assume you are currently in the repo's directory.
 

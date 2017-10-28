@@ -1,4 +1,4 @@
-from ptscripts.utils import ip_extract
+from ptscripts import ip_extract
 
 
 def test_cidr_to_ip_list():

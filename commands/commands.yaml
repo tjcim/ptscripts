@@ -3,50 +3,85 @@
 # pentest_path: path to the specific engagement folder
 # ip_file: list of ips provided for the pentest
 # pentest_name: shortname of engagement
+# domain_name: domain
 ---
 -
-    name: ip_extract
-    command: "python {scripts_path}/ip_extract.py {pentest_path}/{ip_file} {pentest_path}"
-    description: "Extracts ips in cidr or dashed formats into a file with an IP per line."
-    help:
-    provides: _ips.txt
+  name: dnsdumpster
+  command: "python {scripts_path}/dnsdumpster_images.py {pentest_path}/screenshots/ {domain_name}"
+  description:
 
 -
-    name: nessus_scan
-    command: "python {scripts_path}/nessus_scan.py {pentest_path}/_ips.txt {pentest_name}"
-    description: "Kicks off a basic nessus scan against the ips provided."
-    help: "Make sure the nessus ip:port and api information is in config.py"
+  name: nslookup
+  command: "python {scripts_path}/nslookup_images.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
+  description: "Runs nslookup and takes screenshots."
 
 -
-    name: nmap
-    command: "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {pentest_path}/nmap -iL {pentest_path}/_ips.txt --min-hostgroup 128 --defeat-rst-ratelimit | tee /dev/tty | aha -b > {pentest_path}/nmap.html"
-    description: "Nmap aggressive, all TCP ports scanned, top UDP ports scanned"
-    requires: _ips.txt
-    provides: nmap.xml
+  name: whois
+  command: "python {scripts_path}/whois_image.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
+  description: "Runs whois -H {domain}, saves output and takes screenshot"
 
 -
-    name: nmap_to_csv
-    command: "python {scripts_path}/nmap_to_csv.py {pentest_path}/nmap.xml {pentest_path}"
-    description: "Parses nmap.xml to a csv file named ports.csv"
-    requires: nmap.xml
-    provides: ports.csv
+  name: fierce
+  command: "python {scripts_path}/fierce_image.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
+  description: "Runs fierce, saves output and takes a screenshot."
 
 -
-    name: webservers
-    command: "python {scripts_path}/create_webserver_list.py {pentest_path}/ports.csv {pentest_path}"
-    description: "Parses the ports.csv file and creates a text file of all servers hosting a website; one URL per line."
-    requires: ports.csv
-    provides: webservers.txt
+  name: ip_extract
+  command: "python {scripts_path}/ip_extract.py {pentest_path}/{ip_file} {pentest_path}/ips/"
+  description: "Extracts ips in cidr or dashed formats into a file with an IP per line."
+  help:
+  provides: _ips.txt
 
 -
-    name: website_screenshots
-    command: "python {scripts_path}/website_screenshots.py {pentest_path}/webservers.txt {pentest_path}/website_screenshots"
-    description: "Visits each URL and takes a screenshot."
-    requires: webservers.txt
+  name: nessus_scan
+  command: "python {scripts_path}/nessus_scan.py {pentest_path}/ips/_ips.txt {pentest_name}"
+  description: "Kicks off a basic nessus scan against the ips provided."
+  help: "Make sure the nessus ip:port and api information is in config.py"
 
 -
-    name: metasploit_workspace
-    command: "python {scripts_path}/metasploit_resources.py {pentest_name} {pentest_path}/nmap.xml"
-    description: "Creates resources directory along with a few metasploit resource files."
-    requires: nmap.xml
-    provides: resources/db_import.rc
+  name: nmap_st_common
+  command: "python {scripts_path}/nmap_image.py {pentest_path}/discovery/nmap/ {pentest_path}/ips/_ips.txt -s {pentest_path}/screenshots/"
+  description: "FAST - Runs nmap with -sT on common ports. Saves output and takes an image."
+
+-
+  name: nmap
+  command: "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {pentest_path}/discovery/nmap/ss_all -iL {pentest_path}/ept/ips/_ips.txt --min-hostgroup 128 --defeat-rst-ratelimit"
+  description: "SLOW - Nmap aggressive, all TCP ports scanned, top UDP ports scanned"
+  requires: _ips.txt
+  provides: nmap.xml
+
+# TODO
+-
+  name: nmap_to_csv
+  command: "python {scripts_path}/nmap_to_csv.py {pentest_path}/discovery/nmap/ss_all.xml {pentest_path}/discovery/"
+  description: "Parses nmap.xml to a csv file named ports.csv"
+  requires: nmap.xml
+  provides: ports.csv
+
+# TODO
+-
+  name: webservers
+  command: "python {scripts_path}/create_webserver_list.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/"
+  description: "Parses the ports.csv file and creates a text file of all servers hosting a website; one URL per line."
+  requires: ports.csv
+  provides: webservers.txt
+
+# TODO
+-
+  name: website_screenshots
+  command: "python {scripts_path}/website_screenshots.py {pentest_path}/enumeration/webservers.txt {pentest_path}/enumeration/website_screenshots"
+  description: "Visits each URL and takes a screenshot."
+  requires: webservers.txt
+
+# TODO
+-
+  name: metasploit_workspace
+  command: "python {scripts_path}/metasploit_resources.py {pentest_name} {pentest_path}/nmap.xml"
+  description: "Creates resources directory along with a few metasploit resource files."
+  requires: nmap.xml
+  provides: resources/db_import.rc
+
+# TODO
+-
+  name: yasuo
+  command: "python {scripts_path}/yasuo_image.py"

@@ -4,16 +4,20 @@ import csv
 import logging
 import argparse
 import subprocess
+from io import BytesIO
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
 import urllib3
 import requests
+from PIL import Image
+from selenium import webdriver  # pylint: disable=import-error
 
-from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
+# from ptscripts import config
+from utils import logging_config  # noqa pylint: disable=unused-import
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-module_log = logging.getLogger("ptscripts.utils")
+LOG = logging.getLogger("ptscripts.utils")
 
 
 def sort_vulnerabilities(vulnerabilities):
@@ -78,15 +82,13 @@ def dir_exists(dir_path, make=True):
     if make is True it will try to make the dir"""
     if os.path.exists(dir_path):
         return os.path.isdir(dir_path)
-    else:
-        if make:
-            module_log.info("Directory {} doesn't exist, going to try and create it.".format(dir_path))
-            os.mkdir(dir_path)
-            module_log.info("Directory created.")
-            return True
-        else:
-            module_log.info("Directory {} doesn't exist and was not created.".format(dir_path))
-            return False
+    if make:
+        LOG.info("Directory {} doesn't exist, going to try and create it.".format(dir_path))
+        os.mkdir(dir_path)
+        LOG.info("Directory created.")
+        return True
+    LOG.info("Directory {} doesn't exist and was not created.".format(dir_path))
+    return False
 
 
 def get_hosts_with_port_open(csv_file, port):
@@ -137,39 +139,78 @@ def find_files(input_dir, suffix='.csv'):
     return [filename for filename in filenames if filename.endswith(suffix)]
 
 
-def run_command_tee_aha(command, html_output):
-    module_log.debug("Running command {}".format(command))
+def run_command_two(command, html_output, timeout=60 * 5):
+    LOG.debug("Running command {}".format(command))
+    p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)  # pylint: disable=no-member
+    p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    p1.stdout.close()
+    p2.stdout.close()
+    if timeout > 0:
+        p1.wait(timeout=timeout)
+    output = p3.communicate()[0]
+    LOG.debug("Writing output to {}".format(html_output))
+    command_text = "<p style='color:#00CC00'>{}</p>".format(command)
+    with open(html_output, 'wb') as h:
+        h.write(command_text.encode())
+        h.write(output)
+    LOG.info("HTML file written to {}".format(html_output))
+    return html_output
+
+
+def run_command_tee_aha(command, html_output, timeout=60 * 5):
+    LOG.debug("Running command {}".format(command))
     try:
-        p1 = subprocess.run(command.split(), stdout=subprocess.PIPE, timeout=60 * 5)  # pylint: disable=no-member
+        p1 = subprocess.run(command.split(), stdout=subprocess.PIPE, timeout=timeout)  # pylint: disable=no-member
     except subprocess.TimeoutExpired:  # pylint: disable=no-member
-        module_log.warn("Timeout error occurred.")
+        LOG.warning("Timeout error occurred.")
         return
     p2 = subprocess.run(['tee', '/dev/tty'], input=p1.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
     p3 = subprocess.run(['aha', '-b'], input=p2.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
     output = p3.stdout
-    module_log.debug("Writing output to {}".format(html_output))
+    LOG.debug("Writing output to {}".format(html_output))
+    command_text = "<p style='color:#00CC00'>{}</p>".format(command)
     with open(html_output, 'wb') as h:
+        h.write(command_text.encode())
         h.write(output)
+    return html_output
 
 
 def check_url(url, timeout=10):
     """ Uses python requests library first for speed and to get the response code. """
-    module_log.info("Checking url: {}".format(url))
+    LOG.info("Checking url: {}".format(url))
     try:
         resp = requests.get(url, timeout=timeout, verify=False)
     except requests.exceptions.ConnectTimeout:
-        module_log.info("Requests timed out. Moving on.")
+        LOG.info("Requests timed out. Moving on.")
         return False
     except requests.exceptions.ReadTimeout:
-        module_log.info("Requests timed out. Moving on.")
+        LOG.info("Requests timed out. Moving on.")
         return False
     except requests.exceptions.ConnectionError:
-        module_log.info("Connection error. Moving on.")
+        LOG.info("Connection error. Moving on.")
         return False
 
     if resp.status_code in [404, 408]:
-        module_log.info("Response status code {}, skipping.".format(resp.status_code))
+        LOG.info("Response status code {}, skipping.".format(resp.status_code))
         return False
-    else:
-        module_log.info("Response status code {}, its good to go.".format(resp.status_code))
-        return True
+    LOG.info("Response status code {}, its good to go.".format(resp.status_code))
+    return True
+
+
+def selenium_image(html_file, ss_path):
+    """ Take picture of output.
+    Opens html_file with selenium, saves the screenshot to the ss_path folder
+    """
+    driver = webdriver.PhantomJS()
+    LOG.info("opening file {}".format(html_file))
+    driver.get("file://" + html_file)
+    driver.set_window_size(800, 600)
+    filename = os.path.split(html_file)[1].rsplit(".", 1)[0] + ".png"
+    screenshot_path = os.path.join(ss_path, filename)
+    LOG.info("Saving image to {}".format(screenshot_path))
+    screen = driver.get_screenshot_as_png()
+    im = Image.open(BytesIO(screen))
+    im = im.crop((0, 0, 800, 600))
+    im.save(screenshot_path)
+    driver.close()

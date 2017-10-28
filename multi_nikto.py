@@ -17,8 +17,8 @@ import os
 import logging
 import argparse
 
-from ptscripts.utils import utils
-from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
+from utils import utils  # noqa
+from utils import logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.multi_nikto")

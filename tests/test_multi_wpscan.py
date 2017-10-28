@@ -1,4 +1,4 @@
-from ptscripts.enumeration import multi_wpscan as mw
+from ptscripts import multi_wpscan as mw
 
 
 def test_create_command():

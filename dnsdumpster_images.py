@@ -8,6 +8,7 @@ TODO:
     Error handling for both selenium and requests
 """
 import os
+import time
 import logging
 import argparse
 
@@ -19,9 +20,9 @@ from selenium.webdriver.support import expected_conditions as EC  # pylint: disa
 from selenium.common.exceptions import TimeoutException, WebDriverException  # pylint: disable=import-error
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities  # pylint: disable=import-error
 
-from ptscripts import utils
-from ptscripts import config
-from ptscripts import logging_config  # noqa pylint: disable=unused-import
+import config  # noqa
+from utils import utils  # noqa
+from utils import logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.dnsdumpster_images")
@@ -34,7 +35,8 @@ def selenium_open_dnsdumpster():
     fc['acceptInsecureCerts'] = True
     profile = webdriver.FirefoxProfile()
     profile.accept_untrusted_certs = True
-    gd_path = os.path.join(config.SCRIPTS_PATH, 'geckodriver')
+    gd_path = os.path.join(config.SCRIPTS_PATH, 'utils/geckodriver')
+    LOG.debug(gd_path)
     driver = webdriver.Firefox(
         firefox_profile=profile, capabilities=fc, executable_path=gd_path)
     driver.set_page_load_timeout(10)
@@ -66,10 +68,12 @@ def take_screenshot(output_dir, domain, driver):
     filename = "dnsdumpster_{}.png".format(domain)
     screenshot_path = os.path.join(output_dir, filename)
 
-    element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//a[@name='dnsanchor']"))
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, "//canvas[@id='hosting']"))
     )
-    # driver.execute_script("return arguments[0].scrollIntoView();", element)
+    time.sleep(2)
+    element = driver.find_element(By.XPATH, "//h4[contains(text(), 'Showing results for')]")
+    driver.execute_script("return arguments[0].scrollIntoView();", element)
     driver.save_screenshot(screenshot_path)
 
 

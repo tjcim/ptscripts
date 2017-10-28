@@ -26,10 +26,10 @@ import logging
 import argparse
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from ptscripts import config
-from ptscripts.utils import utils
-from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
-from ptscripts.commands.commands import COMMANDS
+from config import config
+from utils import utils
+from utils import logging_config  # noqa pylint: disable=unused-import
+from commands.commands import COMMANDS
 
 
 ASSESSMENT_TYPES = {

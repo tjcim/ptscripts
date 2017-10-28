@@ -1,4 +1,4 @@
-from ptscripts.enumeration import multi_nikto as mn
+from ptscripts import multi_nikto as mn
 
 
 def test_get_webservers(ports_csv):

@@ -1,8 +1,8 @@
 # Functional test
 import os
 
-from ptscripts import config
-from ptscripts.commands import web_commands as wc
+from ptscripts.config import config
+from ptscripts import web_commands as wc
 
 
 def test_web_command(tmpdir):

@@ -1,4 +1,4 @@
-from ptscripts.enumeration import multi_testssl as mt
+from ptscripts import multi_testssl as mt
 
 
 def test_create_command():

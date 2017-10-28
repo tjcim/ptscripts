@@ -23,8 +23,8 @@ import os
 import logging
 import argparse
 
-from ptscripts.utils import utils
-from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
+from utils import utils
+from utils import logging_config  # noqa pylint: disable=unused-import
 
 log = logging.getLogger("ptscripts.create_webserver_list")
 

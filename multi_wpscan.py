@@ -4,7 +4,7 @@ import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from ptscripts.utils import utils
+from utils import utils
 
 
 LOG = logging.getLogger("ptscripts.multi_wpscan")
@@ -17,7 +17,7 @@ def run_command_tee_aha(command, html_output):
         process_stdout = str(process.stdout, 'utf-8')
         p2 = subprocess.run(['tee', '/dev/tty'], input=process.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
     except subprocess.TimeoutExpired:  # pylint: disable=no-member
-        LOG.warn("Timeout error occurred for url.")
+        LOG.warning("Timeout error occurred for url.")
         return
     if "The remote website is up, but" in process_stdout:
         LOG.info("The remote website is up found in process_stdout")

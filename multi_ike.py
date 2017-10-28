@@ -2,7 +2,7 @@ import sys
 import argparse
 import subprocess
 
-from ptscripts.utils import utils
+from utils import utils
 
 
 def create_command(ip):

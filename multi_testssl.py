@@ -4,8 +4,8 @@ import argparse
 import subprocess
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
-from ptscripts.utils import utils
-from ptscripts.utils import logging_config  # noqa pylint: disable=unused-import
+from utils import utils  # noqa
+from utils import logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.multi_testssl")

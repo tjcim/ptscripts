@@ -1,12 +1,12 @@
 import os
 import yaml
 
-import config
+from config import config  # noqa
 
 
 def get_input():
     pentest_name = input('Pentest directory name? ')  # noqa: F821
-    domain_name = input('Domain for dnsrecon? ')  # noqa: F821
+    domain_name = input('Domain to use for dnsdumpster and fierce? ')  # noqa: F821
     ip_file = input('Name of ip file [ips.txt]: ') or "ips.txt"  # noqa: F821
     return {'pentest_name': pentest_name,
             'domain_name': domain_name,
@@ -17,9 +17,10 @@ def c_format(commands, params):
     for com in commands:
         com['command'] = com['command'].format(
             scripts_path=config.SCRIPTS_PATH,
-            pentest_path=os.path.join(config.BASE_PATH, params['pentest_name']),
+            pentest_path=os.path.join(config.BASE_PATH, params['pentest_name'] + "/ept"),
             ip_file=params['ip_file'],
             pentest_name=params['pentest_name'],
+            domain_name=params['domain_name'],
         )
 
 
@@ -37,7 +38,7 @@ def load_commands(yaml_file):
 
 def main():
     params = get_input()
-    commands = load_commands("commands.yaml")
+    commands = load_commands("commands/commands.yaml")
     c_format(commands, params)
     c_print(commands)
 
