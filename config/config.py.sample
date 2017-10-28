@@ -3,7 +3,7 @@ import os
 
 # Do not change this line
 VERSION = "0.2"
-SCRIPTS_PATH = os.path.abspath(os.path.dirname(__file__))
+SCRIPTS_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Set this to where your pentests are stored
 BASE_PATH = '/root/pentests/'
