@@ -3,8 +3,8 @@ import argparse
 
 from zapv2 import ZAPv2
 
-import config
-from utils import parse_webserver_urls, dir_exists
+from config import config
+from utils import utils
 
 
 def run_zap_attack(url, zap):
@@ -32,15 +32,17 @@ def run_zap_attack(url, zap):
     print('Scan completed')
 
 
-def run_zap_attack_on_webservers(url_file, output_dir):
-    dir_exists(output_dir, True)
+def main(args):
+    utils.dir_exists(args.output, True)
 
     zap = ZAPv2(apikey=config.ZAP_API, proxies=config.ZAP_PROXIES)  # pylint: disable=unexpected-keyword-arg
     # Create new session
-    zap.core.new_session(output_dir)
+    zap.core.new_session(args.output)
 
-    urls = parse_webserver_urls(url_file)
+    urls = utils.parse_webserver_urls(args.input)
     for url in urls:
+        if not utils.check_url(url):
+            continue
         run_zap_attack(url, zap)
 
 
@@ -52,4 +54,4 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    run_zap_attack_on_webservers(parse_args().input, parse_args().output)
+    main(parse_args())

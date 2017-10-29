@@ -25,9 +25,8 @@ import argparse
 import subprocess
 import logging
 
-import utils
-import config
-import logging_config  # noqa pylint: disable=unused-import
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
+from config import config
 
 
 LOG = logging.getLogger("ptscripts.multi_pikebrute")
@@ -101,22 +100,23 @@ def main(args):  # pylint: disable=too-many-locals
     """ Wrapper for the pikebrute function that runs it once per ip. """
     output = []
     cracked = []
+    ike_dir = os.path.join(args.out_dir, "ike")
+    utils.dir_exists(ike_dir, True)
     if args.dictionary:
         if os.path.isfile(args.dictionary):
             LOG.info('Using dictionary provided in arguments here: {}'.format(args.dictionary))
             dictionary_path = args.dictionary
         else:
-            LOG.warn('Dictionary provided ({}) cannot be found, using the default.'.format(
+            LOG.warning('Dictionary provided ({}) cannot be found, using the default.'.format(
                 args.dictionary))
     else:
-        dictionary_path = os.path.join(config.SCRIPTS_PATH, 'psk-crack-dictionary')
+        dictionary_path = os.path.join(config.SCRIPTS_PATH, 'utils/psk-crack-dictionary')
         LOG.info('Using the default dictionary: {}'.format(dictionary_path))
     ike_ips = utils.get_ips_with_port_open(args.input, 500)
     aggressive = get_ike_aggressive(ike_ips)
-    vpn_name_list = utils.text_file_lines_to_list(os.path.join(config.SCRIPTS_PATH, 'wordlist.dic'))
-    utils.dir_exists(args.out_dir, True)
+    vpn_name_list = utils.text_file_lines_to_list(os.path.join(config.SCRIPTS_PATH, 'utils/wordlist.dic'))
     for ip in aggressive:
-        ip_dir = os.path.join(args.out_dir, ip)
+        ip_dir = os.path.join(ike_dir, ip)
         utils.dir_exists(ip_dir, True)
         capture_hashes(ip_dir, vpn_name_list, ip)
         # Run psk-crack

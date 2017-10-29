@@ -28,7 +28,7 @@ class Vulnerability:  # pylint: disable=too-many-instance-attributes
         ]
 
     def dict_format(self):
-        formatted_hosts = ",\r\n".join(self.affected)
+        formatted_hosts = ", ".join(self.affected)
         return {
             "finding": self.finding, "risk_level": self.risk_level, "affected": formatted_hosts,
             "impact": self.impact, "remediation": self.remediation, "resource": self.resource,
@@ -48,10 +48,10 @@ class TestSSLVulnerability(Vulnerability):
         except KeyError:
             log.error("Couldn't set an appropriate risk level for {}".format(_id))
 
-    def add_affected(self, issue):
-        log.debug(issue)
-        ip = issue[1].split('/')[1]
-        port = issue[2]
+    def add_affected(self, host):
+        log.debug(host)
+        ip = host[1].split('/')[1]
+        port = host[2]
         self.affected.append("{}:{}".format(ip, port))
 
 
@@ -80,10 +80,10 @@ class NessusVulnerability(Vulnerability):
                 new_remediation.append("\r\n")
         self.remediation = "".join(new_remediation)
 
-    def add_affected(self, nessus_vuln):
-        ip = nessus_vuln["Host"]
-        port = nessus_vuln["Port"]
-        protocol = nessus_vuln["Protocol"]
+    def add_affected(self, host):
+        ip = host["Host"]
+        port = host["Port"]
+        protocol = host["Protocol"]
         host = "{}:{} ({})".format(ip, port, protocol)
         if host not in self.affected:
             log.debug("Adding host {} to vulnerability {}".format(host, self.id))

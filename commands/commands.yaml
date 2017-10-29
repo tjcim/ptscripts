@@ -70,7 +70,7 @@
 
 -
   name: website_screenshots
-  command: "python {scripts_path}/website_screenshots.py {pentest_path}/discovery/webservers.txt {pentest_path}/discovery/website_screenshots"
+  command: "python {scripts_path}/website_screenshot.py {pentest_path}/discovery/webservers.txt {pentest_path}/discovery/website_screenshots"
   description: "Visits each URL and takes a screenshot."
   requires: webservers.txt
 
@@ -83,9 +83,72 @@
 
 -
   name: whatweb
-  command: "python {scripts_path}/multi_whatweb.py {pentest_path}/enumeration/webservers.txt {pentest_path}/enumeration/whatweb/"
+  command: "python {scripts_path}/multi_whatweb.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/whatweb/"
   requires: webservers.txt
 
 -
   name: yasuo
-  command: "python {scripts_path}/yasuo_image.py"
+  command: "python {scripts_path}/yasuo_image.py {pentest_path}/discovery/ss_all.xml {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
+  description: "Runs {yasuo.rb -s /opt/yasuo/signatures.yaml -f <path to nmap xml> -t 10} saving output and taking a screenshot"
+  requires: ss_all.xml
+
+-
+  name: pikebrute
+  command: "python {scripts_path}/pikebrute.py {pentest_path}/discovery/ports.csv {pentest_path}/exploitation/"
+  description: "Runs ike-scan and then tries to crack the hashes of any psks returned."
+  requires: ports.csv
+
+-
+  name: searchsploit
+  command: "python {scripts_path}/searchsploit_image.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
+  description: "Runs searchsploit on the nmap.xml"
+  requires: ports.csv
+
+-
+  name: enum4linux
+  command: "python {scripts_path}/multi_enum4linux.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/"
+  requires: ports.csv
+
+-
+  name: epmapper
+  command: "resource {pentest_path}/enumeration/rc_files/endpoint_mapper.rc"
+  description: "Runs metasploit endpoint mapper on all hosts."
+  help: "Run this from msfconsole."
+
+-
+  name: nikto
+  command: "python {scripts_path}/multi_nikto.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/"
+  description: "Runs nikto for every webserver that responds."
+  requires: ports.csv
+
+-
+  name: testssl
+  command: "python {scripts_path}/multi_testssl.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
+  description: "Runs testssl for every webserver that responds."
+  requires: webservers.txt
+
+-
+  name: smtp_relay
+  command: "resource {pentest_path}/exploitation/rc_files/smtp_relay.rc"
+  description: "Runs metasploit smtp relay command."
+  help: "Run this from msfconsole."
+
+-
+  name: parse_nessus
+  command: "python {scripts_path}/parse_nessus_csv.py {pentest_path}/enumeration/<file>.csv {pentest_path}/enumeration/"
+
+-
+  name: zap_attack
+  command: "python {scripts_path}/zap_attack.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
+  description: "Initiates an attack on each webserver."
+  help: "Make sure zap is running and the configuration information is in the config.py file."
+
+-
+  name: wp_brute
+  command: "wpscan -u <ip> --wordlist /usr/share/wordlists/rockyou.txt --usernames /usr/share/wordlists/seclists/Usernames/top_shortlist.txt -t 5"
+  description: "An example of using wpscan to brute-force."
+
+-
+  name: ftp_brute
+  command: "hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt -v <ip> ftp"
+  description: "An example of using hydra to brute-force an ftp site."

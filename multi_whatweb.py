@@ -35,8 +35,9 @@ def create_command(url, output):
 def main(args):
     utils.dir_exists(args.output, True)
     for url in utils.parse_webserver_urls(args.input):
-        command, html_output = create_command(url, args.output)
-        run_whatweb(command, html_output)
+        if utils.check_url(url):
+            command, html_output = create_command(url, args.output)
+            run_whatweb(command, html_output)
 
 
 def parse_args(args):

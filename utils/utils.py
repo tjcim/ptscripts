@@ -72,7 +72,7 @@ def parse_csv_for_webservers(csv_file):
     webservers = []
     hosts = csv_to_dict(csv_file)
     for host in hosts:
-        if host['service_name'] and host['service_name'] in ["http", "https"]:
+        if host.get('service_name') and host['service_name'] in ["http", "https"]:
             webservers.append(host)
     return webservers
 
@@ -190,8 +190,11 @@ def check_url(url, timeout=10):
     except requests.exceptions.ConnectionError:
         LOG.info("Connection error. Moving on.")
         return False
+    except requests.exceptions.InvalidSchema:
+        LOG.info("Received invalid schema. Moving on.")
+        return False
 
-    if resp.status_code in [404, 408]:
+    if resp.status_code in [404, 408, 403]:
         LOG.info("Response status code {}, skipping.".format(resp.status_code))
         return False
     LOG.info("Response status code {}, its good to go.".format(resp.status_code))

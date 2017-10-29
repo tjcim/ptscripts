@@ -10,6 +10,27 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 
 LOG = logging.getLogger("ptscripts.multi_testssl")
 
+# Unable to open a socket
+
+
+def run_command_tee_aha(command, html_output):
+    LOG.debug("Running command {}".format(command))
+    try:
+        process = subprocess.run(command.split(), stdout=subprocess.PIPE, timeout=60 * 60 * 1)  # Give nikto an hour
+        process_stdout = str(process.stdout, 'utf-8')
+        p2 = subprocess.run(['tee', '/dev/tty'], input=process.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    except subprocess.TimeoutExpired:  # pylint: disable=no-member
+        LOG.warning("Timeout error occurred for url.")
+        return
+    if "Unable to open a socket" in process_stdout:
+        LOG.info("The remote website didn't respons.")
+        return
+    p3 = subprocess.run(['aha', '-b'], input=p2.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
+    output = p3.stdout
+    LOG.debug("Writing output to {}".format(html_output))
+    with open(html_output, 'wb') as h:
+        h.write(output)
+
 
 def create_command(url, output_dir):
     if not utils.uses_encryption(url):
@@ -26,28 +47,19 @@ def create_command(url, output_dir):
     return testssl_command, html_output
 
 
-def run_testssl(command, html_output):
-    LOG.debug("Running command: {}".format(command))
-    p1 = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    p2 = subprocess.Popen(['tee', '/dev/tty'], stdin=p1.stdout, stdout=subprocess.PIPE)
-    p3 = subprocess.Popen(['aha', '-b'], stdin=p2.stdout, stdout=subprocess.PIPE)
-    p1.stdout.close()
-    p2.stdout.close()
-    output = p3.communicate()[0]
-    with open(html_output, 'wb') as h:
-        h.write(output)
-
-
 def main(args):
-    utils.dir_exists(args.output, True)
+    testssl_folder = os.path.join(args.output, "testssl")
+    utils.dir_exists(testssl_folder, True)
     for url in utils.parse_webserver_urls(args.input):
         if not utils.uses_encryption(url):
             LOG.debug("Skipping, no encryption: {}".format(url))
             continue
+        if not utils.check_url(url):
+            continue
         LOG.info("Testing url: {}".format(url))
-        testssl_command, html_output = create_command(url, args.output)
+        testssl_command, html_output = create_command(url, testssl_folder)
         LOG.debug("Saving output to {}".format(html_output))
-        run_testssl(testssl_command, html_output)
+        run_command_tee_aha(testssl_command, html_output)
 
 
 def parse_args(args):

@@ -1,5 +1,6 @@
 # Change Log
 
+* 10/29/2017 - **Major changes, make sure you read the instructions below.**
 * 10/27/2017 - Restructured scripts to oranize them in PTES phases
 * 10/26/2017 - Changed website_screenshot to use requests first, if a response is provied other than a 404/403 error than it is passed to selenium
 * 10/18/2017 - Refactored multi scripts and added unit tests
@@ -14,7 +15,7 @@
 
 Make sure you have python3-venv installed.
 
-    apt install python3-venv phantomjs aha -y
+    apt install python3-venv phantomjs aha libxml2-utils -y
 
 Clone this repo and then cd into the created directory. The commands below assume you are currently in the repo's directory.
 
@@ -40,7 +41,11 @@ Edit the config.py file and replace with the correct information for your enviro
 
 ## Pentest folder prep
 
-Create a folder for the pentest you are conducting. I like to store the pentests in /root/pentests/*name*. Name should be a shortname without spaces for example, if I was doing a pentest for Levi's - I would create a levis folder at /root/pentests/levis/. Within the pentest folder make sure you have a text file with the IPs within the scope.
+Create a folder for the pentest you are conducting. I like to store the pentests in /root/pentests/*name*. Name should be a shortname without spaces for example, if I was doing a pentest for Levi's - I would create a levis folder at /root/pentests/levis/.
+
+Once pentest folder is setup run `python /opt/ptscripts/folder_structure <pentest folder path>`
+
+This will create a bunch of folders with the PTES phases in mind. Once the folders have been created, place a file in the `ept/ips` folder with the in-scope ips (in the formats supported below). Then run the `yaml_poc.py` file. This is a proof of concept that I will be moving to primetime and removing the old `print_commands.py` file.
 
 ## ip file
 
@@ -53,21 +58,25 @@ example - all of these can be interpreted by the script:
     192.168.3.0/24
     192.168.4.154
 
-The script will create a file named '_ips.txt' within the folder specified. This text file will have each ip listed individually. The reason is that some commands are able to parse cidr and dashed ips and some are not, In addition some commands expect a single IP. So we create a file with the lowest common denominator in mind.
+The script will create a file named `_ips.txt` within the `{pentest_folder}/ept/ips/` folder.. This text file will have each ip listed individually. The reason is that some commands are able to parse cidr and dashed ips and some are not, In addition some commands expect a single IP. So we create a file with the lowest common denominator in mind.
 
 # Running the scripts
 
-## print_commands.py
+## yaml_poc.py
 
-    python print_commands.py
+    python yaml_poc.py
 
-It is recommended that the `print_commands.py` script is run first. Be sure you have the virtual environment activated and then run the `print_commands.py` script and answer the questions. The script needs to know the pentest folder name - following the example above I would provide `levis` (path is configured in `config.py`), the ip file name as well as the domain name (used for dns-recon).
+It is recommended that the `yaml_poc.py` script is run first. Be sure you have the virtual environment activated and then run the script and answer the questions. The script needs to know the pentest folder name - following the example above I would provide `levis` (path is configured in `config.py`), the ip file name as well as the domain name (used for dns stuff).
 
-This script will create a `commands.txt` file as well as an `rc_files` folder with metaspoit resource text files.
+This script will create a `{pentest_folder}/ept/yaml_commands.txt` file.
 
-## commands.txt
+**Adding commands**
 
-This file will provide default commands that you can copy and paste into the terminal. Every command listed should produce an output that is saved into the appropriate pentest folder. It is important that the commands that create text files are run before they are required. For example, the first command listed in the `commands.txt` file will be the `ip_extract.py` command. This is what takes the ips and breaks them up into the `_ips.txt` file that is used in later commands. So in general, follow the order of the commands from the `commands.txt` file unless you know what you are doing.
+I moved the commands to a yaml file named `commands.yaml` (in the commands folder). This is to encourage others to add their commands to the file to extend the capabilities.
+
+## yaml_commands.txt
+
+This file will provide default commands that you can copy and paste into the terminal. Every command listed should produce an output that is saved into the appropriate pentest folder. It is important that the commands that create text files are run before they are required. For example, the first command listed in the `yaml_commands.txt` file will be the `ip_extract.py` command. This is what takes the ips and breaks them up into the `_ips.txt` file that is used in later commands. So in general, follow the order of the commands from the `yaml_commands.txt` file unless you know what you are doing.
 
 # TODO
 
@@ -82,7 +91,3 @@ This file will provide default commands that you can copy and paste into the ter
 * fix get_internal_ip - This only works for http sites. I should filter out ssl sites to start with, then figure out if the same works over ssl.
 * Parse nikto csvs to combine them and pull out vulnerabilities to one file.
 * Parse through wpscan results to pull out vulnerabilities identified.
-* fierce
-* ARIN/ICANN
-* DNSDumpster
-* imgkit to take images of output
