@@ -20,7 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC  # pylint: disa
 from selenium.common.exceptions import TimeoutException, WebDriverException  # pylint: disable=import-error
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities  # pylint: disable=import-error
 
-import config  # noqa
+from config import config  # noqa
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
 
