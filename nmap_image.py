@@ -7,8 +7,7 @@ import os
 import logging
 import argparse
 
-from utils import utils  # noqa
-from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.nmap_image")

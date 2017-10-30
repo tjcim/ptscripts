@@ -1,0 +1,37 @@
+# Available variables
+# {scripts_path}
+# {url}
+# {pentest_path}
+---
+-
+  name: wafw00f
+  command: "python {scripts_path}/wafw00f_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+  description: "Runs wafw00f, saves output to an html file and then takes an image."
+
+-
+  name: whatweb
+  command: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+
+-
+  name: http_methods
+  command: "python {scripts_path}/http_methods_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+
+-
+  name: dirb
+  command: "python {scripts_path}/dirb_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+
+-
+  name: nikto
+  command: "python {scripts_path}/nikto_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+
+-
+  name: testssl
+  command: "python {scripts_path}/testssl_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+
+-
+  name: uniscan
+  command: "python {scripts_path}/uniscan_image.py {url} {pentest_path} -s {pentest_path}/screenshots/"
+
+-
+  name: iframe
+  command: "python {scripts_path}/iframe.py {url} {pentest_path}"

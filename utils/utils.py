@@ -201,19 +201,19 @@ def check_url(url, timeout=10):
     return True
 
 
-def selenium_image(html_file, ss_path):
+def selenium_image(html_file, ss_path, x=800, y=600):
     """ Take picture of output.
     Opens html_file with selenium, saves the screenshot to the ss_path folder
     """
     driver = webdriver.PhantomJS()
     LOG.info("opening file {}".format(html_file))
     driver.get("file://" + html_file)
-    driver.set_window_size(800, 600)
+    driver.set_window_size(x, y)
     filename = os.path.split(html_file)[1].rsplit(".", 1)[0] + ".png"
     screenshot_path = os.path.join(ss_path, filename)
     LOG.info("Saving image to {}".format(screenshot_path))
     screen = driver.get_screenshot_as_png()
     im = Image.open(BytesIO(screen))
-    im = im.crop((0, 0, 800, 600))
+    im = im.crop((0, 0, x, y))
     im.save(screenshot_path)
     driver.close()

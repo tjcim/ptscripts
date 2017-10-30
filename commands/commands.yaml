@@ -152,3 +152,8 @@
   name: ftp_brute
   command: "hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt -v <ip> ftp"
   description: "An example of using hydra to brute-force an ftp site."
+
+-
+  name: format_nmap
+  command: "python {scripts_path}/format_nmap.py {pentest_path}/discovery/ports.csv {pentest_path}/discovery/"
+  description: "Reformats the ports.csv to a format for the reports."

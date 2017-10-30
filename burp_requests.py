@@ -22,8 +22,8 @@ import urllib3
 
 import requests
 
-import config
-from utils import parse_webserver_urls
+from config import config
+from utils.utils import parse_webserver_urls
 
 
 def run_burp(url):

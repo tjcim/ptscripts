@@ -1,8 +1,7 @@
 import logging
 import argparse
 
-import utils
-import logging_config  # noqa pylint: disable=unused-import
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.multi_enum4linux")

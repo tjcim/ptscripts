@@ -1,7 +1,13 @@
 """ Build a file to test iframe """
 import os
 import sys
+import logging
 import argparse
+
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
+
+
+LOG = logging.getLogger("ptscripts.iframe")
 
 
 def write_iframe(args):
@@ -16,9 +22,10 @@ def write_iframe(args):
     </html>
     """.format(args.website)
     output_file = os.path.join(args.output_dir, 'iframe.html')
-
+    LOG.info("Writing iframe file to: {}".format(output_file))
     with open(output_file, 'w') as f:
         f.write(iframe_html)
+    LOG.info("File written.")
 
 
 def parse_args(args):

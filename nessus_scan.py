@@ -13,9 +13,8 @@ import argparse
 
 from nessrest import ness6rest  # pylint: disable=import-error
 
-import utils
-import config
-import logging_config  # noqa pylint: disable=unused-import
+from config import config
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
 
 log = logging.getLogger("ptscripts.nessus_scan")
 

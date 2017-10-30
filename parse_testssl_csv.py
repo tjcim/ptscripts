@@ -10,8 +10,8 @@ import os
 import logging
 import argparse
 
-import utils
-from models import TestSSLVulnerability
+from utils import utils
+from models.models import TestSSLVulnerability
 
 
 log = logging.getLogger("ptscripts.parse_testssl_csv")
