@@ -20,7 +20,7 @@ def main(args):
     file_name = "fierce_{}.html".format(args.domain)
     html_path = os.path.join(args.output, file_name)
     LOG.info("Saving output to: {}".format(html_path))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 5)
+    html_output = utils.run_command_two(command, html_path, timeout=60 * 60 * 1)  # let fierce run for an hour
     if html_output and args.screenshot:
         utils.selenium_image(html_output, args.screenshot)
     if not html_output:

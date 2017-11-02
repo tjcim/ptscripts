@@ -1,0 +1,31 @@
+footprinting:
+    dnsdumpster
+    nslookup
+    ICANN/ARIN
+    fierce
+    dnsdumpster map
+
+discovery:
+    nmap
+    metasploit workspace
+    rawr
+    website screenshots
+
+enumeration:
+    whatweb
+    yasuo
+    exploit-db
+    enum4linux
+    metasploit epmapper
+    wpscan - no options
+    nikto
+    testssl
+
+exploitation:
+    ftp/ssh brute-force
+    tomcat manager brute-force
+    wordpress brute-force
+    smtp open relay
+    wpscan - known vulnerabilities
+    wpscan - host list, user list, password list
+    pikebrute

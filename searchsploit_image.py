@@ -67,6 +67,10 @@ def main(args):
     if not args.no_update:
         update_searchsploit()
     search_terms = get_search_terms(args.input)
+    if not search_terms:
+        LOG.info("No banner information found in nmap file: {}".format(args.input))
+        raise SystemExit
+    LOG.info("Found {} terms to search.".format(len(search_terms)))
     stdout = ""
     for term in search_terms:
         command = "searchsploit {term}".format(term=term)

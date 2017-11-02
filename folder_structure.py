@@ -1,9 +1,10 @@
 import os
+import shutil
 import argparse
 import logging
 
-from utils import utils # noqa
-from utils import logging_config  # noqa pylint: disable=unused-import
+from config import config
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.folder_structure")
@@ -18,7 +19,7 @@ def metasploit_rc_files(pentest_dir):
     os.makedirs(discovery_folder, exist_ok=True)
     LOG.info("Creating the db_import.rc file in {}".format(discovery_folder))
     workspace_import_path = os.path.join(discovery_folder, "db_import.rc")
-    nmap_xml = os.path.join(pentest_dir, "ept/discovery/ss_all.xml")
+    nmap_xml = os.path.join(pentest_dir, "ept/discovery/nmap/ss_all.xml")
     with open(workspace_import_path, "w") as f:
         f.write("workspace -a {}\n".format(pentest_name))
         f.write("db_import {}\n".format(nmap_xml))
@@ -48,6 +49,13 @@ def metasploit_rc_files(pentest_dir):
         f.write("exploit")
 
 
+def checklist(pentest_dir):
+    src = os.path.join(config.SCRIPTS_PATH, "templates/checklist.txt")
+    dst = os.path.join(pentest_dir, "ept/checklist.txt")
+    LOG.info("Writing checklist file to: {}".format(dst))
+    shutil.copyfile(src, dst)
+
+
 def main(args):
     base_dirs = ["ept", "ipt", "macros", "physical", "report", "social", "wireless", "webapp"]
     pt_dirs = ["discovery", "enumeration", "exploitation", "footprinting", "ips", "post", "screenshots"]
@@ -62,6 +70,7 @@ def main(args):
             dir_path = os.path.join(os.path.join(args.input, directory), pt_dir)
             os.makedirs(dir_path, exist_ok=True)
     metasploit_rc_files(args.input)
+    checklist(args.input)
     LOG.info("Directories have been created.")
     print("************* ")
     print(""" Now that the directories have been created, please put the in-scope ip addresses in the ips/ips.txt file.""")

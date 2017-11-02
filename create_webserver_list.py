@@ -34,7 +34,7 @@ def get_webserver_list(nmap_dict):
     for host in nmap_dict:
         if host['service_name'] and host['service_name'] in ["http", "https"]:
             # scheme
-            if host['service_tunnel'] == 'ssl':
+            if host['service_tunnel'] == 'ssl' or host['service_name'] == 'https':
                 scheme = 'https'
             else:
                 scheme = 'http'

@@ -45,14 +45,14 @@
   command: "python {scripts_path}/nmap_image.py {pentest_path}/discovery/nmap/ {pentest_path}/ips/_ips.txt -s {pentest_path}/screenshots/"
   description: "FAST - Runs nmap with -sT on common ports. Saves output and takes an image."
   requires: _ips.txt
-  provides: ss_all.xml
+  provides: nmap_sT_common.xml
 
 -
   name: nmap
-  command: "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {pentest_path}/discovery/nmap/ss_all -iL {pentest_path}/ept/ips/_ips.txt --min-hostgroup 128 --defeat-rst-ratelimit"
+  command: "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {pentest_path}/discovery/nmap/ss_all -iL {pentest_path}/ips/_ips.txt --min-hostgroup 128 --defeat-rst-ratelimit"
   description: "SLOW - Nmap aggressive, all TCP ports scanned, top UDP ports scanned"
   requires: _ips.txt
-  provides: nmap.xml
+  provides: ss_all.xml
 
 -
   name: nmap_to_csv
@@ -69,17 +69,19 @@
   provides: webservers.txt
 
 -
+  name: rawr
+  command: "rawr.py {pentest_path}/discovery/nmap/ss_all.xml --rd --dns -orx --downgrade --spider -d {pentest_path}/discovery/rawr"
+  requires: ss_all.xml
+
+-
   name: website_screenshots
   command: "python {scripts_path}/website_screenshot.py {pentest_path}/discovery/webservers.txt {pentest_path}/discovery/website_screenshots"
   description: "Visits each URL and takes a screenshot."
   requires: webservers.txt
 
 -
-  name: metasploit_workspace
-  command: "python {scripts_path}/metasploit_resources.py {pentest_name} {pentest_path}/nmap.xml"
-  description: "Creates resources directory along with a few metasploit resource files."
-  requires: nmap.xml
-  provides: resources/db_import.rc
+  name: metasploit import
+  command: "msfconsole -r {pentest_path}/discovery/rc_files/db_import.rc"
 
 -
   name: whatweb
@@ -88,7 +90,7 @@
 
 -
   name: yasuo
-  command: "python {scripts_path}/yasuo_image.py {pentest_path}/discovery/ss_all.xml {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/yasuo_image.py {pentest_path}/discovery/nmap/ss_all.xml {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
   description: "Runs {yasuo.rb -s /opt/yasuo/signatures.yaml -f <path to nmap xml> -t 10} saving output and taking a screenshot"
   requires: ss_all.xml
 

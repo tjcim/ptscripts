@@ -15,6 +15,7 @@ LOG = logging.getLogger("ptscripts.nmap_image")
 
 def main(args):
     LOG.info("Running nmap")
+    os.makedirs(args.output, exist_ok=True)
     output = os.path.join(args.output, "nmap_sT_common")
     command = """nmap -sT -oA {output} -iL {input_file}""".format(
         output=output, input_file=args.input)
