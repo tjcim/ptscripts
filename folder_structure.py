@@ -19,7 +19,7 @@ def metasploit_rc_files(pentest_dir):
     os.makedirs(discovery_folder, exist_ok=True)
     LOG.info("Creating the db_import.rc file in {}".format(discovery_folder))
     workspace_import_path = os.path.join(discovery_folder, "db_import.rc")
-    nmap_xml = os.path.join(pentest_dir, "ept/discovery/ss_all.xml")
+    nmap_xml = os.path.join(pentest_dir, "ept/discovery/nmap/ss_all.xml")
     with open(workspace_import_path, "w") as f:
         f.write("workspace -a {}\n".format(pentest_name))
         f.write("db_import {}\n".format(nmap_xml))
