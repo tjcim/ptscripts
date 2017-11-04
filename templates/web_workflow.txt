@@ -1,0 +1,17 @@
+wafw00f
+nmap
+whatweb
+http methods
+dirb
+nikto
+testssl
+uniscan
+iframe
+code review - login page
+login - analyze session and any other cookies
+burp suite
+manually spider
+logout
+login
+build burp macro
+active scan

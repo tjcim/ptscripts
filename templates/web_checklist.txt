@@ -1,0 +1,43 @@
+A1 - Injection
+    manual sqli
+    sqlmap
+    burp
+A2 - Broken Auth and Session Management
+    entropy of session token
+    change password
+    forgot password
+    session in URL
+    session secure flag
+    session httponly flag
+    session fixation
+    session timeout
+    logout invalidation
+    brute-force
+    password complexity requirements
+A3 - Sensitive Data Exposure
+    dirb
+    passwords stored in cleartext
+    testssl
+A4 - XXE (2017)
+A5 - Broken Access Control (2017); Insecure Direct Object Reference (2013)
+    direct access to objects
+A6 - Security Misconfiguration (2017)
+    nmap
+    nikto
+    http methods
+    iframe
+    uniscan
+    directory listing
+    dirb/ZAP force browse for sample apps
+    application error
+A7 - XSS (2017)
+    Reflected
+    Stored
+    DOM
+A8 - Insecure deserialization (2017)
+A9 - Components with Known Vulnerabilities (2017)
+    yasuo
+    whatweb
+    searchsploit
+    nessus
+A10 - Insufficient Logging and Monitoring (2017)

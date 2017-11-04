@@ -80,6 +80,8 @@ This file will provide default commands that you can copy and paste into the ter
 
 # TODO
 
+* Change web script commands to output into appropriate folder
+* Use data from whatweb to check for vulnerabilities using searchsploit
 * Make enum4linux output to html and text. Extract found info to one file.
 * Add documentation to each script
   * Information on what the script does
