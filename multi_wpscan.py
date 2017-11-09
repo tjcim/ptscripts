@@ -54,7 +54,7 @@ def create_command(url, output_dir):
 def main(args):
     utils.dir_exists(args.output_dir, True)
     for url in utils.parse_webserver_urls(args.input):
-        if utils.check_url(url):
+        if utils.check_url(url)[0]:
             command, html_output = create_command(url, args.output_dir)
             run_command_tee_aha(command, html_output)
 

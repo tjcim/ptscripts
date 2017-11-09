@@ -142,6 +142,7 @@ def write_nmap_csv(output_file, hosts):
         "port", "protocol", "ipv4", "mac", "hostnames", "service_name",
         "service_tunnel", "product_name", "product_version", "banner",
     ]
+    LOG.info("Writing csv file to: {}".format(output_file))
     with open(output_file, "w", newline='') as f:
         csvwriter = csv.writer(f)
         # Write header
@@ -159,10 +160,13 @@ def write_nmap_csv(output_file, hosts):
 def parse_nmap(args):  # pylint: disable=too-many-locals
     output_file = os.path.join(args.output_dir, 'ports.csv')
 
+    LOG.info("Parsing XML file: {}".format(args.input_file))
     # Read in xml file
     tree = etree.parse(args.input_file)
     root = tree.getroot()
 
+    ports_counter = 0
+    hosts_counter = 0
     hosts = []
     for host in get_all_hosts(root):
         host_info = {
@@ -179,7 +183,10 @@ def parse_nmap(args):  # pylint: disable=too-many-locals
                 "banner": get_banner(port),
             }
             host_info['ports'].append(port_info)
+            ports_counter += 1
         hosts.append(host_info)
+        hosts_counter += 1
+    LOG.info("Found {} hosts with {} open ports.".format(hosts_counter, ports_counter))
     write_nmap_csv(output_file, hosts)
 
 
@@ -188,6 +195,13 @@ def parse_args(args):
     parser.add_argument('input_file', help='Nmap xml file to parse.')
     parser.add_argument('output_dir', help='Output directory to create.')
     args = parser.parse_args(args)
+    logger = logging.getLogger("ptscripts")
+    if args.quiet:
+        logger.setLevel('ERROR')
+    elif args.verbose:
+        logger.setLevel('DEBUG')
+    else:
+        logger.setLevel('INFO')
     return args
 
 

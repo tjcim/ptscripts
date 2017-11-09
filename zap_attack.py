@@ -41,7 +41,7 @@ def main(args):
 
     urls = utils.parse_webserver_urls(args.input)
     for url in urls:
-        if not utils.check_url(url):
+        if not utils.check_url(url)[0]:
             continue
         run_zap_attack(url, zap)
 

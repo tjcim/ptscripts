@@ -72,7 +72,7 @@ def main(args):
     webservers = get_webservers(args.input_file)
     for webserver in webservers:
         url = "{}://{}:{}".format(webserver['service_name'], webserver['ipv4'], webserver['port'])
-        if not utils.check_url(url):
+        if not utils.check_url(url)[0]:
             continue
         LOG.debug("Working on url: {}:{}".format(webserver['ipv4'], webserver['port']))
         command, html_output = create_command(webserver, nikto_folder, args.proxy)

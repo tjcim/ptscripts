@@ -11,7 +11,7 @@ LOG = logging.getLogger("ptscripts.folder_structure")
 
 
 def metasploit_rc_files(pentest_dir):
-    pentest_name = os.path.split(pentest_dir)
+    pentest_name = os.path.split(pentest_dir)[1]
     if pentest_name is None:
         pentest_name = os.path.split(os.path.split(pentest_dir)[0])[1]
     # metasploit workspace and import nmap

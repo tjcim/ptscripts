@@ -13,6 +13,7 @@ Pillow==4.3.0
 pkg-resources==0.0.0
 py==1.4.34
 pylint==1.7.4
+PySocks==1.6.7
 pytest==3.2.3
 pytest-cov==2.5.1
 python-owasp-zap-v2.4==0.0.12

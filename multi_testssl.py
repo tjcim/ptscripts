@@ -54,7 +54,7 @@ def main(args):
         if not utils.uses_encryption(url):
             LOG.debug("Skipping, no encryption: {}".format(url))
             continue
-        if not utils.check_url(url):
+        if not utils.check_url(url)[0]:
             continue
         LOG.info("Testing url: {}".format(url))
         testssl_command, html_output = create_command(url, testssl_folder)

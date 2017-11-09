@@ -26,7 +26,7 @@ import argparse
 from utils import utils
 from utils import logging_config  # noqa pylint: disable=unused-import
 
-log = logging.getLogger("ptscripts.create_webserver_list")
+LOG = logging.getLogger("ptscripts.create_webserver_list")
 
 
 def get_webserver_list(nmap_dict):
@@ -50,17 +50,18 @@ def get_webserver_list(nmap_dict):
                 port = ""
 
             formatted_url = scheme + "://" + host['ipv4'] + port + '/'
-            log.debug("Adding url: {}".format(formatted_url))
+            LOG.debug("Adding url: {}".format(formatted_url))
             webservers.append(formatted_url)
     return webservers
 
 
 def main(args):
-    log.info("Starting to extract urls from {}".format(args.input))
+    LOG.info("Starting to extract urls from {}".format(args.input))
     hosts = utils.csv_to_dict(args.input)
     webservers = get_webserver_list(hosts)
     output_file = os.path.join(args.output, "webservers.txt")
-    log.info("Writing urls to {}".format(output_file))
+    LOG.info("Found {} urls.".format(len(webservers)))
+    LOG.info("Writing urls to {}".format(output_file))
 
     with open(output_file, 'w') as f:
         for webserver in webservers:

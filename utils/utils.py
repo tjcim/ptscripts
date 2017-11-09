@@ -176,29 +176,36 @@ def run_command_tee_aha(command, html_output, timeout=60 * 5):
     return html_output
 
 
-def check_url(url, timeout=10):
+def check_url(url, timeout=10, proxy=False):
     """ Uses python requests library first for speed and to get the response code. """
     LOG.info("Checking url: {}".format(url))
+    if proxy:
+        proxies = {
+            'http': 'http://127.0.0.1:9050',
+            'https': 'https://127.0.0.1:9050'
+        }
+    else:
+        proxies = {}
     try:
-        resp = requests.get(url, timeout=timeout, verify=False)
+        resp = requests.get(url, timeout=timeout, verify=False, proxies=proxies)
     except requests.exceptions.ConnectTimeout:
         LOG.info("Requests timed out. Moving on.")
-        return False
+        return (False, "")
     except requests.exceptions.ReadTimeout:
         LOG.info("Requests timed out. Moving on.")
-        return False
+        return (False, "")
     except requests.exceptions.ConnectionError:
         LOG.info("Connection error. Moving on.")
-        return False
+        return (False, "")
     except requests.exceptions.InvalidSchema:
         LOG.info("Received invalid schema. Moving on.")
-        return False
+        return (False, "")
 
     if resp.status_code in [404, 408, 403]:
         LOG.info("Response status code {}, skipping.".format(resp.status_code))
-        return False
+        return (False, "")
     LOG.info("Response status code {}, its good to go.".format(resp.status_code))
-    return True
+    return (True, resp.url)
 
 
 def selenium_image(html_file, ss_path, x=800, y=600):
