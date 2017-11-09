@@ -27,7 +27,7 @@ import logging
 import argparse
 import xml.etree.ElementTree as etree
 
-from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import utils, logging_config  # noqa pylint: disable=unused-import
 
 LOG = logging.getLogger("ptscripts.nmap_to_csv")
 
@@ -191,7 +191,11 @@ def parse_nmap(args):  # pylint: disable=too-many-locals
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(prog='nmap_to_csv.py')
+    parser = argparse.ArgumentParser(
+        parents=[utils.parent_argparser()],
+        description='Convert nmap.xml to csv file.',
+        prog='nmap_to_csv.py',
+    )
     parser.add_argument('input_file', help='Nmap xml file to parse.')
     parser.add_argument('output_dir', help='Output directory to create.')
     args = parser.parse_args(args)

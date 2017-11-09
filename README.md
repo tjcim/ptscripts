@@ -1,5 +1,6 @@
 # Change Log
 
+* 11/9/2017 - Updated website_screenshot.py script to use threading as well as logic to reduce duplicate/unneeded images. Also it will resume now.
 * 10/29/2017 - **Major changes, make sure you read the instructions below.**
 * 10/27/2017 - Restructured scripts to oranize them in PTES phases
 * 10/26/2017 - Changed website_screenshot to use requests first, if a response is provied other than a 404/403 error than it is passed to selenium
