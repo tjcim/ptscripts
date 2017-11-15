@@ -44,7 +44,9 @@ def run_command_tee_aha(command, html_output):
     p3 = subprocess.run(['aha', '-b'], input=p2.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
     output = p3.stdout
     LOG.debug("Writing output to {}".format(html_output))
+    command_text = "<p style='color:#00CC00'>{}</p>".format(command)
     with open(html_output, 'wb') as h:
+        h.write(command_text.encode())
         h.write(output)
 
 
