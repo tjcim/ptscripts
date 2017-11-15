@@ -17,6 +17,7 @@ Output
 ------
 None.
 """
+import time
 import argparse
 import urllib3
 
@@ -29,7 +30,17 @@ from utils.utils import parse_webserver_urls
 def run_burp(url):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     print('Requesting url: {}'.format(url))
-    requests.head(url, proxies=config.BURP_PROXIES, timeout=5, allow_redirects=False, verify=False)
+    tries = 0
+    while tries < 3:
+        try:
+            requests.head(url, proxies=config.BURP_PROXIES, timeout=5, allow_redirects=False, verify=False)
+            return
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ProxyError):
+            tries += 1
+            print('Timeout received, sleeping for {} seconds and then trying again.'.format(5 * tries))
+            time.sleep(5 * tries)
+    print('Tried 3 times, and failed...')
+    return
 
 
 def run_burp_on_webservers(url_file):

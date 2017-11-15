@@ -16,21 +16,23 @@ python multi_nikto.py /path/to/ports.csv /path/to/output/nikto/
 import os
 import logging
 import argparse
+import threading
 import subprocess
+from queue import Queue
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.multi_nikto")
-NIKTO_COMMAND = "{proxy}nikto -C all -host {ip} -port {port}{ssl} -output {output_csv_file}"
+NIKTO_COMMAND = "{proxy}nikto -C all -host {ip} -port {port}{ssl} -output {output_csv_file} -ask auto -Display P -nointeractive -timeout 4 -until 59m"
 
 
 def run_command_tee_aha(command, html_output):
     LOG.info("Starting nikto.")
-    LOG.debug("Running command {}".format(command))
+    LOG.info("Running command {}".format(command))
     try:
-        process = subprocess.run(command.split(), stdout=subprocess.PIPE)
+        process = subprocess.run(command.split(), stdout=subprocess.PIPE, timeout=60 * 60)  # 60 minute timeout
         process_stdout = str(process.stdout, 'utf-8')
         p2 = subprocess.run(['tee', '/dev/tty'], input=process.stdout, stdout=subprocess.PIPE)  # pylint: disable=no-member
     except subprocess.TimeoutExpired:  # pylint: disable=no-member
@@ -63,6 +65,19 @@ def get_webservers(ports_csv):
     return utils.parse_csv_for_webservers(ports_csv)
 
 
+def process_queue(webserver_queue, nikto_folder, args):
+    while True:
+        webserver = webserver_queue.get()
+        url = "{}://{}:{}".format(webserver['service_name'], webserver['ipv4'], webserver['port'])
+        if not utils.check_url(url)[0]:
+            continue
+        LOG.debug("Working on url: {}:{}".format(webserver['ipv4'], webserver['port']))
+        command, html_output = create_command(webserver, nikto_folder, args.proxy)
+        run_command_tee_aha(command, html_output)
+        webserver_queue.task_done()
+        continue
+
+
 def main(args):
     """ Parse csv and then run nikto for each."""
     nikto_folder = os.path.join(args.output_dir, "nikto")
@@ -70,13 +85,25 @@ def main(args):
     utils.dir_exists(nikto_folder, True)
     LOG.info("Getting webservers from {}".format(args.input_file))
     webservers = get_webservers(args.input_file)
-    for webserver in webservers:
-        url = "{}://{}:{}".format(webserver['service_name'], webserver['ipv4'], webserver['port'])
-        if not utils.check_url(url)[0]:
-            continue
-        LOG.debug("Working on url: {}:{}".format(webserver['ipv4'], webserver['port']))
-        command, html_output = create_command(webserver, nikto_folder, args.proxy)
-        run_command_tee_aha(command, html_output)
+    webserver_queue = Queue()
+
+    LOG.info("Starting {} threads.".format(args.threads))
+    for _ in range(args.threads):
+        t = threading.Thread(
+            target=process_queue,
+            kwargs={
+                'webserver_queue': webserver_queue,
+                'nikto_folder': nikto_folder,
+                'args': args,
+            }
+        )
+        t.daemon = True
+        t.start()
+
+    for current_webserver in webservers:
+        webserver_queue.put(current_webserver)
+
+    webserver_queue.join()
 
 
 def parse_args(args):
@@ -88,6 +115,8 @@ def parse_args(args):
     parser.add_argument('input_file', help='CSV File of open ports.')
     parser.add_argument('output_dir', help='Output directory where nikto reports will be created.')
     parser.add_argument('--proxy', help='Use proxychains', action='store_true')
+    parser.add_argument('-t', '--threads', help="Number of threads (default is 2).",
+                        default=2, type=int)
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

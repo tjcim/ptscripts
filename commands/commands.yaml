@@ -130,6 +130,12 @@
   requires: webservers.txt
 
 -
+  name: wpscan
+  command: "python {scripts_path}/multi_wpscan.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
+  description: Runs wpscan on all the webservers found
+  requires: webservers.txt
+
+-
   name: smtp_relay
   command: "resource {pentest_path}/exploitation/rc_files/smtp_relay.rc"
   description: "Runs metasploit smtp relay command."
@@ -143,7 +149,15 @@
   name: zap_attack
   command: "python {scripts_path}/zap_attack.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
   description: "Initiates an attack on each webserver."
+  requires: webservers.txt
   help: "Make sure zap is running and the configuration information is in the config.py file."
+
+-
+  name: burp requests
+  command: "python {scripts_path}/burp_requests.py {pentest_path}/discovery/webservers.txt"
+  description: Requests each website using burps proxy
+  requires: webservers.txt
+  help: Make sure burp is running and configuration information is in the config.py file.
 
 -
   name: wp_brute

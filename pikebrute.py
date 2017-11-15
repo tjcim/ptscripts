@@ -98,6 +98,7 @@ def filter_pskcrack_output(results, ip, ip_dir, psk_file):
 
 def main(args):  # pylint: disable=too-many-locals
     """ Wrapper for the pikebrute function that runs it once per ip. """
+    tested = 0
     output = []
     cracked = []
     ike_dir = os.path.join(args.out_dir, "ike")
@@ -113,9 +114,13 @@ def main(args):  # pylint: disable=too-many-locals
         dictionary_path = os.path.join(config.SCRIPTS_PATH, 'utils/psk-crack-dictionary')
         LOG.info('Using the default dictionary: {}'.format(dictionary_path))
     ike_ips = utils.get_ips_with_port_open(args.input, 500)
+    if not ike_ips:
+        LOG.info("No vpns found using UDP port 500.")
+        return
     aggressive = get_ike_aggressive(ike_ips)
     vpn_name_list = utils.text_file_lines_to_list(os.path.join(config.SCRIPTS_PATH, 'utils/wordlist.dic'))
     for ip in aggressive:
+        tested += 1
         ip_dir = os.path.join(ike_dir, ip)
         utils.dir_exists(ip_dir, True)
         capture_hashes(ip_dir, vpn_name_list, ip)
@@ -128,6 +133,7 @@ def main(args):  # pylint: disable=too-many-locals
                 output.append(filtered_out)
             if filtered_cracked:
                 cracked.append(filtered_cracked)
+    LOG.info("Tested {} vpns.".format(tested))
     results_file = os.path.join(args.out_dir, "pikebrute_results.txt")
     cracked_file = os.path.join(args.out_dir, "cracked_psks.txt")
     with open(results_file, 'w') as f:

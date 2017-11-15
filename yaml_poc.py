@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 import argparse
 
@@ -33,6 +34,11 @@ def c_write(commands, args):
     pentest_path = os.path.join(config.BASE_PATH, args.name + "/ept")
     commands_path = os.path.join(pentest_path, "yaml_commands.txt")
     with open(commands_path, "w") as f:
+        f.write("## Commands file written on {} for {} using version {} ##\r\n\r\n".format(
+            time.strftime('%I:%M%p %Z on %b %d, %Y'),
+            args.name,
+            config.VERSION,
+        ))
         for com in commands:
             f.write(com['command'] + "\r\n")
             f.write("\r\n")
