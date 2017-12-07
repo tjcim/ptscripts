@@ -75,13 +75,14 @@ def main(args):
 
 
 def parse_args(args):
+    ips_path_prompt = os.path.join(config.BASE_PATH, "<short name>/ept")
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
         description='Print commands formatted for current pentest.',
     )
     parser.add_argument('-n', '--name', help="Short name of the engagement.")
     parser.add_argument('-d', '--domain', help="Domain for the engagement.")
-    parser.add_argument('-i', '--ips-file', help="Path to ips file provided for engagement.")
+    parser.add_argument('-i', '--ips-file', help="Relative path (from {}) to ips file provided for engagement.".format(ips_path_prompt))
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

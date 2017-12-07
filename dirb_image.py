@@ -19,9 +19,9 @@ def main(args):
     LOG.info("Running dirb for {}".format(args.url))
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
-    command = "dirb {url} /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-small.txt".format(url=args.url)
+    command = "dirb {url} /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-small.txt -S".format(url=args.url)
     html_path = os.path.join(args.output, "dirb_{}.html".format(domain))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 60 * 1)  # let it run for an hour
+    html_output = utils.run_command_two(command, html_path, timeout=0)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)

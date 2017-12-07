@@ -21,7 +21,7 @@ def main(args):
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "testssl_{}.html".format(domain))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 5)
+    html_output = utils.run_command_two(command, html_path, timeout=0)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)

@@ -84,7 +84,7 @@ def parse_args(args):
         description='Creates folder structure for engagement.',
         prog='folder_structure.py',
     )
-    parser.add_argument('input', help='Path to pentest folder.')
+    parser.add_argument('input', help='Full path to pentest folder. (ex: /root/pentests/tjcim)')
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

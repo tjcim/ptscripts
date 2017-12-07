@@ -22,7 +22,7 @@ def main(args):
     url = urlparse(args.url).scheme + "://" + netloc + urlparse(args.url).path
     command = "uniscan -u {url} -qweds".format(url=url)
     html_path = os.path.join(args.output, "uniscan_{}.html".format(domain))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 5)
+    html_output = utils.run_command_two(command, html_path, timeout=0)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)

@@ -16,11 +16,11 @@ LOG = logging.getLogger("ptscripts.nmap_image")
 def main(args):
     LOG.info("Running nmap")
     os.makedirs(args.output, exist_ok=True)
-    output = os.path.join(args.output, "nmap_sT_common")
-    command = """nmap -sT -oA {output} -iL {input_file}""".format(
+    output = os.path.join(args.output, "nmap_sT_common_{}".format(args.input))
+    command = """nmap -sT -oA {output} {input_file}""".format(
         output=output, input_file=args.input)
     LOG.info("Running the command: {}".format(command))
-    file_name = "nmap_sT_common.html"
+    file_name = "nmap_sT_common_{}.html".format(args.input)
     html_path = os.path.join(args.output, file_name)
     LOG.info("Saving output to: {}".format(html_path))
     html_output = utils.run_command_two(command, html_path, timeout=0)

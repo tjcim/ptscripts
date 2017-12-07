@@ -12,8 +12,9 @@ from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
 
 
+USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36"
 LOG = logging.getLogger("ptscripts.nikto_image")
-NIKTO_COMMAND = "nikto -C all -host {domain} -port {port}{root}{ssl}"
+NIKTO_COMMAND = "nikto -C all -maxtime 1h -useragent {ua} -host {domain} -port {port}{root}{ssl}"
 
 
 def main(args):
@@ -39,11 +40,11 @@ def main(args):
         root = " -root " + parsed_url.path
     else:
         root = ""
-    command = NIKTO_COMMAND.format(domain=domain, port=port, root=root, ssl=ssl)
+    command = NIKTO_COMMAND.format(domain=domain, port=port, root=root, ssl=ssl, ua=USER_AGENT)
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "nikto_{}.html".format(domain))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 60 * 4)  # let it run for four hours
+    html_output = utils.run_command_two(command, html_path, timeout=0)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)
