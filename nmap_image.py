@@ -8,6 +8,7 @@ import logging
 import argparse
 
 from utils import utils, logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.nmap_image")
@@ -23,7 +24,8 @@ def main(args):
     file_name = "nmap_sT_common.html"
     html_path = os.path.join(args.output, file_name)
     LOG.info("Saving output to: {}".format(html_path))
-    html_output = utils.run_command_two(command, html_path, timeout=0)
+    text_output = run_commands.bash_command(command)
+    html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
         utils.selenium_image(html_output, args.screenshot)
     if not html_output:

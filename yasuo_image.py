@@ -10,6 +10,7 @@ import argparse
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.yasuo_image")
@@ -22,7 +23,8 @@ def main(args):
     LOG.info("Running the command: {}".format(command))
     html_path = os.path.join(args.output, "yasuo.html")
     LOG.info("Saving output to: {}".format(html_path))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 60 * 5)
+    text_output = run_commands.bash_command(command)
+    html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
         utils.selenium_image(html_output, args.screenshot)
     if not html_output:

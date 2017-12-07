@@ -1,0 +1,23 @@
+<html>
+<head>
+<title>blah</title>
+<style>
+body {
+    background: black;
+    color: white;
+}
+p.command {
+    font-family: "Courier";
+    font-size: 13px;
+    color: white;
+}
+</style>
+</head>
+<body>
+<p class="command"><b>{{ command }}</b></p>
+<div class="output">
+<pre>
+{{ output|safe }}
+</pre>
+</div>
+</body>

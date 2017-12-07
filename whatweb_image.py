@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.whatweb_image")
@@ -21,7 +22,8 @@ def main(args):
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "whatweb_{}.html".format(domain))
-    html_output = utils.run_command_two(command, html_path, timeout=0)
+    text_output = run_commands.bash_command(command)
+    html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)

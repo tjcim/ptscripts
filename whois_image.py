@@ -9,6 +9,7 @@ import argparse
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.whois_image")
@@ -18,7 +19,8 @@ def main(args):
     LOG.info("Running whois for {}".format(args.domain))
     command = "whois -H {domain}".format(domain=args.domain)
     html_path = os.path.join(args.output, "whois_{}.html".format(args.domain))
-    html_output = utils.run_command_two(command, html_path, timeout=60 * 5)
+    text_output = run_commands.bash_command(command)
+    html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.selenium_image(html_output, args.screenshot)

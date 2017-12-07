@@ -1,5 +1,14 @@
+# Notes
+
+These are mainly for me, but may be helpful to anyone else using the scripts.
+
+* I need to switch over the bash commands to use utils/run_commands as it works much better.
+* I will need to figure out how to kill a command properly as it looks like my current attempts to timeout don't actually do that.
+* I need to combine muti_nikto, nikto_image and web_nikto into one script (same for all the other similar scripts)
+
 # Change Log
 
+* 12/7/2017 - I am not happy with the way I currently run bash commands and get output, I created a couple of new functions in utils/run_commands.py that seems to work well. I have started switching over a few of the scripts web_nikto and dirb_image have both been switched.
 * 11/14/2017 - Updated multi_nikto.py script to use threading and a few other command options to increase the speed.
 * 11/9/2017 - Updated website_screenshot.py script to use threading as well as logic to reduce duplicate/unneeded images. Also it will resume now.
 * 10/29/2017 - **Major changes, make sure you read the instructions below.**
@@ -79,19 +88,3 @@ I moved the commands to a yaml file named `commands.yaml` (in the commands folde
 ## yaml_commands.txt
 
 This file will provide default commands that you can copy and paste into the terminal. Every command listed should produce an output that is saved into the appropriate pentest folder. It is important that the commands that create text files are run before they are required. For example, the first command listed in the `yaml_commands.txt` file will be the `ip_extract.py` command. This is what takes the ips and breaks them up into the `_ips.txt` file that is used in later commands. So in general, follow the order of the commands from the `yaml_commands.txt` file unless you know what you are doing.
-
-# TODO
-
-* Change web script commands to output into appropriate folder
-* Use data from whatweb to check for vulnerabilities using searchsploit
-* Make enum4linux output to html and text. Extract found info to one file.
-* Add documentation to each script
-  * Information on what the script does
-  * Parameters for running the script
-  * Usage example
-* Add logging to each script
-* Add ability to use proxy in print_commands
-  * Change nmap command to use sT and no UDP
-* fix get_internal_ip - This only works for http sites. I should filter out ssl sites to start with, then figure out if the same works over ssl.
-* Parse nikto csvs to combine them and pull out vulnerabilities to one file.
-* Parse through wpscan results to pull out vulnerabilities identified.

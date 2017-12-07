@@ -40,3 +40,7 @@
 -
   name: iframe
   command: "python {scripts_path}/iframe.py {url} {a6}"
+
+-
+  name: validate TRACE
+  command: "python {scripts_path}/validate_trace_image.py {url} {a6} -s {pentest_path}/screenshots"
