@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.http_methods_image")
@@ -37,10 +38,9 @@ def main(args):
     else:
         command = "nmap --script http-methods -p {port} {domain}".format(port=port, domain=domain)
     html_path = os.path.join(args.output, "http_methods_{}.html".format(domain))
-    html_output = utils.run_command_two(command, html_path, timeout=0)
+    text_output = run_commands.bash_command(command)
+    html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
-        LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
-        utils.dir_exists(args.screenshot, True)
         utils.selenium_image(html_output, args.screenshot)
     if not html_output:
         LOG.error("Didn't receive a response from running the command.")
