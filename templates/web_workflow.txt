@@ -1,7 +1,10 @@
 wafw00f
 nmap
 whatweb
+  check cookies
+  check headers
 http methods
+  test TRACE (or any other unexpected methods)
 dirb
 nikto
 testssl
@@ -9,9 +12,11 @@ uniscan
 iframe
 code review - login page
 login - analyze session and any other cookies
-burp suite
+burp sequencer
 manually spider
-logout
+clear cookies and refresh page
+  Note how the app redirects to login page
 login
+  Note the path taken (GETs and POSTs) for burp macro
 build burp macro
 active scan
