@@ -209,7 +209,7 @@ def check_url(url, timeout=10, proxy=False):
     return (True, resp.url)
 
 
-def selenium_image(html_file, ss_path, x=800, y=600):
+def selenium_image(html_file, ss_path, x=800, y=600, sleep=1):
     """ Take picture of output.
     Opens html_file with selenium, saves the screenshot to the ss_path folder
     """
@@ -219,9 +219,9 @@ def selenium_image(html_file, ss_path, x=800, y=600):
     driver.set_window_size(x, y)
     filename = os.path.split(html_file)[1].rsplit(".", 1)[0] + ".png"
     screenshot_path = os.path.join(ss_path, filename)
-    time.sleep(1)
+    time.sleep(sleep)
     LOG.info("Saving image to {}".format(screenshot_path))
-    time.sleep(1)
+    time.sleep(sleep)
     screen = driver.get_screenshot_as_png()
     im = Image.open(BytesIO(screen))
     im = im.crop((0, 0, x, y))
