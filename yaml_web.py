@@ -77,7 +77,8 @@ def main(args):
         args.name = get_name()
     if not args.url:
         args.url = get_url()
-    commands = load_commands("commands/web_commands.yaml")
+    commands_file = os.path.join(config.SCRIPTS_PATH, "commands/web_commands.yaml")
+    commands = load_commands(commands_file)
     c_format(commands, args)
     c_print(commands)
     c_write(commands, args)

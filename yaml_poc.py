@@ -68,7 +68,8 @@ def main(args):
         args.domain = get_domain()
     if not args.ips_file:
         args.ips_file = get_ips()
-    commands = load_commands("commands/commands.yaml")
+    commands_file = os.path.join(config.SCRIPTS_PATH, "commands/commands.yaml")
+    commands = load_commands(commands_file)
     c_format(commands, args)
     c_print(commands)
     c_write(commands, args)
