@@ -12,10 +12,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 
-def bash_command(command):
+def bash_command(command, split=True):
     """ Runs the command with bash - prints the results as it happens as well as returning the
     output of the command as a string when complete."""
-    proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if split:
+        command = command.split()
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     full = []
     for line in iter(proc.stdout.readline, b''):
         line = line.rstrip().decode('utf-8')

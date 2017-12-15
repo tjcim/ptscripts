@@ -14,16 +14,20 @@ from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.whatweb_image")
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
 
 
 def main(args):
     LOG.info("Running whatweb for {}".format(args.url))
-    command = "whatweb -v -a 3 {url}".format(url=args.url)
+    command_string = 'whatweb -v -a 3 --user-agent {ua} {url}'.format(ua=USER_AGENT, url=args.url)
+    command = 'whatweb -v -a 3 --user-agent'.split()
+    command += [USER_AGENT, args.url]
+    LOG.info(command_string)
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "whatweb_{}.html".format(domain))
-    text_output = run_commands.bash_command(command)
-    html_output = run_commands.create_html_file(text_output, command, html_path)
+    text_output = run_commands.bash_command(command, split=False)
+    html_output = run_commands.create_html_file(text_output, command_string, html_path)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)
