@@ -58,7 +58,7 @@ def main(args):
 def parse_args(args):
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
-        description='Capture dirb data and image.',
+        description='Capture nikto data and image.',
     )
     parser.add_argument('url', help="url to be tested")
     parser.add_argument('output', help="where to store results")
