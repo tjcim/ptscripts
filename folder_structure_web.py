@@ -35,7 +35,7 @@ def main(args):
         dir_path = os.path.join(base_path, directory)
         LOG.debug("Creating directory: {}".format(dir_path))
         os.makedirs(dir_path, exist_ok=True)
-    checklist(args.input)
+    checklist(base_path)
     LOG.info("Directories have been created.")
 
 
