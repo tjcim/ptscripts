@@ -4,11 +4,11 @@ from urllib.parse import urlparse  # pylint: disable=no-name-in-module, import-e
 
 from bs4 import BeautifulSoup
 
-from utils import parse_csv_for_webservers
+from utils.utils import parse_csv_for_webservers
 
 
 def run_get_internal_ip(webserver):
-    host = webserver['ip_addr']
+    host = webserver['ipv4']
     port = webserver['port']
     tn = telnetlib.Telnet(host, port)
     tn.write(b'GET /images\r\n')
