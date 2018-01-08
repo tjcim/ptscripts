@@ -6,6 +6,7 @@ from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-er
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.multi_testssl")
@@ -58,8 +59,9 @@ def main(args):
             continue
         LOG.info("Testing url: {}".format(url))
         testssl_command, html_output = create_command(url, testssl_folder)
+        text_output = run_commands.bash_command(testssl_command)
+        html_output = run_commands.create_html_file(text_output, testssl_command, html_output)
         LOG.debug("Saving output to {}".format(html_output))
-        run_command_tee_aha(testssl_command, html_output)
 
 
 def parse_args(args):
