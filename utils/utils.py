@@ -201,6 +201,9 @@ def check_url(url, timeout=10, proxy=False):
     except requests.exceptions.InvalidSchema:
         LOG.info("Received invalid schema. Moving on.")
         return (False, "")
+    except requests.exceptions.TooManyRedirects:
+        LOG.info("Received too many redirects. Moving on.")
+        return (False, "")
 
     if resp.status_code in [404, 408, 403]:
         LOG.info("Response status code {}, skipping.".format(resp.status_code))
