@@ -7,7 +7,7 @@ hydra.restore
 ghostdriver.log
 config.py
 *.hash
-log_
+log_20*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
