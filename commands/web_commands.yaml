@@ -27,7 +27,7 @@
 
 -
   name: nikto
-  command: "python {scripts_path}/nikto_image.py {url} {a6} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/mnikto.py {a6} --url {url} -s {pentest_path}/screenshots"
 
 -
   name: testssl

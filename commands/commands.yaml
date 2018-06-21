@@ -138,7 +138,7 @@
 
 -
   name: nikto
-  command: "python {scripts_path}/multi_nikto.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/"
+  command: "python {scripts_path}/mnikto.py {pentest_path}/enumeration/ --csv {pentest_path}/discovery/ports.csv"
   description: "Runs nikto for every webserver that responds."
   requires: ports.csv
   scriptable: yes
