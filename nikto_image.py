@@ -56,6 +56,13 @@ def main(args):
 
 
 def parse_args(args):
+    print('\n')
+    print('\n')
+    print('***** IMPORTANT *****')
+    print('Deprecated - use mnikto.py from now on.')
+    print('*****           *****')
+    print('\n')
+    print('\n')
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
         description='Capture nikto data and image.',

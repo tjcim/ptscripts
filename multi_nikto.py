@@ -22,8 +22,10 @@ from queue import Queue
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
+from utils import run_commands
 
 
+USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36"
 LOG = logging.getLogger("ptscripts.multi_nikto")
 NIKTO_COMMAND = "{proxy}nikto -C all -host {ip} -port {port}{ssl} -output {output_csv_file} -ask auto -Display P -nointeractive -timeout 4 -until 59m -useragent \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36\""
 
@@ -60,6 +62,7 @@ def create_command(webserver, output_dir, proxy):
         ip=ip, port=port, output_csv_file=csv_output,
         proxy='proxychains ' if proxy else "",
         ssl=' -ssl' if webserver['service_name'] == 'https' or webserver['service_tunnel'] == 'ssl' else "",
+        ua=USER_AGENT,
     )
     return (command, html_output)
 
@@ -76,8 +79,9 @@ def process_queue(webserver_queue, nikto_folder, args):
             webserver_queue.task_done()
             continue
         LOG.debug("Working on url: {}:{}".format(webserver['ipv4'], webserver['port']))
-        command, html_output = create_command(webserver, nikto_folder, args.proxy)
-        run_command_tee_aha(command, html_output)
+        command, html_path = create_command(webserver, nikto_folder, args.proxy)
+        text_output = run_commands.bash_command(command)
+        run_commands.create_html_file(text_output, command, html_path)
         webserver_queue.task_done()
         LOG.debug("Task done.")
         continue
@@ -112,6 +116,13 @@ def main(args):
 
 
 def parse_args(args):
+    print('\n')
+    print('\n')
+    print('***** IMPORTANT *****')
+    print('Deprecated - use mnikto.py from now on.')
+    print('*****           *****')
+    print('\n')
+    print('\n')
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
         description='Run Nikto on multiple urls servers.',

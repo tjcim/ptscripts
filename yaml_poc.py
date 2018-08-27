@@ -1,5 +1,6 @@
 import os
 import time
+import stat
 import logging
 import argparse
 
@@ -33,6 +34,8 @@ def c_print(commands):
 def c_write(commands, args):
     pentest_path = os.path.join(config.BASE_PATH, args.name + "/ept")
     commands_path = os.path.join(pentest_path, "yaml_commands.txt")
+    script_path = os.path.join(pentest_path, "commands.sh")
+    other_path = os.path.join(pentest_path, "not_scriptable.txt")
     with open(commands_path, "w") as f:
         f.write("## Commands file written on {} for {} using version {} ##\r\n\r\n".format(
             time.strftime('%I:%M%p %Z on %b %d, %Y'),
@@ -42,6 +45,17 @@ def c_write(commands, args):
         for com in commands:
             f.write(com['command'] + "\r\n")
             f.write("\r\n")
+    with open(script_path, "w") as f:
+        f.write("#!/usr/bin/env bash" + "\n")
+        for com in commands:
+            if com['scriptable']:
+                f.write(com['command'] + "\n")
+    with open(other_path, "w") as f:
+        for com in commands:
+            if not com['scriptable']:
+                f.write(com['command'] + "\n")
+    st = os.stat(script_path)
+    os.chmod(script_path, st.st_mode | stat.S_IEXEC)
 
 
 def load_commands(yaml_file):

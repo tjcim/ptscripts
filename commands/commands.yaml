@@ -9,21 +9,25 @@
   name: dnsdumpster
   command: "python {scripts_path}/dnsdumpster_images.py {pentest_path}/screenshots/ {domain_name}"
   description:
+  scriptable: yes
 
 -
   name: nslookup
   command: "python {scripts_path}/nslookup_images.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
   description: "Runs nslookup and takes screenshots."
+  scriptable: yes
 
 -
   name: whois
   command: "python {scripts_path}/whois_image.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
   description: "Runs whois -H {domain}, saves output and takes screenshot"
+  scriptable: yes
 
 -
   name: fierce
   command: "python {scripts_path}/fierce_image.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
   description: "Runs fierce, saves output and takes a screenshot."
+  scriptable: yes
 
 -
   name: ip_extract
@@ -31,6 +35,7 @@
   description: "Extracts ips in cidr or dashed formats into a file with an IP per line."
   help:
   provides: _ips.txt
+  scriptable: yes
 
 -
   name: nessus_scan
@@ -39,6 +44,7 @@
   help: "Make sure the nessus ip:port and api information is in config.py"
   requires: _ips.txt
   provides: nessus_scan.csv
+  scriptable: no
 
 -
   name: nmap_st_common
@@ -46,6 +52,7 @@
   description: "FAST - Runs nmap with -sT on common ports. Saves output and takes an image."
   requires: _ips.txt
   provides: nmap_sT_common.xml
+  scriptable: yes
 
 -
   name: nmap
@@ -53,6 +60,7 @@
   description: "SLOW - Nmap aggressive, all TCP ports scanned, top UDP ports scanned"
   requires: _ips.txt
   provides: ss_all.xml
+  scriptable: yes
 
 -
   name: nmap_to_csv
@@ -60,6 +68,7 @@
   description: "Parses nmap.xml to a csv file named ports.csv"
   requires: ss_all.xml
   provides: ports.csv
+  scriptable: yes
 
 -
   name: webservers
@@ -67,83 +76,98 @@
   description: "Parses the ports.csv file and creates a text file of all servers hosting a website; one URL per line."
   requires: ports.csv
   provides: webservers.txt
+  scriptable: yes
 
 -
   name: rawr
   command: "rawr.py {pentest_path}/discovery/nmap/ss_all.xml --rd --dns -orx --downgrade --spider -d {pentest_path}/discovery/rawr"
   requires: ss_all.xml
+  scriptable: no
 
 -
   name: website_screenshots
   command: "python {scripts_path}/website_screenshot.py {pentest_path}/discovery/webservers.txt {pentest_path}/discovery/website_screenshots"
   description: "Visits each URL and takes a screenshot."
   requires: webservers.txt
+  scriptable: yes
 
 -
   name: metasploit import
   command: "msfconsole -r {pentest_path}/discovery/rc_files/db_import.rc"
+  scriptable: no
 
 -
   name: whatweb
   command: "python {scripts_path}/multi_whatweb.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/whatweb/"
   requires: webservers.txt
+  scriptable: yes
 
 -
   name: yasuo
   command: "python {scripts_path}/yasuo_image.py {pentest_path}/discovery/nmap/ss_all.xml {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
   description: "Runs {yasuo.rb -s /opt/yasuo/signatures.yaml -f <path to nmap xml> -t 10} saving output and taking a screenshot"
   requires: ss_all.xml
+  scriptable: yes
 
 -
   name: pikebrute
   command: "python {scripts_path}/pikebrute.py {pentest_path}/discovery/ports.csv {pentest_path}/exploitation/"
   description: "Runs ike-scan and then tries to crack the hashes of any psks returned."
   requires: ports.csv
+  scriptable: yes
 
 -
   name: searchsploit
   command: "python {scripts_path}/searchsploit_image.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
   description: "Runs searchsploit on the nmap.xml"
   requires: ports.csv
+  scriptable: yes
 
 -
   name: enum4linux
   command: "python {scripts_path}/multi_enum4linux.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/"
   requires: ports.csv
+  scriptable: yes
 
 -
   name: epmapper
   command: "resource {pentest_path}/enumeration/rc_files/endpoint_mapper.rc"
   description: "Runs metasploit endpoint mapper on all hosts."
   help: "Run this from msfconsole."
+  scriptable: no
 
 -
   name: nikto
-  command: "python {scripts_path}/multi_nikto.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/"
+  command: "python {scripts_path}/mnikto.py {pentest_path}/enumeration/ --csv {pentest_path}/discovery/ports.csv"
   description: "Runs nikto for every webserver that responds."
   requires: ports.csv
+  scriptable: yes
 
 -
   name: testssl
   command: "python {scripts_path}/multi_testssl.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
   description: "Runs testssl for every webserver that responds."
   requires: webservers.txt
+  scriptable: yes
 
 -
   name: wpscan
   command: "python {scripts_path}/multi_wpscan.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
   description: Runs wpscan on all the webservers found
   requires: webservers.txt
+  scriptable: yes
 
 -
   name: smtp_relay
   command: "resource {pentest_path}/exploitation/rc_files/smtp_relay.rc"
   description: "Runs metasploit smtp relay command."
   help: "Run this from msfconsole."
+  scriptable: no
 
 -
   name: parse_nessus
   command: "python {scripts_path}/parse_nessus_csv.py {pentest_path}/enumeration/<file>.csv {pentest_path}/enumeration/"
+  scriptable: yes
 
 -
   name: zap_attack
@@ -151,6 +175,7 @@
   description: "Initiates an attack on each webserver."
   requires: webservers.txt
   help: "Make sure zap is running and the configuration information is in the config.py file."
+  scriptable: yes
 
 -
   name: burp requests
@@ -158,18 +183,22 @@
   description: Requests each website using burps proxy
   requires: webservers.txt
   help: Make sure burp is running and configuration information is in the config.py file.
+  scriptable: no
 
 -
   name: wp_brute
   command: "wpscan -u <ip> --wordlist /usr/share/wordlists/rockyou.txt --usernames /usr/share/wordlists/seclists/Usernames/top_shortlist.txt -t 5"
   description: "An example of using wpscan to brute-force."
+  scriptable: no
 
 -
   name: ftp_brute
   command: "hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt -v <ip> ftp"
   description: "An example of using hydra to brute-force an ftp site."
+  scriptable: no
 
 -
   name: format_nmap
   command: "python {scripts_path}/format_nmap.py {pentest_path}/discovery/ports.csv {pentest_path}/discovery/"
   description: "Reformats the ports.csv to a format for the reports."
+  scriptable: yes
