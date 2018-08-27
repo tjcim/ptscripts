@@ -178,6 +178,14 @@
   scriptable: yes
 
 -
+  name: brutespray
+  command: "brutespray -f {pentest_path}/discovery/nmap/ss_all.xml -o {pentest_path}/exploitation/ -t 5"
+  description: "Runs a bruteforce attack using medusa on all available ports from nmap.xml file."
+  requires: ss_all.xml
+  help: "Change threads (-t) as needed."
+  scriptable: yes
+
+-
   name: burp requests
   command: "python {scripts_path}/burp_requests.py {pentest_path}/discovery/webservers.txt"
   description: Requests each website using burps proxy
