@@ -25,7 +25,7 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 
 
 LOG = logging.getLogger("ptscripts.multi_nikto")
-NIKTO_COMMAND = "{proxy}nikto -C all -host {ip} -port {port}{ssl} -output {output_csv_file} -ask auto -Display P -nointeractive -timeout 4 -until 59m"
+NIKTO_COMMAND = "{proxy}nikto -C all -host {ip} -port {port}{ssl} -output {output_csv_file} -ask auto -Display P -nointeractive -timeout 4 -until 59m -useragent \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36\""
 
 
 def run_command_tee_aha(command, html_output):
@@ -48,6 +48,7 @@ def run_command_tee_aha(command, html_output):
     with open(html_output, 'wb') as h:
         h.write(command_text.encode())
         h.write(output)
+    LOG.debug("Output written.")
 
 
 def create_command(webserver, output_dir, proxy):
@@ -72,11 +73,13 @@ def process_queue(webserver_queue, nikto_folder, args):
         webserver = webserver_queue.get()
         url = "{}://{}:{}".format(webserver['service_name'], webserver['ipv4'], webserver['port'])
         if not utils.check_url(url)[0]:
+            webserver_queue.task_done()
             continue
         LOG.debug("Working on url: {}:{}".format(webserver['ipv4'], webserver['port']))
         command, html_output = create_command(webserver, nikto_folder, args.proxy)
         run_command_tee_aha(command, html_output)
         webserver_queue.task_done()
+        LOG.debug("Task done.")
         continue
 
 
@@ -117,8 +120,8 @@ def parse_args(args):
     parser.add_argument('input_file', help='CSV File of open ports.')
     parser.add_argument('output_dir', help='Output directory where nikto reports will be created.')
     parser.add_argument('--proxy', help='Use proxychains', action='store_true')
-    parser.add_argument('-t', '--threads', help="Number of threads (default is 2).",
-                        default=2, type=int)
+    parser.add_argument('-t', '--threads', help="Number of threads (default is 1).",
+                        default=1, type=int)
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
