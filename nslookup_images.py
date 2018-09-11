@@ -56,6 +56,9 @@ def main(args):
     LOG.info("Running nslookup with type NS")
     content, ns_html = run_nslookup(args.domain, args.output, "NS")
     auth_nameservers = parse_nslookup_ns(content)
+    if not auth_nameservers:
+        LOG.error("No authoritative nameservers found, cannot continue.")
+        sys.exit()
     # Run nslookup query for MX records
     _, mx_html = run_nslookup(args.domain, args.output, "MX", auth_nameservers[0])
     # Run nslookup query for SRV records
