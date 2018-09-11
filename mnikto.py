@@ -85,8 +85,12 @@ def main(args):
             for line in f:
                 parsed_url = parse_url_nikto(line.strip())
                 urls.append(parsed_url)
+    if args.screenshot:
+        screenshot = args.screenshot
+    else:
+        screenshot = False
     for url in urls:
-        run_nikto(url, args.output)
+        run_nikto(url, args.output, screenshot)
 
 
 def parse_args(args):
