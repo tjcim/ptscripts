@@ -136,11 +136,22 @@ def get_banner(port):
         return
 
 
+def get_script_getrequest(port):
+    """ Gets the script GetRequest if present. """
+    try:
+        script = port.find('script')
+        get_results = script.find('elem[@key="GetRequest"]')
+        return get_results.text
+    except AttributeError:
+        return
+
+
 def write_nmap_csv(output_file, hosts):
     """ Write the parsed hosts to the csv file. """
     header = [
         "port", "protocol", "ipv4", "mac", "hostnames", "service_name",
         "service_tunnel", "product_name", "product_version", "banner",
+        "get_request"
     ]
     LOG.info("Writing csv file to: {}".format(output_file))
     with open(output_file, "w", newline='') as f:
@@ -153,7 +164,7 @@ def write_nmap_csv(output_file, hosts):
                 csvwriter.writerow([
                     port["port"], port["protocol"], host["ipv4"], host["mac"],
                     " ".join(host["hostnames"]), port["service_name"], port["service_tunnel"],
-                    port["product"], port["version"], port["banner"]
+                    port["product"], port["version"], port["banner"], port["get_results"],
                 ])
 
 
@@ -180,7 +191,7 @@ def parse_nmap(args):  # pylint: disable=too-many-locals
                 "protocol": get_protocol(port), "port": get_port(port),
                 "service_name": get_service_name(port), "service_tunnel": get_service_tunnel(port),
                 "product": get_product(port), "version": get_version(port),
-                "banner": get_banner(port),
+                "banner": get_banner(port), "get_results": get_script_getrequest(port),
             }
             host_info['ports'].append(port_info)
             ports_counter += 1

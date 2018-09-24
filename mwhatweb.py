@@ -1,33 +1,31 @@
 """
-Run wpscan save data and create images of the results
+Run whatweb save data and create images of the results
 
-USAGE: python mwpscan.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
+USAGE: python mwhatweb.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
 """
 import os
 import logging
 import argparse
-import subprocess
+from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
 from utils import utils
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.mwpscan")
-WPSCAN_COMMAND = "wpscan -u {url} -e u --random-agent --follow-redirection --disable-tls-checks"
+LOG = logging.getLogger("ptscripts.mwhatweb")
+WHATWEB_COMMAND = "whatweb -v -a 3 {url}"
 
 
-def run_update():
-    LOG.info("Running wpscan --update")
-    try:
-        subprocess.run(["wpscan", "--update"], timeout=60 * 5)
-    except subprocess.TimeoutExpired:
-        LOG.warning("Timeout error ocurred trying to update wpscan.")
-    return
-
-
-def run_wpscan(url, output_dir, screenshot=False):
-    html_path = os.path.join(output_dir, f"wpscan_{url['domain']}_{url['port']}.html")
-    command = WPSCAN_COMMAND.format(url=url['url'])
+def run_whatweb(url, output_dir, screenshot=False):
+    parsed_url = urlparse(url)
+    port = parsed_url.port
+    if not port:
+        if parsed_url.scheme == 'http':
+            port = '80'
+        else:
+            port = '443'
+    html_path = os.path.join(output_dir, f"whatweb_{parsed_url.netloc}_{port}.html")
+    command = WHATWEB_COMMAND.format(url=url)
     LOG.info('Running command: ' + command)
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
@@ -39,8 +37,7 @@ def run_wpscan(url, output_dir, screenshot=False):
         LOG.error("Didn't receive a response from running the command.")
 
 
-def main(args):  # noqa
-    run_update()
+def main(args):
     urls = []
     # Prepare commands
     if args.csv:
@@ -52,10 +49,10 @@ def main(args):  # noqa
             else:
                 scheme = 'http://'
             port = webserver['port']
-            domain = f'{webserver["ipv4"]}'
+            url = f'{scheme}{webserver["ipv4"]}'
             if not webserver['port'] == '80' and not webserver['port'] == '443':
-                domain = domain + f':{port}'
-            urls.append({'url': f'{scheme}{domain}', 'port': port, 'domain': domain})
+                url = url + f':{port}'
+            urls.append(url)
     elif args.url:
         LOG.info('Running wpscan against a single URL.')
         urls.append(args.url)
@@ -69,13 +66,13 @@ def main(args):  # noqa
     else:
         screenshot = False
     for url in urls:
-        run_wpscan(url, args.output, screenshot)
+        run_whatweb(url, args.output, screenshot)
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
-        description='Run wpscan against one or many targets.',
+        description='Run whatweb against one or many targets.',
     )
 
     # Mutually exclusive inputs: csv, url, list of sites.

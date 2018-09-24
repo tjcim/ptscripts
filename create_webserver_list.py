@@ -32,7 +32,9 @@ LOG = logging.getLogger("ptscripts.create_webserver_list")
 def get_webserver_list(nmap_dict):
     webservers = []
     for host in nmap_dict:
-        if host['service_name'] and host['service_name'] in ["http", "https"]:
+        if not host['service_name']:
+            continue
+        if host['service_name'] in ["http", "https"] or "200 OK" in host['get_request']:
             # scheme
             if host['service_tunnel'] == 'ssl' or host['service_name'] == 'https':
                 scheme = 'https'
