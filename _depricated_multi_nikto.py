@@ -1,4 +1,6 @@
 """
+depricated by mnikto.py
+
 Run Nikto on multiple webservers
 
 Parameters

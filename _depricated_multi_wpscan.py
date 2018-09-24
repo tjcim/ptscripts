@@ -1,3 +1,4 @@
+# depricated by mwpscan.py
 import os
 import logging
 import argparse

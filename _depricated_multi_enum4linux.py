@@ -1,3 +1,4 @@
+# Depricated by menum4linux
 import os
 import logging
 import argparse
