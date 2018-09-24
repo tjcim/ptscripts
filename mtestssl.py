@@ -1,29 +1,27 @@
-"""
-Run nikto save data and create images of the results
-
-USAGE: python nikto_image.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
-"""
 import os
 import logging
 import argparse
-from urllib.parse import urlparse
+from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
 from utils import utils  # noqa
 from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.web_nikto")
-NIKTO_COMMAND = "nikto -C all -maxtime 1h -nointeractive "\
-    "-useragent 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36' "\
-    "-ask auto -o {output} -host {domain} -port {port}{root}{ssl}"
+LOG = logging.getLogger("ptscripts.mtestssl")
+COMMAND = "testssl.sh --csvfile {csv_output} {url}"
 
 
-def run_nikto(url_dict, output_dir, screenshot=False):
-    html_path = os.path.join(output_dir, f"nikto_{url_dict['domain']}_{url_dict['port']}.html")
-    csv_path = os.path.join(output_dir, f"nikto_{url_dict['domain']}_{url_dict['port']}.csv")
-    command = NIKTO_COMMAND.format(domain=url_dict['domain'], port=url_dict['port'],
-                                   root=url_dict['root'], ssl=url_dict['ssl'], output=csv_path)
+def run_whatweb(url, output_dir, screenshot=False):
+    if not utils.uses_encryption(url):
+        return
+    parsed_url = urlparse(url)
+    port = '443'
+    if parsed_url.port:
+        port = str(parsed_url.port)
+    html_path = os.path.join(output_dir, f"testssl_{parsed_url.netloc}_{port}.html")
+    csv_output = os.path.join(output_dir, f"testssl_{parsed_url.netloc}_{port}.csv")
+    command = COMMAND.format(url=url, csv_output=csv_output)
     LOG.info('Running command: ' + command)
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
@@ -35,68 +33,42 @@ def run_nikto(url_dict, output_dir, screenshot=False):
         LOG.error("Didn't receive a response from running the command.")
 
 
-def parse_url_nikto(url):
-    parsed_url = urlparse(url)
-    netloc = parsed_url.netloc
-    # if non-standard port break it up.
-    if ":" in netloc:
-        domain = netloc.split(":")[0]
-        port = netloc.split(":")[1]
-    # otherwise port is based on scheme
-    else:
-        domain = netloc
-        if parsed_url.scheme == 'http':
-            port = '80'
-        else:
-            port = '443'
-    if parsed_url.scheme == 'https':
-        ssl = " -ssl"
-    else:
-        ssl = ""
-    if parsed_url.path:
-        root = " -root " + parsed_url.path
-    else:
-        root = ""
-    return {'domain': domain, 'port': port, 'root': root, 'ssl': ssl}
-
-
 def main(args):
     urls = []
     # Prepare commands
     if args.csv:
-        LOG.info('Running nikto against CSV file.')
+        LOG.info('Running testssl against CSV file.')
         webservers = utils.parse_csv_for_webservers(args.csv)
         for webserver in webservers:
             if webserver['service_tunnel'] == 'ssl' or webserver['service_name'] == 'https':
-                ssl = " -ssl"
+                scheme = 'https://'
             else:
-                ssl = ""
+                scheme = 'http://'
             port = webserver['port']
-            domain = webserver['ipv4']
-            root = ""
-            urls.append({'domain': domain, 'port': port, 'root': root, 'ssl': ssl})
+            url = f'{scheme}{webserver["ipv4"]}'
+            if not webserver['port'] == '80' and not webserver['port'] == '443':
+                url = url + f':{port}'
+            urls.append(url)
     elif args.url:
-        LOG.info('Running nikto against a single URL.')
-        parsed_url = parse_url_nikto(args.url)
-        urls.append(parsed_url)
+        LOG.info('Running wpscan against a single URL.')
+        urls.append(args.url)
     else:
-        LOG.info('Running nikto against a text file of URLs.')
+        LOG.info('Running wpscan against a text file of URLs.')
         with open(args.txt, 'r') as f:
             for line in f:
-                parsed_url = parse_url_nikto(line.strip())
-                urls.append(parsed_url)
+                urls.append(line.strip())
     if args.screenshot:
         screenshot = args.screenshot
     else:
         screenshot = False
     for url in urls:
-        run_nikto(url, args.output, screenshot)
+        run_whatweb(url, args.output, screenshot)
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
-        description='Run nikto against one or many targets.',
+        description='Run testssl against one or many targets.',
     )
 
     # Mutually exclusive inputs: csv, url, list of sites.
@@ -124,6 +96,6 @@ def parse_args(args):
     return args
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import sys
     main(parse_args(sys.argv[1:]))

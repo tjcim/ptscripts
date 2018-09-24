@@ -1,3 +1,5 @@
+# depricated by mtestssl.py
+
 import os
 import logging
 import argparse

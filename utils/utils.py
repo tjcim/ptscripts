@@ -73,7 +73,9 @@ def parse_csv_for_webservers(csv_file):
     webservers = []
     hosts = csv_to_dict(csv_file)
     for host in hosts:
-        if host.get('service_name') and host['service_name'] in ["http", "https"]:
+        if not host['service_name']:
+            continue
+        if host['service_name'] in ["http", "https"] or "200 OK" in host['get_request']:
             webservers.append(host)
     return webservers
 
@@ -177,7 +179,7 @@ def run_command_tee_aha(command, html_output, timeout=60 * 5):
     return html_output
 
 
-def check_url(url, timeout=10, proxy=False):
+def check_url(url, timeout=10, proxy=False):  # pylint: disable=too-many-return-statements
     """ Uses python requests library first for speed and to get the response code. """
     LOG.info("Checking url: {}".format(url))
     if proxy:

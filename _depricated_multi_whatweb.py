@@ -1,3 +1,4 @@
+# depricated with mwhatweb.py
 import os
 import logging
 import argparse
