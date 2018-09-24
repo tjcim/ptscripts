@@ -1,7 +1,7 @@
 """
 Run nikto save data and create images of the results
 
-USAGE: python nikto_image.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
+USAGE: python mnikto.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
 """
 import os
 import logging

@@ -1,3 +1,8 @@
+"""
+Run testssl save data and create images of the results
+
+USAGE: python mtestssl.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
+"""
 import os
 import logging
 import argparse

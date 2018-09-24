@@ -114,6 +114,13 @@
   command: "python {scripts_path}/pikebrute.py {pentest_path}/discovery/ports.csv {pentest_path}/exploitation/"
   description: "Runs ike-scan and then tries to crack the hashes of any psks returned."
   requires: ports.csv
+  scriptable: no
+
+-
+  name: onesixtyone
+  command: "python {scripts_path}/monesixtyone.py {pentest_path}/exploitation/ --csv {pentest_path}/discovery/ports.csv -s {pentest_path}/screenshots/"
+  description: "Runs onesixtyone and captures an image."
+  requires: ports.csv
   scriptable: yes
 
 -
