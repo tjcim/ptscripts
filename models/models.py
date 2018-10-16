@@ -44,14 +44,14 @@ class TestSSLVulnerability(Vulnerability):
         super().__init__(finding, risk_level, _id, impact, remediation)
         risk_levels = {"NOT ok": "M", "MINOR": "L", "WARN": "L", "MEDIUM": "L"}
         try:
-            self.risk_level = risk_level + ": " + risk_levels[self.risk_level]
+            self.risk_level = risk_levels[self.risk_level]
         except KeyError:
-            log.error("Couldn't set an appropriate risk level for {}".format(_id))
+            log.warning("Couldn't set an appropriate risk level for {}".format(_id))
 
     def add_affected(self, host):
         log.debug(host)
-        ip = host[1].split('/')[1]
-        port = host[2]
+        ip = host['fqdn/ip'].split('/')[1]
+        port = host['port']
         self.affected.append("{}:{}".format(ip, port))
 
 

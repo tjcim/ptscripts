@@ -17,7 +17,7 @@ LOG = logging.getLogger("ptscripts.mtestssl")
 COMMAND = "testssl.sh --csvfile {csv_output} {url}"
 
 
-def run_whatweb(url, output_dir, screenshot=False):
+def run_testssl(url, output_dir, screenshot=False):
     if not utils.uses_encryption(url):
         return
     parsed_url = urlparse(url)
@@ -67,7 +67,11 @@ def main(args):
     else:
         screenshot = False
     for url in urls:
-        run_whatweb(url, args.output, screenshot)
+        try:
+            run_testssl(url, args.output, screenshot)
+        except KeyboardInterrupt:
+            LOG.info('moving on.')
+            continue
 
 
 def parse_args(args):
