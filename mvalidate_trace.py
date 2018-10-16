@@ -1,32 +1,32 @@
 """
-Run whatweb save data and create images of the results
+Run curl to test TRACE save data and create images of the results
 
-USAGE: python mwhatweb.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
+USAGE: python validate_trace_image.py <url> <output_dir> [-s <screenshot directory>]
 """
 import os
 import logging
 import argparse
-from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
+from urllib.parse import urlparse
 
-from utils import utils
+from utils import utils  # noqa
+from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.mwhatweb")
-WHATWEB_COMMAND = "whatweb -v -a 3 "\
-    "-U 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36' {url}"
+LOG = logging.getLogger("ptscripts.validate_trace_image")
+COMMAND = "curl --insecure -X TRACE {url}"
 
 
-def run_whatweb(url, output_dir, screenshot=False):
+def run_validate_trace(url, output_dir, screenshot=False):
     parsed_url = urlparse(url)
-    port = parsed_url.port
-    if not port:
-        if parsed_url.scheme == 'http':
-            port = '80'
-        else:
-            port = '443'
-    html_path = os.path.join(output_dir, f"whatweb_{parsed_url.netloc}_{port}.html")
-    command = WHATWEB_COMMAND.format(url=url)
+    if parsed_url.scheme == 'http':
+        port = '80'
+    elif parsed_url.scheme == 'https':
+        port = '443'
+    if parsed_url.port:
+        port = str(parsed_url.port)
+    html_path = os.path.join(output_dir, f"validate_trace_{parsed_url.netloc}_{port}.html")
+    command = COMMAND.format(url=url)
     LOG.info('Running command: ' + command)
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
@@ -42,7 +42,7 @@ def main(args):
     urls = []
     # Prepare commands
     if args.csv:
-        LOG.info('Running wpscan against CSV file.')
+        LOG.info('Running validate_trace against CSV file.')
         webservers = utils.parse_csv_for_webservers(args.csv)
         for webserver in webservers:
             if webserver['service_tunnel'] == 'ssl' or webserver['service_name'] == 'https':
@@ -55,10 +55,10 @@ def main(args):
                 url = url + f':{port}'
             urls.append(url)
     elif args.url:
-        LOG.info('Running wpscan against a single URL.')
+        LOG.info('Running validate_trace against a single URL.')
         urls.append(args.url)
     else:
-        LOG.info('Running wpscan against a text file of URLs.')
+        LOG.info('Running validate_trace against a text file of URLs.')
         with open(args.txt, 'r') as f:
             for line in f:
                 urls.append(line.strip())
@@ -67,13 +67,13 @@ def main(args):
     else:
         screenshot = False
     for url in urls:
-        run_whatweb(url, args.output, screenshot)
+        run_validate_trace(url, args.output, screenshot)
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
-        description='Run whatweb against one or many targets.',
+        description='Capture curl TRACE data and image.',
     )
 
     # Mutually exclusive inputs: csv, url, list of sites.
@@ -101,6 +101,6 @@ def parse_args(args):
     return args
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     main(parse_args(sys.argv[1:]))
