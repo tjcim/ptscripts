@@ -99,6 +99,7 @@ def parse_testssl(args):
     log.info(f"Of the {vuln_count} vulnerabilities found:")
     log.info(f"{med_vuln_count} are considered medium risk.")
     log.info(f"{low_vuln_count} are considered low risk.")
+    log.info(f"Number of hosts with vulnerabilities: {len(vuln_hosts)}")
     log.info(f"Vulnerable hosts: {vuln_hosts}")
 
 
