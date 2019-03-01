@@ -30,6 +30,18 @@
   scriptable: yes
 
 -
+  name: theharvester
+  command: "python {scripts_path}/theharvester_image.py {pentest_path}/ {domain_name} -s {pentest_path}/screenshots/"
+  description: "Runs theharvester against the domain, saves output and screenshot."
+  scriptable: yes
+
+-
+  name: recon-ng
+  command: "coming soon"
+  description: "Runs recon-ng"
+  scriptable: yes
+
+-
   name: ip_extract
   command: "python {scripts_path}/ip_extract.py {pentest_path}/{ip_file} {pentest_path}/ips/"
   description: "Extracts ips in cidr or dashed formats into a file with an IP per line."

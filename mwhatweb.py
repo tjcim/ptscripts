@@ -13,8 +13,7 @@ from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.mwhatweb")
-WHATWEB_COMMAND = "whatweb -v -a 3 "\
-    "-U 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36' {url}"
+WHATWEB_COMMAND = "whatweb -v -a 3 {url}"
 
 
 def run_whatweb(url, output_dir, screenshot=False):
