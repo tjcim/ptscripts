@@ -15,8 +15,7 @@ LOG = logging.getLogger("ptscripts.yaml_web")
 def c_format(commands, args):  # pylint: disable=too-many-locals
     parsed_url = urlparse(args.url)
     netloc = parsed_url.netloc.split(":")[0]
-    base_path = os.path.join(config.BASE_PATH, args.name)
-    pentest_path = os.path.join(base_path, netloc)
+    pentest_path = args.path
     a1 = os.path.join(pentest_path, "a1_injection")
     a2 = os.path.join(pentest_path, "a2_auth_session")
     a3 = os.path.join(pentest_path, "a3_sde")
@@ -46,8 +45,7 @@ def c_print(commands):
 def c_write(commands, args):
     parsed_url = urlparse(args.url)
     netloc = parsed_url.netloc.split(":")[0]
-    base_path = os.path.join(config.BASE_PATH, args.name)
-    pentest_path = os.path.join(base_path, netloc)
+    pentest_path = args.path
     commands_path = os.path.join(pentest_path, "web_commands_{netloc}.txt".format(netloc=netloc))
     scripts_path = os.path.join(pentest_path, "wc_{netloc}.sh".format(netloc=netloc))
     with open(commands_path, "w") as f:
@@ -73,8 +71,10 @@ def get_url():
 
 
 def main(args):
-    if not args.name:
-        args.name = get_name()
+    print(args.path)
+    if args.path:
+        args.path = args.path.rstrip('/')
+        print(args.path)
     if not args.url:
         args.url = get_url()
     commands_file = os.path.join(config.SCRIPTS_PATH, "commands/web_commands.yaml")
@@ -89,7 +89,7 @@ def parse_args(args):
         parents=[utils.parent_argparser()],
         description='Print web commands formatted for current pentest.',
     )
-    parser.add_argument('-n', '--name', help="Short name of the engagement.")
+    parser.add_argument('-p', '--path', help="Full path to folder")
     parser.add_argument('-u', '--url', help="URL for the engagement.")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
