@@ -51,71 +51,80 @@ def get_filename(output_dir, url):
     return os.path.join(output_dir, '{}_{}.jpg'.format(domain, port))
 
 
-def take_screenshot(url, url_list, args):  # noqa
-    def close_and_return():
-        driver.close()
-        if not args.no_display:
-            display.stop()
-
-    with LOG_LOCK:
-        LOG.info("Taking a screenshot of {}".format(url))
+def close_and_return(args, driver, display):
+    driver.close()
     if not args.no_display:
-        display = Display(visible=0, size=(1200, 1800))
-        display.start()
-    driver = get_driver()
-    with LOG_LOCK:
-        LOG.info('Selenium is connecting to {}'.format(url))
+        display.stop()
 
-    # Get the page
-    try:
-        driver.get(url)
-        try:
-            WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting alret.')
-            alert = driver.switch_to.alert
-            alert.accept()
-            with LOG_LOCK:
-                LOG.info("alert accepted {}".format(url))
-        except TimeoutException:
-            with LOG_LOCK:
-                LOG.info("no alert continuing on")
-    except TimeoutException:
-        with LOG_LOCK:
-            LOG.info("Selenium timeout occured, moving on.")
-        close_and_return()
-        return
-    except WebDriverException:
-        with LOG_LOCK:
-            LOG.info("Selenium WebDriverException, moving on.")
-        close_and_return()
-        return
 
-    # Check for redirections
-    end_url = driver.current_url
-    if not end_url == url:
-        # If we are redirected, check if current url is in list of urls to check
-        # If it is then no need to take a picture.
-        if end_url in url_list:
-            with LOG_LOCK:
-                LOG.info('redirected to {} going to look at it later'.format(end_url))
-            close_and_return()
-            return
-        with LOG_LOCK:
-            LOG.info('redirected from {} to {}'.format(url, end_url))
-        if end_url == 'about:blank':
-            close_and_return()
-            return
+def create_display():
+    display = Display(visible=0, size=(1200, 1800))
+    display.start()
+    return display
 
-    file_name = get_filename(args.output_dir, url)
-    with LOG_LOCK:
-        LOG.info('Taking screenshot and saving it to {}'.format(file_name))
 
+def take_screenshot(args, driver, display, file_name):
     # We are going to save it as jpg to get rid of the transparency of png
     time.sleep(2)  # wait an extra 2 seconds before taking image
     screen = driver.get_screenshot_as_png()
     im = Image.open(BytesIO(screen))
     rgb_im = im.convert('RGB')
     rgb_im.save(file_name)
-    close_and_return()
+    close_and_return(args, driver, display)
+
+
+def get_page(url, url_list, args):  # noqa
+    LOG.info("Taking a screenshot of {}".format(url))
+    if not args.no_display:
+        display = create_display()
+    try:
+        driver = get_driver()
+    except WebDriverException:
+        LOG.error("Driver exception WebDriverException, moving on.")
+        if not args.no_display:
+            display.stop()
+        return
+    LOG.debug('Selenium is connecting to {}'.format(url))
+    # Get the page
+    try:
+        driver.get(url)
+        # The following is to handle instances when an alert box is popped up right as you see the site.
+        try:
+            WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting alret.')
+            alert = driver.switch_to.alert
+            alert.dismiss()
+            LOG.info("alert accepted {}".format(url))
+        except TimeoutException:
+            pass
+        except WebDriverException:
+            LOG.error("Selenium WebDriverException, moving on.")
+            close_and_return(args, driver, display)
+            return
+    except TimeoutException:
+        LOG.error("Selenium timeout occured, moving on.")
+        close_and_return(args, driver, display)
+        return
+    except WebDriverException:
+        LOG.error("Selenium WebDriverException, moving on.")
+        close_and_return(args, driver, display)
+        return
+    # Check for redirections
+    end_url = driver.current_url
+    if not end_url == url:
+        # If we are redirected, check if current url is in list of urls to check
+        # If it is then no need to take a picture.
+        if end_url in url_list:
+            LOG.debug('redirected to {} going to look at it later'.format(end_url))
+            close_and_return(args, driver, display)
+            return
+        LOG.debug('redirected from {} to {}'.format(url, end_url))
+        if end_url == 'about:blank':
+            close_and_return(args, driver, display)
+            return
+
+    file_name = get_filename(args.output_dir, url)
+    LOG.debug('Taking screenshot and saving it to {}'.format(file_name))
+    take_screenshot(args, driver, display, file_name)
 
 
 def process_queue(args, url_queue, imaged_urls, urls):
@@ -124,20 +133,17 @@ def process_queue(args, url_queue, imaged_urls, urls):
         if not args.force:
             file_name = get_filename(args.output_dir, url)
             if os.path.isfile(file_name):
-                with LOG_LOCK:
-                    LOG.info(
-                        "Skipping {url} as it has already been done (use -f to force).".format(url=url)
-                    )
+                LOG.debug(
+                    "Skipping {url} as it has already been done (use -f to force).".format(url=url)
+                )
                 url_queue.task_done()
                 continue
 
         # Use requests to check that the URL is valid (requests is much faster).
         valid, end_url = utils.check_url(url)
-        with LOG_LOCK:
-            LOG.debug("check_url results: {}, {}".format(valid, end_url))
+        LOG.debug("check_url results: {}, {}".format(valid, end_url))
         if end_url in imaged_urls:
-            with LOG_LOCK:
-                LOG.info("Skipping, already took an image of this end_url {}".format(end_url))
+            LOG.debug("Skipping, already took an image of this end_url {}".format(end_url))
             url_queue.task_done()
             continue
 
@@ -151,14 +157,13 @@ def process_queue(args, url_queue, imaged_urls, urls):
             end_url = 'http://' + parsed_url.netloc.split(":")[0] + parsed_url.path
         if not end_url == url:
             if end_url in urls:
-                with LOG_LOCK:
-                    LOG.info("Skipping, redirected to a url later in the list: {}".format(end_url))
+                LOG.debug("Skipping, redirected to a url later in the list: {}".format(end_url))
                 url_queue.task_done()
                 continue
 
         # If url is valid, take the screenshot and then add end_url to imaged_urls list
         if valid:
-            take_screenshot(url, urls, args)
+            get_page(url, urls, args)
             imaged_urls.append(end_url)
         url_queue.task_done()
 
@@ -168,6 +173,9 @@ def main(args):
     utils.dir_exists(args.output_dir, True)
     urls = utils.parse_webserver_urls(args.input_file)
     url_queue = Queue()
+
+    for current_url in urls:
+        url_queue.put(current_url)
 
     for _ in range(args.threads):
         t = threading.Thread(
@@ -181,9 +189,7 @@ def main(args):
         )
         t.daemon = True
         t.start()
-
-    for current_url in urls:
-        url_queue.put(current_url)
+        t.join(timeout=10)
 
     url_queue.join()
 
@@ -208,8 +214,7 @@ def parse_args(args):
         logger.setLevel('ERROR')
     elif args.verbose:
         logger.setLevel('DEBUG')
-        with LOG_LOCK:
-            LOG.debug("Logging set to debug.")
+        LOG.debug("Logging set to debug.")
     else:
         logger.setLevel('INFO')
     return args
