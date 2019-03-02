@@ -13,6 +13,9 @@ from pyvirtualdisplay import Display  # pylint: disable=import-error
 from selenium import webdriver  # pylint: disable=import-error
 from selenium.common.exceptions import TimeoutException, WebDriverException  # pylint: disable=import-error
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities  # pylint: disable=import-error
+# from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from config import config
 from utils import utils
@@ -53,7 +56,6 @@ def take_screenshot(url, url_list, args):  # noqa
         driver.close()
         if not args.no_display:
             display.stop()
-        return
 
     with LOG_LOCK:
         LOG.info("Taking a screenshot of {}".format(url))
@@ -67,6 +69,15 @@ def take_screenshot(url, url_list, args):  # noqa
     # Get the page
     try:
         driver.get(url)
+        try:
+            WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting alret.')
+            alert = driver.switch_to.alert
+            alert.accept()
+            with LOG_LOCK:
+                LOG.info("alert accepted {}".format(url))
+        except TimeoutException:
+            with LOG_LOCK:
+                LOG.info("no alert continuing on")
     except TimeoutException:
         with LOG_LOCK:
             LOG.info("Selenium timeout occured, moving on.")
@@ -88,12 +99,11 @@ def take_screenshot(url, url_list, args):  # noqa
                 LOG.info('redirected to {} going to look at it later'.format(end_url))
             close_and_return()
             return
-        else:
-            with LOG_LOCK:
-                LOG.info('redirected from {} to {}'.format(url, end_url))
-            if end_url == 'about:blank':
-                close_and_return()
-                return
+        with LOG_LOCK:
+            LOG.info('redirected from {} to {}'.format(url, end_url))
+        if end_url == 'about:blank':
+            close_and_return()
+            return
 
     file_name = get_filename(args.output_dir, url)
     with LOG_LOCK:
