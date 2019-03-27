@@ -14,6 +14,7 @@ LOG = logging.getLogger("ptscripts.fierce_image")
 
 
 def main(args):
+    os.makedirs(args.output, exist_ok=True)
     LOG.info("Running fierce for {}".format(args.domain))
     command = "fierce -dns {} -threads 3".format(args.domain)
     LOG.info("Running the command: {}".format(command))

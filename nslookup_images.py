@@ -52,6 +52,7 @@ def parse_nslookup_ns(content):
 
 
 def main(args):
+    os.makedirs(args.output, exist_ok=True)
     # Run nslookup query for Name Servers
     LOG.info("Running nslookup with type NS")
     content, ns_html = run_nslookup(args.domain, args.output, "NS")
@@ -67,6 +68,7 @@ def main(args):
     _, any_html = run_nslookup(args.domain, args.output, "ANY", auth_nameservers[0])
     # Take picture of html file
     if args.screenshot:
+        os.makedirs(args.screenshot, exist_ok=True)
         for html_file in [ns_html, mx_html, srv_html, any_html]:
             utils.selenium_image(html_file, args.screenshot)
 

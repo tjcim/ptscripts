@@ -13,7 +13,7 @@ from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.mwpscan")
-WPSCAN_COMMAND = "wpscan -u {url} -e u --random-agent --follow-redirection --disable-tls-checks"
+WPSCAN_COMMAND = "wpscan -u {url} -e u --random-agent --follow-redirection --disable-tls-checks --batch"
 
 
 def run_update():
@@ -22,13 +22,12 @@ def run_update():
         subprocess.run(["wpscan", "--update"], timeout=60 * 5)
     except subprocess.TimeoutExpired:
         LOG.warning("Timeout error ocurred trying to update wpscan.")
-    return
 
 
 def run_wpscan(url, output_dir, screenshot=False):
     html_path = os.path.join(output_dir, f"wpscan_{url['domain']}_{url['port']}.html")
     command = WPSCAN_COMMAND.format(url=url['url'])
-    LOG.info('Running command: ' + command)
+    LOG.info('Running command: {}'.format(command))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and screenshot:
@@ -41,6 +40,7 @@ def run_wpscan(url, output_dir, screenshot=False):
 
 def main(args):  # noqa
     run_update()
+    os.makedirs(args.output, exist_ok=True)
     urls = []
     # Prepare commands
     if args.csv:
@@ -68,7 +68,9 @@ def main(args):  # noqa
         screenshot = args.screenshot
     else:
         screenshot = False
-    for url in urls:
+    url_count = len(urls)
+    for i, url in enumerate(urls, start=1):
+        LOG.info('**** Number {} of {} ****'.format(i, url_count))
         run_wpscan(url, args.output, screenshot)
 
 

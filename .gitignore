@@ -8,6 +8,7 @@ ghostdriver.log
 config.py
 *.hash
 log_20*
+*.sqlite
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

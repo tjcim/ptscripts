@@ -12,6 +12,7 @@ import urllib3
 import requests
 from PIL import Image
 from selenium import webdriver  # pylint: disable=import-error
+from selenium.webdriver.firefox.options import Options
 
 # from ptscripts import config
 from utils import logging_config  # noqa pylint: disable=unused-import
@@ -218,7 +219,9 @@ def selenium_image(html_file, ss_path, x=800, y=600, sleep=1):
     """ Take picture of output.
     Opens html_file with selenium, saves the screenshot to the ss_path folder
     """
-    driver = webdriver.PhantomJS()
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
     LOG.info("opening file {}".format(html_file))
     driver.get("file://" + html_file)
     driver.set_window_size(x, y)

@@ -28,6 +28,13 @@ Make sure you have python3-venv installed.
 
     apt install python3-venv phantomjs aha libxml2-utils -y
 
+Get the latest geckodriver release: https://github.com/mozilla/geckodriver/releases
+
+    cd ~/Downloads
+    tar -xvzf geckodriver*
+    chmod a+x geckodriver
+    mv geckodriver /usr/local/bin/
+
 Clone this repo and then cd into the created directory. The commands below assume you are currently in the repo's directory.
 
     cd /opt && git clone htps://github.com/tjcim/ptscripts.gig && cd ptscripts

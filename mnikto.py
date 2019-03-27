@@ -24,7 +24,7 @@ def run_nikto(url_dict, output_dir, screenshot=False):
     csv_path = os.path.join(output_dir, f"nikto_{url_dict['domain']}_{url_dict['port']}.csv")
     command = NIKTO_COMMAND.format(domain=url_dict['domain'], port=url_dict['port'],
                                    root=url_dict['root'], ssl=url_dict['ssl'], output=csv_path)
-    LOG.info('Running command: ' + command)
+    LOG.info('Running command: {}'.format(command))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and screenshot:
@@ -61,6 +61,7 @@ def parse_url_nikto(url):
 
 
 def main(args):
+    os.makedirs(args.output, exist_ok=True)
     urls = []
     # Prepare commands
     if args.csv:
@@ -89,7 +90,9 @@ def main(args):
         screenshot = args.screenshot
     else:
         screenshot = False
-    for url in urls:
+    url_count = len(urls)
+    for i, url in enumerate(urls, start=1):
+        LOG.info('**** Number {} of {} ****'.format(i, url_count))
         run_nikto(url, args.output, screenshot)
 
 

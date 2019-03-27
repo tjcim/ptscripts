@@ -10,26 +10,70 @@ from utils import utils, logging_config  # noqa pylint: disable=unused-import
 LOG = logging.getLogger("ptscripts.folder_structure")
 
 
+def recon_ng_rc_files(pentest_dir, domain):
+    pentest_name = os.path.split(pentest_dir)[1]
+    if pentest_name is None:
+        pentest_name = os.path.split(os.path.split(pentest_dir)[0])[1]
+
+    # bing_domain_web
+    rc_folder = os.path.join(pentest_dir, "ept/rc_files")
+    os.makedirs(rc_folder, exist_ok=True)
+    LOG.info("Creating the recon_bing.rc file in {}".format(rc_folder))
+    recon_bing_path = os.path.join(rc_folder, "recon_bing.rc")
+    with open(recon_bing_path, "w") as f:
+        f.write("workspaces delete {}\n".format(pentest_name))
+        f.write("set VERBOSITY 1\n")
+        f.write("workspaces add {}\n".format(pentest_name))
+        f.write("add domains {}\n".format(domain))
+        f.write("keys add ipinfodb_api {}\n".format(config.IPINFODB_API))
+        f.write("keys add builtwith_api {}\n".format(config.BUILTWITH_API))
+        f.write("show domains\n")
+        f.write("use recon/domains-hosts/bing_domain_web\n")
+        f.write("run\n")
+        f.write("show hosts\n")
+        f.write("exit\n")
+
+    # google_site_web
+    LOG.info("Creating the recon_google.rc file in {}".format(rc_folder))
+    recon_google_path = os.path.join(rc_folder, "recon_google.rc")
+    with open(recon_google_path, "w") as f:
+        f.write("workspaces select {}\n".format(pentest_name))
+        f.write("show domains\n")
+        f.write("use recon/domains-hosts/google_site_web\n")
+        f.write("run\n")
+        f.write("show hosts\n")
+        f.write("exit\n")
+
+    # brute_hosts
+    LOG.info("Creating the recon_brute.rc file in {}".format(rc_folder))
+    recon_brute_path = os.path.join(rc_folder, "recon_brute.rc")
+    with open(recon_brute_path, "w") as f:
+        f.write("workspaces select {}\n".format(pentest_name))
+        f.write("show domains\n")
+        f.write("use recon/domains-hosts/brute_hosts\n")
+        f.write("run\n")
+        f.write("show hosts\n")
+        f.write("exit\n")
+
+
 def metasploit_rc_files(pentest_dir):
     pentest_name = os.path.split(pentest_dir)[1]
     if pentest_name is None:
         pentest_name = os.path.split(os.path.split(pentest_dir)[0])[1]
     # metasploit workspace and import nmap
-    discovery_folder = os.path.join(pentest_dir, "ept/discovery/rc_files")
-    os.makedirs(discovery_folder, exist_ok=True)
-    LOG.info("Creating the db_import.rc file in {}".format(discovery_folder))
-    workspace_import_path = os.path.join(discovery_folder, "db_import.rc")
-    nmap_xml = os.path.join(pentest_dir, "ept/discovery/nmap/ss_all.xml")
+    rc_folder = os.path.join(pentest_dir, "ept/rc_files")
+    os.makedirs(rc_folder, exist_ok=True)
+    LOG.info("Creating the db_import.rc file in {}".format(rc_folder))
+    workspace_import_path = os.path.join(rc_folder, "db_import.rc")
+    nmap_xml = os.path.join(pentest_dir, "ept/nmap/ss_all.xml")
     with open(workspace_import_path, "w") as f:
         f.write("workspace -a {}\n".format(pentest_name))
         f.write("db_import {}\n".format(nmap_xml))
         f.write("hosts")
 
     # endpointmapper
-    enumeration_folder = os.path.join(pentest_dir, "ept/enumeration/rc_files")
-    os.makedirs(enumeration_folder, exist_ok=True)
-    LOG.info("Creating the endpoint_mapper.rc file in {}".format(enumeration_folder))
-    endpoint_resource_file = os.path.join(enumeration_folder, "endpoint_mapper.rc")
+    LOG.info("Creating the endpoint_mapper.rc file in {}".format(rc_folder))
+    endpoint_resource_file = os.path.join(rc_folder, "endpoint_mapper.rc")
     with open(endpoint_resource_file, "w") as f:
         f.write("use auxiliary/scanner/dcerpc/endpoint_mapper\n")
         f.write("hosts -R\n")
@@ -38,10 +82,8 @@ def metasploit_rc_files(pentest_dir):
         f.write("exploit")
 
     # smtp_relay
-    exploitation_folder = os.path.join(pentest_dir, "ept/exploitation/rc_files")
-    os.makedirs(exploitation_folder, exist_ok=True)
-    LOG.info("Creating the smtp_relay.rc file in {}".format(exploitation_folder))
-    smtp_resource_path = os.path.join(exploitation_folder, "smtp_relay.rc")
+    LOG.info("Creating the smtp_relay.rc file in {}".format(rc_folder))
+    smtp_resource_path = os.path.join(rc_folder, "smtp_relay.rc")
     with open(smtp_resource_path, "w") as f:
         f.write("use auxiliary/scanner/smtp/smtp_relay\n")
         f.write("services -p 25 -R\n")
@@ -57,23 +99,23 @@ def checklist(pentest_dir):
 
 
 def main(args):
-    base_dirs = ["ept", "ipt", "macros", "physical", "report", "social", "wireless", "webapp"]
-    pt_dirs = ["discovery", "enumeration", "exploitation", "footprinting", "ips", "post", "screenshots"]
+    base_dirs = ["ept"]
+    pt_dirs = ["testssl", "whatweb", "rc_files", "nmap", "screenshots"]
     LOG.info("Creating directories")
     for directory in base_dirs:
         dir_path = os.path.join(args.input, directory)
         LOG.debug("Creating directory: {}".format(dir_path))
         os.makedirs(dir_path, exist_ok=True)
-    for directory in ["ept", "ipt"]:
         for pt_dir in pt_dirs:
-            LOG.debug("Creating directory: {}".format(dir_path))
-            dir_path = os.path.join(os.path.join(args.input, directory), pt_dir)
-            os.makedirs(dir_path, exist_ok=True)
+            pt_path = os.path.join(dir_path, pt_dir)
+            LOG.debug("Creating directory: {}".format(pt_path))
+            os.makedirs(pt_path, exist_ok=True)
     metasploit_rc_files(args.input)
+    recon_ng_rc_files(args.input, args.domain)
     checklist(args.input)
     LOG.info("Directories have been created.")
     print("************* ")
-    print(""" Now that the directories have been created, please put the in-scope ip addresses in the ips/ips.txt file.""")
+    print(""" Now that the directories have been created, please put the in-scope ip addresses into a file named ips.txt.""")
     print(" Once done run the yaml_poc.py script to create the needed commands.")
     print("************* ")
 
@@ -85,6 +127,7 @@ def parse_args(args):
         prog='folder_structure.py',
     )
     parser.add_argument('input', help='Full path to pentest folder. (ex: /root/pentests/tjcim)')
+    parser.add_argument('domain', help='Domain')
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

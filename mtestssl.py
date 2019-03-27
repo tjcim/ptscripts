@@ -14,7 +14,7 @@ from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.mtestssl")
-COMMAND = "testssl.sh --csvfile {csv_output} {url}"
+COMMAND = "/opt/testssl.sh/testssl.sh --warnings off --csvfile {csv_output} {url}"
 
 
 def run_testssl(url, output_dir, screenshot=False):
@@ -27,7 +27,7 @@ def run_testssl(url, output_dir, screenshot=False):
     html_path = os.path.join(output_dir, f"testssl_{parsed_url.netloc}_{port}.html")
     csv_output = os.path.join(output_dir, f"testssl_{parsed_url.netloc}_{port}.csv")
     command = COMMAND.format(url=url, csv_output=csv_output)
-    LOG.info('Running command: ' + command)
+    LOG.info('Running command: {}'.format(command))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and screenshot:
@@ -66,7 +66,9 @@ def main(args):
         screenshot = args.screenshot
     else:
         screenshot = False
-    for url in urls:
+    url_count = len(urls)
+    for i, url in enumerate(urls, start=1):
+        LOG.info('**** Number {} of {} ****'.format(i, url_count))
         try:
             run_testssl(url, args.output, screenshot)
         except KeyboardInterrupt:

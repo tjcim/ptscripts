@@ -13,54 +13,51 @@
 
 -
   name: nslookup
-  command: "python {scripts_path}/nslookup_images.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/nslookup_images.py {pentest_path}/nslookup/ {domain_name} -s {pentest_path}/screenshots/"
   description: "Runs nslookup and takes screenshots."
   scriptable: yes
 
 -
   name: whois
-  command: "python {scripts_path}/whois_image.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/whois_image.py {pentest_path}/whois/ {domain_name} -s {pentest_path}/screenshots/"
   description: "Runs whois -H {domain}, saves output and takes screenshot"
   scriptable: yes
 
 -
   name: fierce
-  command: "python {scripts_path}/fierce_image.py {pentest_path}/footprinting/ {domain_name} -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/fierce_image.py {pentest_path}/fierce/ {domain_name} -s {pentest_path}/screenshots/"
   description: "Runs fierce, saves output and takes a screenshot."
   scriptable: yes
 
 -
+  name: google_dorks
+  command: "Run google dorks"
+  description: "Run google dorks for domain"
+  scriptable: no
+
+-
   name: theharvester
-  command: "python {scripts_path}/theharvester_image.py {pentest_path}/ {domain_name} -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/harvester.py {domain_name} {pentest_path}/theharvester/ -s {pentest_path}/screenshots/"
   description: "Runs theharvester against the domain, saves output and screenshot."
   scriptable: yes
 
 -
   name: recon-ng
-  command: "coming soon"
-  description: "Runs recon-ng"
+  command: "python {scripts_path}/recon_ng.py {pentest_path} {pentest_path}/recon_ng/ -s {pentest_path}/screenshots/"
+  description: "Runs recon-ng bing web"
   scriptable: yes
 
 -
   name: ip_extract
-  command: "python {scripts_path}/ip_extract.py {pentest_path}/{ip_file} {pentest_path}/ips/"
+  command: "python {scripts_path}/ip_extract.py {pentest_path}/{ip_file} {pentest_path}/"
   description: "Extracts ips in cidr or dashed formats into a file with an IP per line."
   help:
   provides: _ips.txt
   scriptable: yes
 
 -
-  name: nessus_scan
-  command: "python {scripts_path}/nessus_scan.py {pentest_path}/ips/_ips.txt {pentest_name}"
-  description: "Kicks off a basic nessus scan against the ips provided."
-  help: "Make sure the nessus ip:port and api information is in config.py"
-  requires: _ips.txt
-  provides: nessus_scan.csv
-  scriptable: no
-
--
   name: nmap_st_common
-  command: "python {scripts_path}/nmap_image.py {pentest_path}/discovery/nmap/ {pentest_path}/ips/_ips.txt -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/nmap_image.py {pentest_path}/nmap/ {pentest_path}/_ips.txt -s {pentest_path}/screenshots/"
   description: "FAST - Runs nmap with -sT on common ports. Saves output and takes an image."
   requires: _ips.txt
   provides: nmap_sT_common.xml
@@ -68,7 +65,7 @@
 
 -
   name: nmap
-  command: "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {pentest_path}/discovery/nmap/ss_all -iL {pentest_path}/ips/_ips.txt --min-hostgroup 128 --defeat-rst-ratelimit"
+  command: "nmap -sS -sU -v --script banner -sV --version-light -Pn -p U:631,161,123,138,137,1434,445,135,67,53,139,500,68,520,1900,4500,514,49152,162,69,5353,111,49154,1701,998,996,997,999,3283,49153,1812,136,2222,2049,3278,5060,1025,1433,3456,80,20031,1026,7,1646,1645,593,518,2048,31337,515,T:[1-65535] -oA {pentest_path}/nmap/ss_all -iL {pentest_path}/_ips.txt --min-hostgroup 128 --defeat-rst-ratelimit"
   description: "SLOW - Nmap aggressive, all TCP ports scanned, top UDP ports scanned"
   requires: _ips.txt
   provides: ss_all.xml
@@ -76,15 +73,21 @@
 
 -
   name: nmap_to_csv
-  command: "python {scripts_path}/nmap_to_csv.py {pentest_path}/discovery/nmap/ss_all.xml {pentest_path}/discovery/"
+  command: "python {scripts_path}/nmap_to_csv.py {pentest_path}/nmap/ss_all.xml {pentest_path}/"
   description: "Parses nmap.xml to a csv file named ports.csv"
   requires: ss_all.xml
   provides: ports.csv
   scriptable: yes
 
 -
+  name: format_nmap
+  command: "python {scripts_path}/format_nmap.py {pentest_path}/ports.csv {pentest_path}/"
+  description: "Reformats the ports.csv to a format for the reports."
+  scriptable: yes
+
+-
   name: webservers
-  command: "python {scripts_path}/create_webserver_list.py {pentest_path}/discovery/ports.csv {pentest_path}/discovery/"
+  command: "python {scripts_path}/create_webserver_list.py {pentest_path}/ports.csv {pentest_path}/"
   description: "Parses the ports.csv file and creates a text file of all servers hosting a website; one URL per line."
   requires: ports.csv
   provides: webservers.txt
@@ -92,105 +95,105 @@
 
 -
   name: rawr
-  command: "rawr.py {pentest_path}/discovery/nmap/ss_all.xml --rd --dns -orx --downgrade --spider -d {pentest_path}/discovery/rawr"
+  command: "rawr.py {pentest_path}/nmap/ss_all.xml --rd --dns -orx --downgrade --spider -d {pentest_path}/rawr"
   requires: ss_all.xml
   scriptable: no
 
 -
   name: website_screenshots
-  command: "python {scripts_path}/website_screenshot.py {pentest_path}/discovery/webservers.txt {pentest_path}/discovery/website_screenshots"
+  command: "python {scripts_path}/website_screenshot.py {pentest_path}/webservers.txt {pentest_path}/website_screenshots"
   description: "Visits each URL and takes a screenshot."
   requires: webservers.txt
   scriptable: yes
 
 -
   name: metasploit import
-  command: "msfconsole -r {pentest_path}/discovery/rc_files/db_import.rc"
+  command: "msfconsole -r {pentest_path}/rc_files/db_import.rc"
   scriptable: no
 
 -
   name: whatweb
-  command: "python {scripts_path}/mwhatweb.py {pentest_path}/enumeration/ --txt {pentest_path}/discovery/webservers.txt -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/mwhatweb.py {pentest_path}/whatweb/ --txt {pentest_path}/webservers.txt -s {pentest_path}/screenshots/whatweb/"
   requires: webservers.txt
   scriptable: yes
 
 -
   name: yasuo
-  command: "python {scripts_path}/yasuo_image.py {pentest_path}/discovery/nmap/ss_all.xml {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/yasuo_image.py {pentest_path}/nmap/ss_all.xml {pentest_path}/ -s {pentest_path}/screenshots/"
   description: "Runs {yasuo.rb -s /opt/yasuo/signatures.yaml -f <path to nmap xml> -t 10} saving output and taking a screenshot"
   requires: ss_all.xml
   scriptable: yes
 
 -
   name: pikebrute
-  command: "python {scripts_path}/pikebrute.py {pentest_path}/discovery/ports.csv {pentest_path}/exploitation/"
+  command: "python {scripts_path}/pikebrute.py {pentest_path}/ports.csv {pentest_path}/"
   description: "Runs ike-scan and then tries to crack the hashes of any psks returned."
   requires: ports.csv
   scriptable: no
 
 -
   name: onesixtyone
-  command: "python {scripts_path}/monesixtyone.py {pentest_path}/exploitation/ --csv {pentest_path}/discovery/ports.csv -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/monesixtyone.py {pentest_path}/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/"
   description: "Runs onesixtyone and captures an image."
   requires: ports.csv
   scriptable: yes
 
 -
   name: searchsploit
-  command: "python {scripts_path}/searchsploit_image.py {pentest_path}/discovery/ports.csv {pentest_path}/enumeration/ -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/searchsploit_image.py {pentest_path}/ports.csv {pentest_path}/ -s {pentest_path}/screenshots/"
   description: "Runs searchsploit on the nmap.xml"
   requires: ports.csv
   scriptable: yes
 
 -
   name: enum4linux
-  command: "python {scripts_path}/menum4linux.py {pentest_path}/enumeration/ --csv {pentest_path}/discovery/ports.csv -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/menum4linux.py {pentest_path}/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/"
   requires: ports.csv
   scriptable: yes
 
 -
   name: epmapper
-  command: "resource {pentest_path}/enumeration/rc_files/endpoint_mapper.rc"
+  command: "resource {pentest_path}/rc_files/endpoint_mapper.rc"
   description: "Runs metasploit endpoint mapper on all hosts."
   help: "Run this from msfconsole."
   scriptable: no
 
 -
   name: nikto
-  command: "python {scripts_path}/mnikto.py {pentest_path}/enumeration/ --txt {pentest_path}/discovery/webservers.txt -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/mnikto.py {pentest_path}/nikto/ --txt {pentest_path}/webservers.txt -s {pentest_path}/screenshots/nikto/"
   description: "Runs nikto for every webserver that responds."
   requires: ports.csv
   scriptable: yes
 
 -
   name: testssl
-  command: "python {scripts_path}/mtestssl.py {pentest_path}/enumeration/ --txt {pentest_path}/discovery/webservers.txt -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/mtestssl.py {pentest_path}/testssl/ --txt {pentest_path}/webservers.txt -s {pentest_path}/screenshots/testssl/"
   description: "Runs testssl for every webserver that responds."
   requires: webservers.txt
   scriptable: yes
 
 -
   name: wpscan
-  command: "python {scripts_path}/mwpscan.py {pentest_path}/discovery/ --csv {pentest_path}/discovery/ports.csv -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/mwpscan.py {pentest_path}/wpscan/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/wpscan/"
   description: Runs wpscan on all the webservers found
   requires: webservers.txt
   scriptable: yes
 
 -
   name: smtp_relay
-  command: "resource {pentest_path}/exploitation/rc_files/smtp_relay.rc"
+  command: "resource {pentest_path}/rc_files/smtp_relay.rc"
   description: "Runs metasploit smtp relay command."
   help: "Run this from msfconsole."
   scriptable: no
 
 -
   name: parse_nessus
-  command: "python {scripts_path}/parse_nessus_csv.py {pentest_path}/enumeration/<file>.csv {pentest_path}/enumeration/"
-  scriptable: yes
+  command: "python {scripts_path}/parse_nessus_csv.py {pentest_path}/<file>.csv {pentest_path}/"
+  scriptable: no
 
 -
   name: zap_attack
-  command: "python {scripts_path}/zap_attack.py {pentest_path}/discovery/webservers.txt {pentest_path}/enumeration/"
+  command: "python {scripts_path}/zap_attack.py {pentest_path}/webservers.txt {pentest_path}/"
   description: "Initiates an attack on each webserver."
   requires: webservers.txt
   help: "Make sure zap is running and the configuration information is in the config.py file."
@@ -198,7 +201,7 @@
 
 -
   name: brutespray
-  command: "brutespray -f {pentest_path}/discovery/nmap/ss_all.xml -o {pentest_path}/exploitation/ -t 5"
+  command: "brutespray -f {pentest_path}/nmap/ss_all.xml -o {pentest_path}/ -t 5"
   description: "Runs a bruteforce attack using medusa on all available ports from nmap.xml file."
   requires: ss_all.xml
   help: "Change threads (-t) as needed."
@@ -206,7 +209,7 @@
 
 -
   name: burp requests
-  command: "python {scripts_path}/burp_requests.py {pentest_path}/discovery/webservers.txt"
+  command: "python {scripts_path}/burp_requests.py {pentest_path}/webservers.txt"
   description: Requests each website using burps proxy
   requires: webservers.txt
   help: Make sure burp is running and configuration information is in the config.py file.
@@ -229,9 +232,3 @@
   command: 'hydra -v -I -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt <domain> https-post-form "<path>:<data>&txtUserName=^USER^&txtPassword=^PASS^&ctl00%24ContentPlaceHolder1%24btnSubmit=Submit:<failed text>"'
   description: "An example of using hydra to brute-force an https form"
   scriptable: no
-
--
-  name: format_nmap
-  command: "python {scripts_path}/format_nmap.py {pentest_path}/discovery/ports.csv {pentest_path}/discovery/"
-  description: "Reformats the ports.csv to a format for the reports."
-  scriptable: yes
