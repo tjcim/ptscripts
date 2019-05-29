@@ -133,7 +133,7 @@
 
 -
   name: onesixtyone
-  command: "python {scripts_path}/monesixtyone.py {pentest_path}/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/"
+  command: "python {scripts_path}/monesixtyone.py {pentest_path}/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/onesixtyone/"
   description: "Runs onesixtyone and captures an image."
   requires: ports.csv
   scriptable: yes

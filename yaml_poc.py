@@ -95,8 +95,8 @@ def parse_args(args):
         parents=[utils.parent_argparser()],
         description='Print commands formatted for current pentest.',
     )
-    parser.add_argument('-n', '--name', help="Short name of the engagement.")
-    parser.add_argument('-d', '--domain', help="Domain for the engagement.")
+    parser.add_argument('-n', '--name', help="Short name of the engagement (folder name).")
+    parser.add_argument('-d', '--domain', help="Root domain for the engagement (no www).")
     parser.add_argument('-i', '--ips-file', help="Relative path (from {}) to ips file provided for engagement.".format(ips_path_prompt))
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
