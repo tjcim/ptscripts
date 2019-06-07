@@ -30,9 +30,21 @@
   scriptable: yes
 
 -
-  name: google_dorks
-  command: "Run google dorks"
-  description: "Run google dorks for domain"
+  name: google_dork_login
+  command: "site:{domain_name} intitle:login"
+  description: "Run google dork for logins"
+  scriptable: no
+
+-
+  name: google_dork_pdf
+  command: "site:{domain_name} filetype:pdf"
+  description: "Run google dork for pdf files"
+  scriptable: no
+
+-
+  name: google_dork_config
+  command: "site:{domain_name} filetype:config"
+  description: "Run google dork for config files"
   scriptable: no
 
 -
@@ -177,6 +189,13 @@
   command: "python {scripts_path}/mwpscan.py {pentest_path}/wpscan/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/wpscan/"
   description: Runs wpscan on all the webservers found
   requires: webservers.txt
+  scriptable: yes
+
+-
+  name: eternal_scanner
+  command: "python {scripts_path}/eternal_scan.py {pentest_path}/_ips.txt {pentest_path} -s {pentest_path}/screenshots/"
+  description: Runs eternal scanner against all ips
+  requires: _ips.txt
   scriptable: yes
 
 -

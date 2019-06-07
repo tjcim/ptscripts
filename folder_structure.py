@@ -129,6 +129,8 @@ def parse_args(args):
     parser.add_argument('input', help='Full path to pentest folder. (ex: /root/pentests/tjcim)')
     parser.add_argument('domain', help='Domain')
     args = parser.parse_args(args)
+    if args.input.endswith('/'):
+        args.input = args.input[:-1]
     logger = logging.getLogger("ptscripts")
     if args.quiet:
         logger.setLevel('ERROR')

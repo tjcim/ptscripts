@@ -95,6 +95,14 @@ def dir_exists(dir_path, make=True):
     return False
 
 
+def file_exists(file_path):
+    return os.path.isfile(file_path)
+
+
+def file_is_executable(file_path):
+    return os.path.isfile(file_path) and os.access(file_path, os.X_OK)
+
+
 def get_hosts_with_port_open(csv_file, port):
     hosts = []
     ports_dict = csv_to_dict(csv_file)
