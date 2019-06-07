@@ -12,7 +12,7 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.web_nikto")
+LOG = logging.getLogger("ptscripts.enum4linux")
 
 
 def run_enum4linux(ip, output_dir, screenshot=False):

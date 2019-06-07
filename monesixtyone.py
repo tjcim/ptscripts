@@ -12,8 +12,8 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.web_nikto")
-COMMAND = "onesixtyone -c /usr/share/doc/onesixtyone/dict.txt -o {text_path} {ip}"
+LOG = logging.getLogger("ptscripts.monesixtyone")
+COMMAND = "onesixtyone -c /usr/share/doc/onesixtyone/dict.txt -d -o {text_path} {ip}"
 
 
 def run_onesixtyone(ip, output_dir, screenshot=False):
@@ -78,7 +78,7 @@ def parse_args(args):
     else:
         logger.setLevel('INFO')
 
-    if not args.csv and not args.url and not args.txt:
+    if not args.csv and not args.ip and not args.txt:
         print('You must provide either a single IP (--ip), a CSV file (--csv) or a text file (--txt)')
         sys.exit()
     return args
