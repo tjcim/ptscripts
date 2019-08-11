@@ -13,7 +13,7 @@ from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.mwpscan")
-WPSCAN_COMMAND = "wpscan -u {url} -e u --random-agent --follow-redirection --disable-tls-checks --batch"
+WPSCAN_COMMAND = "wpscan --url {url} -e u --random-agent --follow-redirection --disable-tls-checks --batch"
 
 
 def run_update():

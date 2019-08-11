@@ -227,6 +227,9 @@ def selenium_image(html_file, ss_path, x=800, y=600, sleep=1):
     """ Take picture of output.
     Opens html_file with selenium, saves the screenshot to the ss_path folder
     """
+    if not os.path.isfile(html_file):
+        LOG.warning("Output file does not exist. Could not open to take a picture of it.")
+        return
     options = Options()
     options.headless = True
     driver = webdriver.Firefox(options=options)
