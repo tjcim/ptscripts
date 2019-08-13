@@ -185,6 +185,13 @@
   scriptable: yes
 
 -
+  name: testssl_csv
+  command: "python {scripts_path}/testssl_vulns_to_csv.py {pentest_path}/testssl/ {pentest_path}"
+  description: "Combines all the testssl files into one csv file and removes some extraneous entries."
+  requires: testssl
+  scriptable: yes
+
+-
   name: wpscan
   command: "python {scripts_path}/mwpscan.py {pentest_path}/wpscan/ --csv {pentest_path}/ports.csv -s {pentest_path}/screenshots/wpscan/"
   description: Runs wpscan on all the webservers found
