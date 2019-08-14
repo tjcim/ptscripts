@@ -22,6 +22,10 @@ def main(args):
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "testssl_{}.html".format(domain))
+    csv_path = html_path[4:] + "csv"
+    if os.path.isfile(csv_path):
+        LOG.info("CSV file already exists, deleting it.")
+        os.remove(csv_path)
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:

@@ -53,4 +53,4 @@ def create_html_file(command_output, command, html_file_path, max_lines=300):  #
     with open(html_file_path, 'w') as f:
         f.write(html_content)
 
-    return html_file_path
+    return full_html_file_path

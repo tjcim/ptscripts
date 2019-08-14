@@ -26,6 +26,9 @@ def run_testssl(url, output_dir, screenshot=False):
         port = str(parsed_url.port)
     html_path = os.path.join(output_dir, f"testssl_{parsed_url.netloc}_{port}.html")
     csv_output = os.path.join(output_dir, f"testssl_{parsed_url.netloc}_{port}.csv")
+    if os.path.isfile(csv_output):
+        LOG.info("CSV file already exists, deleting it.")
+        os.remove(csv_output)
     command = COMMAND.format(url=url, csv_output=csv_output)
     LOG.info('Running command: {}'.format(command))
     text_output = run_commands.bash_command(command)
