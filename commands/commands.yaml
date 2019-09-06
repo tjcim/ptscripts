@@ -178,6 +178,13 @@
   scriptable: yes
 
 -
+  name: parse_nikto
+  command: "python {scripts_path}/parse_nikto.py {pentest_path}/testssl/ {pentest_path}"
+  description: "Combines all the nikto files into one csv file and removes some extraneous entries."
+  requires: nikto
+  scriptable: yes
+
+-
   name: testssl
   command: "python {scripts_path}/mtestssl.py {pentest_path}/testssl/ --txt {pentest_path}/webservers.txt -s {pentest_path}/screenshots/testssl/"
   description: "Runs testssl for every webserver that responds."
@@ -185,8 +192,8 @@
   scriptable: yes
 
 -
-  name: testssl_csv
-  command: "python {scripts_path}/testssl_vulns_to_csv.py {pentest_path}/testssl/ {pentest_path}"
+  name: parse_testssl
+  command: "python {scripts_path}/parse_testssl.py {pentest_path}/testssl/ {pentest_path}"
   description: "Combines all the testssl files into one csv file and removes some extraneous entries."
   requires: testssl
   scriptable: yes
