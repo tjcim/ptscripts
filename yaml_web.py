@@ -15,10 +15,11 @@ LOG = logging.getLogger("ptscripts.yaml_web")
 def c_format(commands, args):  # pylint: disable=too-many-locals
     parsed_url = urlparse(args.url)
     netloc = parsed_url.netloc.split(":")[0]
+    pentest_path = os.path.join(args.path, netloc)
     for com in commands:
         com['command'] = com['command'].format(
             scripts_path=config.SCRIPTS_PATH,
-            pentest_path=args.path,
+            pentest_path=pentest_path,
             url=args.url, netloc=netloc,
         )
 
@@ -33,7 +34,7 @@ def c_print(commands):
 def c_write(commands, args):
     parsed_url = urlparse(args.url)
     netloc = parsed_url.netloc.split(":")[0]
-    pentest_path = args.path
+    pentest_path = os.path.join(args.path, "{netloc}".format(netloc=netloc))
     commands_path = os.path.join(pentest_path, "web_commands_{netloc}.txt".format(netloc=netloc))
     scripts_path = os.path.join(pentest_path, "wc_{netloc}.sh".format(netloc=netloc))
     with open(commands_path, "w") as f:

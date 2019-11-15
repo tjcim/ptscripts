@@ -24,9 +24,7 @@ def checklist(pentest_dir):
 
 def main(args):
     base_dirs = [
-        "a1_injection", "a2_auth_session", "a3_sde", "a4_xxe", "a5_access",
-        "a6_security", "a7_xss", "a8_deserialize", "a9_vulnerable",
-        "a10_log", "screenshots",
+        "burp_zap", "screenshots",
     ]
     site_directory = urlparse(args.url).netloc.split(":")[0]
     base_path = os.path.join(args.input, site_directory)
