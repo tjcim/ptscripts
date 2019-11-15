@@ -15,23 +15,11 @@ LOG = logging.getLogger("ptscripts.yaml_web")
 def c_format(commands, args):  # pylint: disable=too-many-locals
     parsed_url = urlparse(args.url)
     netloc = parsed_url.netloc.split(":")[0]
-    pentest_path = args.path
-    a1 = os.path.join(pentest_path, "a1_injection")
-    a2 = os.path.join(pentest_path, "a2_auth_session")
-    a3 = os.path.join(pentest_path, "a3_sde")
-    a4 = os.path.join(pentest_path, "a4_xxe")
-    a5 = os.path.join(pentest_path, "a5_access")
-    a6 = os.path.join(pentest_path, "a6_security")
-    a7 = os.path.join(pentest_path, "a7_xss")
-    a8 = os.path.join(pentest_path, "a8_deserialize")
-    a9 = os.path.join(pentest_path, "a9_vulnerable")
-    a10 = os.path.join(pentest_path, "a10_log")
     for com in commands:
         com['command'] = com['command'].format(
             scripts_path=config.SCRIPTS_PATH,
-            pentest_path=pentest_path,
-            url=args.url, netloc=netloc, a1=a1, a2=a2, a3=a3, a4=a4, a5=a5, a6=a6,
-            a7=a7, a8=a8, a9=a9, a10=a10,
+            pentest_path=args.path,
+            url=args.url, netloc=netloc,
         )
 
 
@@ -71,10 +59,8 @@ def get_url():
 
 
 def main(args):
-    print(args.path)
     if args.path:
         args.path = args.path.rstrip('/')
-        print(args.path)
     if not args.url:
         args.url = get_url()
     commands_file = os.path.join(config.SCRIPTS_PATH, "commands/web_commands.yaml")

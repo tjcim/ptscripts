@@ -5,42 +5,42 @@
 ---
 -
   name: wafw00f
-  command: "python {scripts_path}/wafw00f_image.py {url} {a10} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/wafw00f_image.py {url} -s {pentest_path}/screenshots"
   description: "Runs wafw00f, saves output to an html file and then takes an image."
 
 -
   name: nmap_st_common
-  command: "python {scripts_path}/web_nmap_image.py {a6} {netloc} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/web_nmap_image.py {netloc} -s {pentest_path}/screenshots"
   description: "FAST - Runs nmap with -sT on common ports. Saves output and takes an image."
 
 -
   name: whatweb
-  command: "python {scripts_path}/whatweb_image.py {url} {a9} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/whatweb_image.py {url} -s {pentest_path}/screenshots"
 
 -
   name: http_methods
-  command: "python {scripts_path}/http_methods_image.py {url} {a6} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/http_methods_image.py {url} -s {pentest_path}/screenshots"
 
 -
   name: dirb
-  command: "python {scripts_path}/dirb_image.py {url} {a6} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/dirb_image.py {url} -s {pentest_path}/screenshots"
 
 -
   name: nikto
-  command: "python {scripts_path}/mnikto.py {a6} --url {url} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/mnikto.py --url {url} -s {pentest_path}/screenshots"
 
 -
   name: testssl
-  command: "python {scripts_path}/testssl_image.py {url} {a3} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/testssl_image.py {url} -s {pentest_path}/screenshots"
 
 -
   name: uniscan
-  command: "python {scripts_path}/uniscan_image.py {url} {a6} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/uniscan_image.py {url} -s {pentest_path}/screenshots"
 
 -
   name: iframe
-  command: "python {scripts_path}/iframe.py {url} {a6}"
+  command: "python {scripts_path}/iframe.py {url}"
 
 -
   name: validate TRACE
-  command: "python {scripts_path}/validate_trace_image.py {url} {a6} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/validate_trace_image.py {url} -s {pentest_path}/screenshots"
