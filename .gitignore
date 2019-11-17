@@ -9,6 +9,7 @@ config.py
 *.hash
 log_20*
 *.sqlite
+hosts.tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

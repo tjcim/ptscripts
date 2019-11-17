@@ -49,7 +49,7 @@ def get_mac(host):
         return mac
     except AttributeError:
         LOG.debug("Couldn't get mac address for host.")
-        return
+        return None
 
 
 def get_hostnames(host):
@@ -61,7 +61,7 @@ def get_hostnames(host):
             hostname_list.append(hostname.get('name'))
         return hostname_list
     except AttributeError:
-        return
+        return None
 
 
 def get_all_ports(host):
@@ -69,7 +69,7 @@ def get_all_ports(host):
     try:
         return host.findall("./ports/port")
     except AttributeError:
-        return
+        return None
 
 
 def is_open(port):
@@ -77,7 +77,7 @@ def is_open(port):
     try:
         return port.find('state').get('state') == 'open'
     except AttributeError:
-        return
+        return None
 
 
 def get_protocol(port):
@@ -85,7 +85,7 @@ def get_protocol(port):
     try:
         return port.get('protocol')
     except AttributeError:
-        return
+        return None
 
 
 def get_port(port):
@@ -93,7 +93,7 @@ def get_port(port):
     try:
         return port.get('portid')
     except AttributeError:
-        return
+        return None
 
 
 def get_service_name(port):
@@ -101,7 +101,7 @@ def get_service_name(port):
     try:
         return port.find('service').get('name')
     except AttributeError:
-        return
+        return None
 
 
 def get_service_tunnel(port):
@@ -109,7 +109,7 @@ def get_service_tunnel(port):
     try:
         return port.find('service').get('tunnel')
     except AttributeError:
-        return
+        return None
 
 
 def get_product(port):
@@ -117,7 +117,7 @@ def get_product(port):
     try:
         return port.find('service').get('product')
     except AttributeError:
-        return
+        return None
 
 
 def get_version(port):
@@ -125,7 +125,7 @@ def get_version(port):
     try:
         return port.find('service').get('version')
     except AttributeError:
-        return
+        return None
 
 
 def get_banner(port):
@@ -133,7 +133,7 @@ def get_banner(port):
     try:
         return port.find('./script/[@id="banner"]').get('output')
     except AttributeError:
-        return
+        return None
 
 
 def get_script_getrequest(port):
@@ -143,7 +143,7 @@ def get_script_getrequest(port):
         get_results = script.find('elem[@key="GetRequest"]')
         return get_results.text
     except AttributeError:
-        return
+        return None
 
 
 def write_nmap_csv(output_file, hosts):
@@ -168,12 +168,9 @@ def write_nmap_csv(output_file, hosts):
                 ])
 
 
-def parse_nmap(args):  # pylint: disable=too-many-locals
-    output_file = os.path.join(args.output_dir, 'ports.csv')
-
-    LOG.info("Parsing XML file: {}".format(args.input_file))
+def parse_nmap(input_file):  # pylint: disable=too-many-locals
     # Read in xml file
-    tree = etree.parse(args.input_file)
+    tree = etree.parse(input_file)
     root = tree.getroot()
 
     ports_counter = 0
@@ -198,6 +195,13 @@ def parse_nmap(args):  # pylint: disable=too-many-locals
         hosts.append(host_info)
         hosts_counter += 1
     LOG.info("Found {} hosts with {} open ports.".format(hosts_counter, ports_counter))
+    return hosts
+
+
+def main(args):
+    output_file = os.path.join(args.output_dir, 'ports.csv')
+    LOG.info("Parsing XML file: {}".format(args.input_file))
+    hosts = parse_nmap(args.input_file)
     write_nmap_csv(output_file, hosts)
 
 
@@ -221,4 +225,4 @@ def parse_args(args):
 
 
 if __name__ == '__main__':
-    parse_nmap(parse_args(sys.argv[1:]))
+    main(parse_args(sys.argv[1:]))
