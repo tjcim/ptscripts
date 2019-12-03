@@ -215,6 +215,9 @@ def check_url(url, timeout=10, proxy=False):  # pylint: disable=too-many-return-
     except requests.exceptions.TooManyRedirects:
         LOG.info("Received too many redirects. Moving on.")
         return (False, "")
+    except Exception as e:
+        LOG.info(f"Received unhandled exception: {e}")
+        return (False, "")
 
     if resp.status_code in [404, 408, 403]:
         LOG.info("Response status code {}, skipping.".format(resp.status_code))
