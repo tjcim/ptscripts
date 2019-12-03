@@ -76,7 +76,7 @@ def parse_args(args):
         parents=[utils.parent_argparser()],
         description='Print web commands formatted for current pentest.',
     )
-    parser.add_argument('-p', '--path', help="Full path to folder")
+    parser.add_argument('-p', '--path', help="Full path to pentest folder (not url folder)")
     parser.add_argument('-u', '--url', help="URL for the engagement.")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
