@@ -52,7 +52,10 @@ def get_filename(output_dir, url):
 
 
 def close_and_return(args, driver, display):
-    driver.close()
+    try:
+        driver.close()
+    except Exception as e:
+        LOG.error(e)
     if not args.no_display:
         display.stop()
 
