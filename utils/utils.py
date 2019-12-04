@@ -238,7 +238,7 @@ def selenium_image(html_file, ss_path, x=800, y=600, cropx=0, cropy=0, sleep=1, 
     driver = webdriver.Firefox(options=options)
     LOG.info("opening file {}".format(html_file))
     driver.get("file://" + html_file)
-    driver.set_window_size(x, y)
+    driver.set_window_size(800, 800)
     filename = os.path.split(html_file)[1].rsplit(".", 1)[0] + ".png"
     screenshot_path = os.path.join(ss_path, filename)
     time.sleep(sleep)
