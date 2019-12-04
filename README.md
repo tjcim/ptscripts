@@ -1,13 +1,13 @@
-# Notes
+# Notes and TODOs
 
-These are mainly for me, but may be helpful to anyone else using the scripts.
-
+* I should mark all the scripts as executable and include the proper shebang
+* The tests have to be rebuilt. I have fallen out of using them and should resolve that.
 * I need to switch over the bash commands to use utils/run_commands as it works much better.
 * I will need to figure out how to kill a command properly as it looks like my current attempts to timeout don't actually do that.
-* I need to combine muti_nikto, nikto_image and web_nikto into one script (same for all the other similar scripts)
 
 # Change Log
 
+* 12/4/2019 - I am going to slowly switch all the scripts to use click as the cli instead of argparse
 * 12/7/2017 - I am not happy with the way I currently run bash commands and get output, I created a couple of new functions in utils/run_commands.py that seems to work well. I have started switching over a few of the scripts web_nikto and dirb_image have both been switched.
 * 11/14/2017 - Updated multi_nikto.py script to use threading and a few other command options to increase the speed.
 * 11/9/2017 - Updated website_screenshot.py script to use threading as well as logic to reduce duplicate/unneeded images. Also it will resume now.
@@ -37,7 +37,7 @@ Get the latest geckodriver release: https://github.com/mozilla/geckodriver/relea
 
 Clone this repo and then cd into the created directory. The commands below assume you are currently in the repo's directory.
 
-    cd /opt && git clone htps://github.com/tjcim/ptscripts.gig && cd ptscripts
+    cd /opt && git clone htps://github.com/tjcim/ptscripts.git && cd ptscripts
 
 Create a python virtual environment
 
@@ -59,11 +59,11 @@ Edit the config.py file and replace with the correct information for your enviro
 
 ## Pentest folder prep
 
-Create a folder for the pentest you are conducting. I like to store the pentests in /root/pentests/*name*. Name should be a shortname without spaces for example, if I was doing a pentest for Levi's - I would create a levis folder at /root/pentests/levis/.
+Create a folder for the pentest you are conducting. I like to store the pentests in /root/pentests/*name*. Name should be a shortname without spaces for example, if I was doing a pentest for ACME - I would create a acme folder at /root/pentests/acme/.
 
-Once pentest folder is setup run `python /opt/ptscripts/folder_structure <pentest folder path>`
+For an external pentest: Once pentest folder is setup run `python /opt/ptscripts/folder_structure <pentest folder path>`
 
-This will create a bunch of folders with the PTES phases in mind. Once the folders have been created, place a file in the `ept/ips` folder with the in-scope ips (in the formats supported below). Then run the `yaml_poc.py` file. This is a proof of concept that I will be moving to primetime and removing the old `print_commands.py` file.
+~~This will create a bunch of folders with the PTES phases in mind.~~ Once the folders have been created, place a file in the `ept/ips` folder with the in-scope ips (in the formats supported below). Then run the `yaml_poc.py` file. This is a proof of concept that I will be moving to primetime and removing the old `print_commands.py` file.
 
 ## ip file
 
@@ -76,7 +76,7 @@ example - all of these can be interpreted by the script:
     192.168.3.0/24
     192.168.4.154
 
-The script will create a file named `_ips.txt` within the `{pentest_folder}/ept/ips/` folder.. This text file will have each ip listed individually. The reason is that some commands are able to parse cidr and dashed ips and some are not, In addition some commands expect a single IP. So we create a file with the lowest common denominator in mind.
+The script will create a file named `_ips.txt` within the `{pentest_folder}/ept/ips/` folder.. This text file will have each ip listed individually. The reason we use individual IPs is because some commands are able to parse cidr and dashed ips and some are not. In addition, some commands expect a single IP. So, we create a file with the lowest common denominator in mind.
 
 # Running the scripts
 
