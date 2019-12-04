@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+"""
+This script is used to quickly identify the network information. It will print out the IP address,
+network address, gateway address, dns servers, it will run an nbtquery for active directory dcs.
+It also runs an arp scan, and ping scan saving the results to a hosts.txt file.
+
+Arguments:
+    output: full path to pentest folder
+    interface: what interface to use, defaults to eth0
+"""
 import os
 import socket
 import logging
@@ -7,6 +17,11 @@ import subprocess
 import click
 from requests import get
 import netifaces as ni
+
+
+HOSTS_FILE = "sa_hosts.txt"
+COMMANDS_FILE = "sa_commands.txt"
+SA_RESUTS_FILE = "sa_results.txt"
 
 
 def is_valid_ipv4_address(address):
@@ -28,7 +43,7 @@ def is_valid_ipv4_address(address):
 
 def get_dns_ips():
     # TODO: Get this to run cat /etc/resolv.conf saving the output as a screenshot
-    log.debug(f"Reading /etc/resolv.conf to get DNS server")
+    log.info(f"Reading /etc/resolv.conf to get DNS server")
     dns_ips = []
     with open('/etc/resolv.conf') as fp:
         for _, line in enumerate(fp):
@@ -42,7 +57,7 @@ def get_dns_ips():
 
 
 def get_domain_names():
-    log.debug(f"Reading /etc/resolv.conf to get domain names")
+    log.info(f"Reading /etc/resolv.conf to get domain names")
     domain_names = []
     with open('/etc/resolv.conf') as fp:
         for _, line in enumerate(fp):
@@ -55,7 +70,7 @@ def get_domain_names():
 
 def get_domain_controllers(domain_names, commands, output):
     # TODO: Get this to run the command saving the output and creating a screenshot
-    log.debug("Querying the network for domain controllers.")
+    log.info("Querying the network for domain controllers.")
     domain_controllers = []
     for domain in domain_names:
         for ending in ["", ".com", ".local"]:
@@ -120,28 +135,15 @@ def arp_scan(interface, hosts, commands):
     return hosts, commands
 
 
-@click.command()
-@click.option("-v", "--verbose", "verbocity", flag_value="verbose",
-              help="-v Will show DEBUG messages.")
-@click.option("-q", "--quiet", "verbocity", flag_value="quiet",
-              help="-q Will show only ERROR messages.")
-@click.argument("output", type=click.Path(
-    exists=True, file_okay=False, dir_okay=True, resolve_path=True))
-@click.argument("interface", default="eth0")
-def cli(verbocity, output, interface):
-    commands = []
-    if verbocity == "verbose":
-        log.setLevel("DEBUG")
-        log.debug("Setting logging level to DEBUG")
-    elif verbocity == "quiet":
-        log.setLevel("ERROR")
-        log.error("Setting logging level to ERROR")
-    else:
-        log.setLevel("INFO")
-        log.info("Setting logging level to INFO")
+def get_external_ip():
+    log.info("Getting external IP from api.ipify.org")
+    external_ip = get('https://api.ipify.org').text
+    log.debug(f"External IP = {external_ip}")
+    return external_ip
 
-    log.debug(f"Running sa on interface {interface}")
-    log.debug(f"Getting IP address for {interface}")
+
+def get_if_ip_info(commands, interface):
+    log.info(f"Getting IP address for {interface}")
     commands.append("ip addr")
     ip_address = ni.ifaddresses(interface)[ni.AF_INET][0]["addr"]
     log.debug(f"IP address for {interface} is {ip_address}")
@@ -154,16 +156,48 @@ def cli(verbocity, output, interface):
     log.debug(f"Network subnet {network.compressed}, cidr = {cidr}")
     gateway = ni.gateways()['default'][ni.AF_INET][0]
     log.debug(f"Gateway address {gateway}")
-    log.debug("Getting external IP from api.ipify.org")
-    external_ip = get('https://api.ipify.org').text
-    log.debug(f"External IP = {external_ip}")
     commands.append("cat /etc/resolv.conf")
+    return ip_address, netmask, network, cidr, gateway, commands
+
+
+def write_hosts(output, hosts):
+    log.info(f"Writing IPs found to {os.path.join(output, HOSTS_FILE)}")
+    with open(os.path.join(output, HOSTS_FILE), "w") as fp:
+        fp.write("\n".join(hosts))
+        fp.write("\n")
+
+
+def write_commands(output, commands):
+    log.info(f"Writing commands run to {os.path.join(output, COMMANDS_FILE)}")
+    with open(os.path.join(output, COMMANDS_FILE), "w") as fp:
+        fp.write("\n".join(commands))
+        fp.write("\n")
+
+
+def main(output, interface):
+    commands = []
+    log.info(f"Running sa on interface {interface}")
+    ip_address, netmask, network, cidr, gateway, commands = get_if_ip_info(commands, interface)
+    external_ip = get_external_ip()
     dns_ips = get_dns_ips()
     domain_names = get_domain_names()
     domain_controllers, commands = get_domain_controllers(domain_names, commands, output)
     hosts, commands = ping_scan(network.compressed, set(), commands)
     hosts, commands = nbt_scan(network.compressed, hosts, commands)
     hosts, commands = arp_scan(interface, hosts, commands)
+    log.info(f"Writing sa results to {os.path.join(output, SA_RESUTS_FILE)}")
+    with open(os.path.join(output, SA_RESUTS_FILE), "w") as fp:
+        fp.write(f"IP Address: {ip_address}\n")
+        fp.write(f"Net Mask: {netmask}\n")
+        fp.write(f"CIDR: {cidr}\n")
+        fp.write(f"Network Address: {network.network_address}\n")
+        fp.write(f"DNS Servers: {', '.join(dns_ips)}\n")
+        fp.write(f"External IP: {external_ip}\n")
+        fp.write(f"Domain Controllers: {', '.join(domain_controllers)}\n")
+        fp.write(f"Domain Names: {', '.join(domain_names)}\n")
+        fp.write(f"Gateway IP: {gateway}\n")
+    write_hosts(output, hosts)
+    write_commands(output, commands)
     print("-----------------------------")
     print(f"IP Address: {ip_address}")
     print(f"Net Mask: {netmask}")
@@ -174,14 +208,30 @@ def cli(verbocity, output, interface):
     print(f"Domain Controllers: {', '.join(domain_controllers)}")
     print(f"Domain Names: {', '.join(domain_names)}")
     print(f"Gateway IP: {gateway}")
-    print(f"Writing IPs found to {os.path.join(output, 'hosts.txt')}")
     print("-----------------------------")
-    with open(os.path.join(output, "hosts.txt"), "w") as fp:
-        fp.write("\n".join(hosts))
-        fp.write("\n")
-    with open(os.path.join(output, "commands.txt"), "w") as fp:
-        fp.write("\n".join(commands))
-        fp.write("\n")
+
+
+@click.command()
+@click.option("-v", "--verbose", "verbocity", flag_value="verbose",
+              help="-v Will show DEBUG messages.")
+@click.option("-q", "--quiet", "verbocity", flag_value="quiet",
+              help="-q Will show only ERROR messages.")
+@click.option("-o", "--output", prompt=True,
+              type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
+              help="The path where the information will be saved.")
+@click.option("-i", "--interface", default="eth0", help="Interface to use, default is eth0")
+def cli(verbocity, output, interface):
+    """This script performs a series of commands to provide information on the environment."""
+    if verbocity == "verbose":
+        log.setLevel("DEBUG")
+        log.debug("Setting logging level to DEBUG")
+    elif verbocity == "quiet":
+        log.setLevel("ERROR")
+        log.error("Setting logging level to ERROR")
+    else:
+        log.setLevel("INFO")
+        log.info("Setting logging level to INFO")
+    main(output, interface)
 
 
 logging.basicConfig(
