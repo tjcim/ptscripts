@@ -26,8 +26,10 @@ def bash_command(command, split=True):
     return '\n'.join(full)
 
 
-def create_html_file(command_output, command, html_file_path, max_lines=300):  # python: disable=too-many-locals
+def create_html_file(command_output, command, html_file_path, max_lines=300):  # pylint: disable=too-many-locals
     """ Creates an html file using aha with the contents of output (limits to max_lines) """
+    program = command.split()[0]
+    LOG.info(f"Running: {program}")
     command_output = command_output.encode('utf-8')
     full = []
     proc = subprocess.Popen(["aha", "--no-header"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -46,10 +48,10 @@ def create_html_file(command_output, command, html_file_path, max_lines=300):  #
     full_html_file_path = head + "_full" + ext
     full_output = "\n".join(full)
     output = "\n".join(full[:max_lines])
-    full_html_content = template.render(output=full_output, command=command)
+    full_html_content = template.render(output=full_output, command=command, program=program)
     with open(full_html_file_path, 'w') as f:
         f.write(full_html_content)
-    html_content = template.render(output=output, command=command)  # pylint: disable=no-member
+    html_content = template.render(output=output, command=command, program=program)  # pylint: disable=no-member
     with open(html_file_path, 'w') as f:
         f.write(html_content)
 
