@@ -14,7 +14,7 @@ from utils import run_commands
 
 
 LOG = logging.getLogger("ptscripts.mtestssl")
-COMMAND = "/opt/testssl.sh/testssl.sh --warnings off --csvfile {csv_output} {url}"
+COMMAND = "/opt/testssl/testssl.sh --warnings off --csvfile {csv_output} {url}"
 
 
 def run_testssl(url, output_dir, screenshot=False):
