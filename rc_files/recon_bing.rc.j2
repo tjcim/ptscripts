@@ -1,0 +1,10 @@
+workspaces delete {{name}}
+workspaces create {{name}}
+workspaces select {{ name }}
+options set VERBOSITY 1
+marketplace install bing_domain_web
+modules load bing_domain_web
+options set SOURCE {{domain}}
+run
+show hosts
+exit

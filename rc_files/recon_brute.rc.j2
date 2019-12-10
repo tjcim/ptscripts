@@ -1,0 +1,8 @@
+workspaces select {{name}}
+marketplace install brute_hosts
+modules load brute_hosts
+options set SOURCE {{domain}}
+options list
+run
+show hosts
+exit

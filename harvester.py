@@ -15,10 +15,10 @@ LOG = logging.getLogger("ptscripts.harvester")
 
 
 def main(args):
-    LOG.info("Running theharvester")
+    LOG.info("Running theHarvester")
     os.makedirs(args.output, exist_ok=True)
     output = os.path.join(args.output, "harvester.html")
-    command = """theharvester -d {domain} -b all -l 100 -f {output}""".format(
+    command = """theHarvester -d {domain} -b all -l 100 -f {output}""".format(
         domain=args.domain, output=output)
     LOG.info("Running the command: {}".format(command))
     file_name = "harvester_output.html"

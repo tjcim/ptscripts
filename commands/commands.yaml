@@ -61,7 +61,7 @@
 
 -
   name: ip_extract
-  command: "python {scripts_path}/ip_extract.py {pentest_path}/{ip_file} {pentest_path}/"
+  command: "python {scripts_path}/ip_extract.py {ip_file} {pentest_path}/"
   description: "Extracts ips in cidr or dashed formats into a file with an IP per line."
   help:
   provides: _ips.txt
