@@ -114,7 +114,7 @@ def main(url, output):
 @click.option("-u", "--url", "url", prompt=True,
               help="Full url for the web application including virtual directories and port.")
 @click.option("-o", "--output", prompt=True,
-              type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
+              type=click.Path(file_okay=False, dir_okay=True, resolve_path=True),
               help="Full path to pentest folder.")
 def cli(verbocity, url, output):
     set_logging_level(verbocity)
