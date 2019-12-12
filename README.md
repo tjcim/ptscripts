@@ -5,7 +5,7 @@
 
 # Change Log
 
-* 12/11/2019 - Fixed the `http_methods2.py` file. But it needs a bit more work. I want to make it accept a single url (done), a text file of urls, and the csv output from `nmap_to_csv.py`. Second, I need to figure out how to take a picture of the console output.
+* 12/11/2019 - Fixed the `http_methods2.py` file. But it needs a bit more work. I want to make it accept a single url (done), a text file of urls, and the csv output from `nmap_to_csv.py`. ~~Second, I need to figure out how to take a picture of the console output.~~ (done, but a bit hacky)
 * 12/4/2019 - I am going to slowly switch all the scripts to use click as the cli instead of argparse
 * 12/7/2017 - I am not happy with the way I currently run bash commands and get output, I created a couple of new functions in utils/run_commands.py that seems to work well. I have started switching over a few of the scripts web_nikto and dirb_image have both been switched.
 * 11/14/2017 - Updated multi_nikto.py script to use threading and a few other command options to increase the speed.
