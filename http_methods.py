@@ -76,7 +76,7 @@ def get_response(conn, parsed_url, method, path):
     log.debug(f"{method} Connection response status: {r1.status}, reason: {r1.reason}")
     response = r1.read()
     if r1.status in IGNORE_STATUS:
-        log_i(f"{method}: return a status of {r1.status} and will be ignored.")
+        log_i(f"{method}: returned a status of {r1.status} and will be ignored.")
         return
     if not response:
         log.debug(f"{method} provided no response.")
