@@ -37,6 +37,7 @@ def main(args):
         )
     else:
         command = "nmap --script http-methods -p {port} {domain}".format(port=port, domain=domain)
+    LOG.info(f"Running command: {command}")
     html_path = os.path.join(args.output, "http_methods_{}.html".format(domain))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)

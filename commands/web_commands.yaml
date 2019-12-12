@@ -19,7 +19,7 @@
 
 -
   name: http_methods
-  command: "python {scripts_path}/http_methods_image.py {url} {pentest_path} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url}"
 
 -
   name: dirb

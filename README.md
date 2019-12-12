@@ -2,11 +2,10 @@
 
 * I should mark all the scripts as executable and include the proper shebang
 * The tests have to be rebuilt. I have fallen out of using them and should resolve that.
-* I need to switch over the bash commands to use utils/run_commands as it works much better.
-* I will need to figure out how to kill a command properly as it looks like my current attempts to timeout don't actually do that.
 
 # Change Log
 
+* 12/11/2019 - Fixed the `http_methods2.py` file. But it needs a bit more work. I want to make it accept a single url (done), a text file of urls, and the csv output from `nmap_to_csv.py`. Second, I need to figure out how to take a picture of the console output.
 * 12/4/2019 - I am going to slowly switch all the scripts to use click as the cli instead of argparse
 * 12/7/2017 - I am not happy with the way I currently run bash commands and get output, I created a couple of new functions in utils/run_commands.py that seems to work well. I have started switching over a few of the scripts web_nikto and dirb_image have both been switched.
 * 11/14/2017 - Updated multi_nikto.py script to use threading and a few other command options to increase the speed.
@@ -59,13 +58,11 @@ Edit the config.py file and replace with the correct information for your enviro
 
 ## Pentest folder prep
 
-Create a folder for the pentest you are conducting. I like to store the pentests in /root/pentests/*name*. Name should be a shortname without spaces for example, if I was doing a pentest for ACME - I would create a acme folder at /root/pentests/acme/.
+Start with either the `ept_initial.py` or `web_initial.py` file. This will create the folder structure and a list of commands to be run.
 
-For an external pentest: Once pentest folder is setup run `python /opt/ptscripts/folder_structure <pentest folder path>`
+For EPTs make sure to put the IPs in a file named ips.txt in the ept folder.
 
-~~This will create a bunch of folders with the PTES phases in mind.~~ Once the folders have been created, place a file in the `ept/ips` folder with the in-scope ips (in the formats supported below). Then run the `yaml_poc.py` file. This is a proof of concept that I will be moving to primetime and removing the old `print_commands.py` file.
-
-## ip file
+### ip file
 
 The script will extract individual ips, each entry should be on a line by itself. Extraction is done from either a dashed (192.168.1.1-32 or 192.168.1.1-192.168.1.22) or a cidr (192.169.1.1/24). You can also include individual ips.
 
@@ -80,18 +77,10 @@ The script will create a file named `_ips.txt` within the `{pentest_folder}/ept/
 
 # Running the scripts
 
-## yaml_poc.py
+## ept_initial.py
 
-    python yaml_poc.py
-
-It is recommended that the `yaml_poc.py` script is run first. Be sure you have the virtual environment activated and then run the script and answer the questions. The script needs to know the pentest folder name - following the example above I would provide `levis` (path is configured in `config.py`), the ip file name as well as the domain name (used for dns stuff).
-
-This script will create a `{pentest_folder}/ept/yaml_commands.txt` file.
+    python ept_initial.py -o /root/pentests/acme -d acme.org
 
 **Adding commands**
 
 I moved the commands to a yaml file named `commands.yaml` (in the commands folder). This is to encourage others to add their commands to the file to extend the capabilities.
-
-## yaml_commands.txt
-
-This file will provide default commands that you can copy and paste into the terminal. Every command listed should produce an output that is saved into the appropriate pentest folder. It is important that the commands that create text files are run before they are required. For example, the first command listed in the `yaml_commands.txt` file will be the `ip_extract.py` command. This is what takes the ips and breaks them up into the `_ips.txt` file that is used in later commands. So in general, follow the order of the commands from the `yaml_commands.txt` file unless you know what you are doing.
