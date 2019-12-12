@@ -3,13 +3,17 @@
 Tests the website against a list of potentially dangerous HTTP Methods
 
 Arguments:
-    output: path to pentest folder
+    -o --output: path to pentest folder
         The output of this script will be saved to {output}/http_methods
-        The folder will be created if it doesn't exist.
+        The http_methods folder will be created if it doesn't exist.
 
-    url: Full url to the web app being tested.
+    -u --url: Full url to the web app being tested.
         It should include subdomains and folders if present. It should also include the port
         if required and start with http or https.
+
+    -n --no-screenshot: No screenshot
+        This is a flag. If present, a screenshot will not be taken. If not present, a
+        screenshot will be taken and saved to the {output}/screenshots folder.
 
 Example: http_methods.py -o /root/pentests/acme/ -u https://www.acme.org/
 """
