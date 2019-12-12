@@ -31,7 +31,7 @@
 
 -
   name: testssl
-  command: "python {scripts_path}/testssl_image.py {url} {pentest_path} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/mtestssl.py --url {url} {pentest_path} -s {pentest_path}/screenshots"
 
 -
   name: uniscan
@@ -39,7 +39,7 @@
 
 -
   name: iframe
-  command: "python {scripts_path}/iframe.py {url} {pentest_path}"
+  command: "python {scripts_path}/iframe.py {url} {pentest_path} -s {pentest_path}/screenshots"
 
 -
   name: validate TRACE

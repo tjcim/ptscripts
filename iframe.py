@@ -33,7 +33,8 @@ def write_iframe(args):
     with open(output_file, 'w') as f:
         f.write(iframe_html)
     LOG.info("File written.")
-    utils.selenium_image(output_file, args.screenshot, sleep=1)
+    if args.screenshot:
+        utils.selenium_image(output_file, args.screenshot, sleep=1)
 
 
 def parse_args(args):
