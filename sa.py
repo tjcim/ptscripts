@@ -16,6 +16,7 @@ import subprocess
 
 import click
 from requests import get
+from requests.exceptions import ConnectionError
 import netifaces as ni
 
 
@@ -78,8 +79,8 @@ def get_domain_controllers(domain_names, commands, output):
             commands.append(" ".join(args))
             nslookup_results = subprocess.run(args, capture_output=True, text=True)
             for line in nslookup_results.stdout.splitlines():
-                if line.startswith("_ldap"):
-                    domain_controllers.append(line.split()[6][:-1])  # Just get the hostname
+                if line.startswith("_ldap") and len(line.split()) > 1:
+                    domain_controllers.append(line.split()[-1][:-1])  # Just get the hostname
     if not domain_controllers:
         domain_controllers.append("No Domain Controllers found.")
     else:
@@ -137,7 +138,11 @@ def arp_scan(interface, hosts, commands):
 
 def get_external_ip():
     log.info("Getting external IP from api.ipify.org")
-    external_ip = get('https://api.ipify.org').text
+    try:
+        external_ip = get('https://api.ipify.org').text
+    except ConnectionError:
+        external_ip = "Could not reach api.ipify.org"
+        log.info(external_ip)
     log.debug(f"External IP = {external_ip}")
     return external_ip
 

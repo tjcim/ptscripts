@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 """
-Sets up the initial folders and creates the command list for an external pentest.
+Sets up the initial folders and creates the command list for an internal pentest.
 
 Arguments:
     output: path to pentest folder
         The pentest root folder will be created below this level. Typically I will do
         /root/pentests/<company name> as the output.
-
-    domain: domain to use for the external pentest
-        The domain will be used for programs like fierce and dnsdumpster
 """
 import os
 import stat
@@ -23,23 +20,23 @@ from jinja2 import Template
 
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-TEMPLATES_DIR = os.path.join(SCRIPT_DIR, "rc_files")
+RC_TEMPLATES_DIR = os.path.join(SCRIPT_DIR, "rc_files")
 VERSION = "0.3"
 
 
-def create_render_args(pentest_name, ept_dir, domain):
-    nmap_xml = os.path.join(ept_dir, "nmap/ss_all.xml")
+def create_render_args(pentest_name, ipt_dir, host):
+    nmap_xml = os.path.join(ipt_dir, "nmap/ss_all.xml")
     render_args = {
         'name': pentest_name,
         'nmap_xml': nmap_xml,
-        'domain': domain,
+        'host': host,
     }
     return render_args
 
 
 def render_rc_files(rc_folder, render_args):
     log.info("Creating RC files.")
-    templates = glob.glob(TEMPLATES_DIR + "/*.j2")
+    templates = glob.glob(RC_TEMPLATES_DIR + "/*.j2")
     for template in templates:
         with open(template, "r") as fp:
             content = Template(fp.read())
@@ -51,23 +48,11 @@ def render_rc_files(rc_folder, render_args):
     log.info("RC files created.")
 
 
-def checklist(ept_dir):
-    src = os.path.join(SCRIPT_DIR, "templates/checklist.txt")
-    dst = os.path.join(ept_dir, "checklist.txt")
+def checklist(ipt_dir):
+    src = os.path.join(SCRIPT_DIR, "templates/int_checklist.txt")
+    dst = os.path.join(ipt_dir, "checklist.txt")
     log.info("Writing checklist file to: {}".format(dst))
     shutil.copyfile(src, dst)
-
-
-def create_directories(ept_dir):
-    log.info("Creating pentest directories.")
-    pt_dirs = ["testssl", "whatweb", "rc_files", "nmap", "screenshots", "theharvester"]
-    log.debug("Creating directory: {}".format(ept_dir))
-    os.makedirs(ept_dir, exist_ok=True)
-    for pt_dir in pt_dirs:
-        pt_path = os.path.join(ept_dir, pt_dir)
-        log.debug("Creating directory: {}".format(pt_path))
-        os.makedirs(pt_path, exist_ok=True)
-    log.info("Directories have been created.")
 
 
 def load_commands(yaml_file):
@@ -75,22 +60,30 @@ def load_commands(yaml_file):
         return yaml.safe_load(f)
 
 
-def commands_format(commands, ept_dir, ip_file, pentest_name, domain):
+def commands_format(commands, ipt_dir, pentest_name, host):
     for com in commands:
         com['command'] = com['command'].format(
             scripts_path=SCRIPT_DIR,
-            pentest_path=ept_dir,
-            ip_file=ip_file,
+            pentest_path=ipt_dir,
             pentest_name=pentest_name,
-            domain_name=domain,
+            host=host,
         )
 
 
-def commands_write(commands, ept_dir, pentest_name):
+def create_command_file(ipt_dir, pentest_name, host):
+    log.info("Creating commands files.")
+    commands_yaml = os.path.join(SCRIPT_DIR, "commands/int_commands.yaml")
+    commands = load_commands(commands_yaml)
+    commands_format(commands, ipt_dir, pentest_name, host)
+    commands_write(commands, ipt_dir, pentest_name)
+    log.info("Done creating command files.")
+
+
+def commands_write(commands, ipt_dir, pentest_name):
     log.info("Writing commands files.")
-    commands_path = os.path.join(ept_dir, "yaml_commands.txt")
-    script_path = os.path.join(ept_dir, "commands.sh")
-    other_path = os.path.join(ept_dir, "not_scriptable.txt")
+    commands_path = os.path.join(ipt_dir, "yaml_commands.txt")
+    script_path = os.path.join(ipt_dir, "commands.sh")
+    other_path = os.path.join(ipt_dir, "not_scriptable.txt")
     with open(commands_path, "w") as f:
         f.write("## Commands file written on {} for {} using version {} ##\r\n\r\n".format(
             time.strftime('%I:%M%p %Z on %b %d, %Y'),
@@ -117,32 +110,31 @@ def commands_write(commands, ept_dir, pentest_name):
     log.info("Bash script set as executable")
 
 
-def create_command_file(ept_dir, ip_file, pentest_name, domain):
-    log.info("Creating commands files.")
-    commands_yaml = os.path.join(SCRIPT_DIR, "commands/ext_commands.yaml")
-    commands = load_commands(commands_yaml)
-    commands_format(commands, ept_dir, ip_file, pentest_name, domain)
-    commands_write(commands, ept_dir, pentest_name)
-    log.info("Done creating command files.")
+def create_directories(ipt_dir):
+    log.info("Creating pentest directories.")
+    pt_dirs = ["testssl", "whatweb", "rc_files", "nmap", "screenshots", "theharvester"]
+    log.debug("Creating directory: {}".format(ipt_dir))
+    os.makedirs(ipt_dir, exist_ok=True)
+    for pt_dir in pt_dirs:
+        pt_path = os.path.join(ipt_dir, pt_dir)
+        log.debug("Creating directory: {}".format(pt_path))
+        os.makedirs(pt_path, exist_ok=True)
+    log.info("Directories have been created.")
 
 
-def main(output, domain):
-    ept_dir = os.path.join(output, "ept")
-    create_directories(ept_dir)
+def main(output, host):
+    ipt_dir = os.path.join(output, "ipt")
+    create_directories(ipt_dir)
     pentest_name = os.path.split(output)[1]
     if pentest_name is None:
         pentest_name = os.path.split(os.path.split(output)[0])[1]
-    rc_folder = os.path.join(ept_dir, "rc_files")
-    render_args = create_render_args(pentest_name, ept_dir, domain)
+    rc_folder = os.path.join(ipt_dir, "rc_files")
+    render_args = create_render_args(pentest_name, ipt_dir, host)
     os.makedirs(rc_folder, exist_ok=True)
     render_rc_files(rc_folder, render_args)
-    checklist(ept_dir)
-    ip_file = os.path.join(ept_dir, "ips.txt")
-    create_command_file(ept_dir, ip_file, pentest_name, domain)
-    log.info(f"Folders, files, and scripts have been created in {ept_dir}")
-    print("*************")
-    print(f"Make sure to place the ips.txt file {ept_dir}/ips.txt")
-    print("*************")
+    checklist(ipt_dir)
+    create_command_file(ipt_dir, pentest_name, host)
+    log.info(f"Folders, files, and scripts have been created in {ipt_dir}")
 
 
 @click.command()
@@ -153,12 +145,10 @@ def main(output, domain):
 @click.option("-o", "--output", prompt=True,
               type=click.Path(file_okay=False, dir_okay=True, resolve_path=True),
               help="Full path to pentest folder.")
-@click.option(
-    "-d", "--domain", prompt=True, help="Domain for the test (used for applications like fierce)."
-)
-def cli(verbocity, output, domain):
+@click.option("-h", "--host", prompt=True, help="Name of remote host (should be in .ssh/config).")
+def cli(verbocity, output, host):
     set_logging_level(verbocity)
-    main(output, domain)
+    main(output, host)
 
 
 def set_logging_level(verbocity):

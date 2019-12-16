@@ -1,0 +1,25 @@
+
+---
+-
+  name: sshfs
+  command: "sshfs -o allow_other,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3 {host}:/root/pentests /mnt/pentests"
+  description: "Mounts the /root/pentests folder to /mnt/pentests"
+  scriptable: no
+
+-
+  name: ssh_socks_proxy
+  command: "ssh -D 8085 -fnN {host}"
+  description: "Sets up a socks proxy in the background."
+  scriptable: no
+
+-
+  name: remote_firefox
+  command: "ssh -fY {host} firefox"
+  description: "Runs firefox on remote host"
+  scriptable: no
+
+-
+  name: sa
+  command: "python {scripts_path}/sa.py -o {pentest_path}"
+  description: "Runs the sa script."
+  scriptable: yes
