@@ -1,10 +1,12 @@
 # Notes and TODOs
 
+* Combine the `int_initial.py`, `ext_initial.py` and `web_initial.py` scripts
 * I should mark all the scripts as executable and include the proper shebang
 * The tests have to be rebuilt. I have fallen out of using them and should resolve that.
 
 # Change Log
 
+* 12/15/2019 - Added the `int_initial.py` script, it nees a lot of work still. Fixed an issue with the `sa.py` script.
 * 12/11/2019 - Fixed the `http_methods.py` file. But it needs a bit more work. I want to make it accept a single url (done), a text file of urls, and the csv output from `nmap_to_csv.py`. ~~Second, I need to figure out how to take a picture of the console output.~~ (done, but a bit hacky)
 * 12/4/2019 - I am going to slowly switch all the scripts to use click as the cli instead of argparse
 * 12/7/2017 - I am not happy with the way I currently run bash commands and get output, I created a couple of new functions in utils/run_commands.py that seems to work well. I have started switching over a few of the scripts web_nikto and dirb_image have both been switched.
