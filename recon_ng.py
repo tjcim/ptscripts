@@ -24,7 +24,7 @@ def run_bing(args):
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
-        utils.selenium_image(html_output, args.screenshot, x=1000, y=800,
+        utils.selenium_image(html_output, args.screenshot, x=800, y=800,
                              cropx=-10, cropy=-100, sleep=2, bottom=True)
     if not html_output:
         LOG.error("Didn't receive a response from running the command.")
@@ -40,7 +40,7 @@ def run_google(args):
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
-        utils.selenium_image(html_output, args.screenshot, x=1000, y=800,
+        utils.selenium_image(html_output, args.screenshot, x=800, y=800,
                              cropx=-10, cropy=-100, sleep=2, bottom=True)
     if not html_output:
         LOG.error("Didn't receive a response from running the command.")
@@ -56,7 +56,7 @@ def run_brute(args):
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and args.screenshot:
-        utils.selenium_image(html_output, args.screenshot, x=1000, y=800,
+        utils.selenium_image(html_output, args.screenshot, x=800, y=800,
                              cropx=-10, cropy=-100, sleep=2, bottom=True)
     if not html_output:
         LOG.error("Didn't receive a response from running the command.")
