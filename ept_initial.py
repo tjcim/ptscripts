@@ -119,7 +119,7 @@ def commands_write(commands, ept_dir, pentest_name):
 
 def create_command_file(ept_dir, ip_file, pentest_name, domain):
     log.info("Creating commands files.")
-    commands_yaml = os.path.join(SCRIPT_DIR, "commands/ext_commands.yaml")
+    commands_yaml = os.path.join(SCRIPT_DIR, "commands/ept_commands.yaml")
     commands = load_commands(commands_yaml)
     commands_format(commands, ept_dir, ip_file, pentest_name, domain)
     commands_write(commands, ept_dir, pentest_name)

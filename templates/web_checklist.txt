@@ -35,6 +35,7 @@ A7 - XSS (2017)
     Stored
     DOM
 A8 - Insecure deserialization (2017)
+    yoserial
 A9 - Components with Known Vulnerabilities (2017)
     yasuo
     whatweb
