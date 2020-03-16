@@ -91,26 +91,31 @@ def commands_write(commands, ept_dir, pentest_name):
     commands_path = os.path.join(ept_dir, "yaml_commands.txt")
     script_path = os.path.join(ept_dir, "commands.sh")
     other_path = os.path.join(ept_dir, "not_scriptable.txt")
-    with open(commands_path, "w") as f:
-        f.write("## Commands file written on {} for {} using version {} ##\r\n\r\n".format(
+    with open(commands_path, "w") as fp:
+        fp.write("## Commands file written on {} for {} using version {} ##\r\n\r\n".format(
             time.strftime('%I:%M%p %Z on %b %d, %Y'),
             pentest_name,
             VERSION,
         ))
         for com in commands:
-            f.write(com['command'] + "\r\n")
-            f.write("\r\n")
+            fp.write(com['command'] + "\r\n")
+            fp.write("\r\n")
     log.info(f"Commands written to {commands_path}")
-    with open(script_path, "w") as f:
-        f.write("#!/usr/bin/env bash" + "\n")
+    with open(script_path, "w") as fp:
+        ips_file = os.path.join(ept_dir, 'ips.txt')
+        fp.write("#!/usr/bin/env bash\n")
+        fp.write(f"if [ ! -f {ips_file} ]; then\n")
+        fp.write("\techo 'IPs file not found! Cannot continue.'\n")
+        fp.write("\texit 1\n")
+        fp.write("fi\n")
         for com in commands:
             if com['scriptable']:
-                f.write(com['command'] + "\n")
+                fp.write(com['command'] + "\n")
     log.info(f"Commands bash script written to {script_path}")
-    with open(other_path, "w") as f:
+    with open(other_path, "w") as fp:
         for com in commands:
             if not com['scriptable']:
-                f.write(com['command'] + "\n")
+                fp.write(com['command'] + "\n")
     log.info(f"Writing non-scriptable commands to {other_path}")
     st = os.stat(script_path)
     os.chmod(script_path, st.st_mode | stat.S_IEXEC)
@@ -119,7 +124,7 @@ def commands_write(commands, ept_dir, pentest_name):
 
 def create_command_file(ept_dir, ip_file, pentest_name, domain):
     log.info("Creating commands files.")
-    commands_yaml = os.path.join(SCRIPT_DIR, "commands/ext_commands.yaml")
+    commands_yaml = os.path.join(SCRIPT_DIR, "commands/ept_commands.yaml")
     commands = load_commands(commands_yaml)
     commands_format(commands, ept_dir, ip_file, pentest_name, domain)
     commands_write(commands, ept_dir, pentest_name)

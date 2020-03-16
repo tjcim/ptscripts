@@ -1,3 +1,7 @@
+check google dorks
+check github
+check for robots.txt
+check for security.txt
 wafw00f
 nmap
 whatweb
