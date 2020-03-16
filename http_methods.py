@@ -73,6 +73,9 @@ def get_response(conn, parsed_url, method, path):
     except http.client.RemoteDisconnected:
         log.debug(f"Method: {method} was disconnected without a response.")
         return
+    except ConnectionResetError:
+        log.debug(f"Method: {method} received a ConnectionResetError.")
+        return
     log.debug(f"{method} Connection response status: {r1.status}, reason: {r1.reason}")
     response = r1.read()
     if r1.status in IGNORE_STATUS:
