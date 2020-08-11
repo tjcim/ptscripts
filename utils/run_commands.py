@@ -17,6 +17,7 @@ def bash_command(command, split=True):
     output of the command as a string when complete."""
     if split:
         command = command.split()
+    LOG.info(f"Running: {command[0]}")
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     full = []
     for line in iter(proc.stdout.readline, b''):
@@ -28,8 +29,10 @@ def bash_command(command, split=True):
 
 def create_html_file(command_output, command, html_file_path, max_lines=300):  # pylint: disable=too-many-locals
     """ Creates an html file using aha with the contents of output (limits to max_lines) """
-    program = command.split()[0]
-    LOG.info(f"Running: {program}")
+    if type(command) is list:
+        program = command[0]
+    else:
+        program = command.split()[0]
     command_output = command_output.encode('utf-8')
     full = []
     proc = subprocess.Popen(["aha", "--no-header"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)

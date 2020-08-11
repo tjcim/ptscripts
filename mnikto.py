@@ -13,26 +13,37 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.web_nikto")
-NIKTO_COMMAND = "nikto -C all -maxtime 1h -nointeractive "\
-    "-useragent 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36' "\
-    "-ask auto -o {output} -host {domain} -port {port}{root}{ssl}"
+log = logging.getLogger("ptscripts.web_nikto")
+NIKTO_COMMAND = "/opt/nikto/program/nikto.pl -C all -maxtime 1h -nointeractive "\
+    "-useragent 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"\
+    " Chrome/40.0.2214.85 Safari/537.36' -ask auto -o {output} -host {domain} -port {port}{root}{ssl}"
+NIKTO_PROXY_COMMAND = "/opt/nikto/program/nikto.pl -C all -maxtime 1h -nointeractive "\
+    "-useragent 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"\
+    " Chrome/40.0.2214.85 Safari/537.36' -ask auto -o {output} -host {domain} -port {port}{root}"\
+    " -nossl -useproxy http://{proxy}/"
 
 
-def run_nikto(url_dict, output_dir, screenshot=False):
+def run_nikto(url_dict, output_dir, proxy, screenshot=False):
     html_path = os.path.join(output_dir, f"nikto_{url_dict['domain']}_{url_dict['port']}.html")
     csv_path = os.path.join(output_dir, f"nikto_{url_dict['domain']}_{url_dict['port']}.csv")
-    command = NIKTO_COMMAND.format(domain=url_dict['domain'], port=url_dict['port'],
-                                   root=url_dict['root'], ssl=url_dict['ssl'], output=csv_path)
-    LOG.info('Running command: {}'.format(command))
+    if proxy:
+        log.info(f"Using proxy: {proxy}")
+        command_text = NIKTO_PROXY_COMMAND
+    else:
+        command_text = NIKTO_COMMAND
+    log.info(command_text)
+    command = command_text.format(domain=url_dict['domain'], port=url_dict['port'],
+                                  root=url_dict['root'], ssl=url_dict['ssl'], output=csv_path,
+                                  proxy=proxy)
+    log.info('Running command: {}'.format(command))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
     if html_output and screenshot:
-        LOG.info("Creating a screenshot of the output and saving it to {}".format(screenshot))
+        log.info("Creating a screenshot of the output and saving it to {}".format(screenshot))
         utils.dir_exists(screenshot, True)
         utils.selenium_image(html_output, screenshot)
     if not html_output:
-        LOG.error("Didn't receive a response from running the command.")
+        log.error("Didn't receive a response from running the command.")
 
 
 def parse_url_nikto(url):
@@ -65,7 +76,7 @@ def main(args):
     urls = []
     # Prepare commands
     if args.csv:
-        LOG.info('Running nikto against CSV file.')
+        log.info('Running nikto against CSV file.')
         webservers = utils.parse_csv_for_webservers(args.csv)
         for webserver in webservers:
             if webserver['service_tunnel'] == 'ssl' or webserver['service_name'] == 'https':
@@ -77,11 +88,11 @@ def main(args):
             root = ""
             urls.append({'domain': domain, 'port': port, 'root': root, 'ssl': ssl})
     elif args.url:
-        LOG.info('Running nikto against a single URL.')
+        log.info('Running nikto against a single URL.')
         parsed_url = parse_url_nikto(args.url)
         urls.append(parsed_url)
     else:
-        LOG.info('Running nikto against a text file of URLs.')
+        log.info('Running nikto against a text file of URLs.')
         with open(args.txt, 'r') as f:
             for line in f:
                 parsed_url = parse_url_nikto(line.strip())
@@ -92,8 +103,8 @@ def main(args):
         screenshot = False
     url_count = len(urls)
     for i, url in enumerate(urls, start=1):
-        LOG.info('**** Number {} of {} ****'.format(i, url_count))
-        run_nikto(url, args.output, screenshot)
+        log.info('**** Number {} of {} ****'.format(i, url_count))
+        run_nikto(url, args.output, args.proxy, screenshot)
 
 
 def parse_args(args):
@@ -111,6 +122,7 @@ def parse_args(args):
     parser.add_argument('output', help="where to store results")
     parser.add_argument("-s", "--screenshot",
                         help="full path to where the screenshot will be saved.")
+    parser.add_argument("-p", "--proxy", help="proxy")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

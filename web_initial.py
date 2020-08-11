@@ -27,19 +27,29 @@ from config import config
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def format_commands(commands, url, base_path, netloc):  # pylint: disable=too-many-locals
+def format_commands(commands, url, base_path, netloc, proxy, burp):  # pylint: disable=too-many-locals
     log.info("Formatting commands")
     for com in commands:
-        com['command'] = com['command'].format(
+        if proxy:
+            command_text = com.get('proxy', com['command'])
+        elif burp:
+            command_text = com.get('burp', com['command'])
+        else:
+            command_text = com['command']
+        com['command'] = command_text.format(
             scripts_path=SCRIPT_DIR,
             pentest_path=base_path,
-            url=url, netloc=netloc,
+            url=url,
+            netloc=netloc,
+            proxy=proxy,
         )
 
 
 def print_commands(commands):
     log.info("Printing commands.")
     for com in commands:
+        if com['command'] == "":
+            continue
         if com.get('help') and com['help']:
             print('# ' + com['help'])
         print(com['command'])
@@ -51,12 +61,16 @@ def write_commands(commands, base_path, netloc):
     log.info("Writing commands to txt file.")
     with open(commands_path, "w") as f:
         for com in commands:
+            if com['command'] == "":
+                continue
             f.write(com['command'] + "\n")
             f.write("\n")
     log.info("Writing commands to sh file.")
     with open(scripts_path, "w") as f:
         f.write("#!/bin/bash\n")
         for com in commands:
+            if com['command'] == "":
+                continue
             f.write(com['command'] + "\n")
     log.info("Marking bash script as executeable")
     st = os.stat(scripts_path)
@@ -95,14 +109,20 @@ def create_dirs(url, output):
     return base_path, site_directory_name
 
 
-def main(url, output):
-    base_path, site_directory_name = create_dirs(url, output)
-    create_checklists(base_path)
+def main(url, output, proxy, dont, burp):
+    if dont:
+        log.info("Not making any changes, just printing the formatted results.")
+        site_directory_name = urlparse(url).netloc.split(":")[0]
+        base_path = os.path.join(output, site_directory_name)
+    else:
+        base_path, site_directory_name = create_dirs(url, output)
+        create_checklists(base_path)
     commands_file = os.path.join(SCRIPT_DIR, "commands/web_commands.yaml")
     commands = load_commands(commands_file)
-    format_commands(commands, url, base_path, site_directory_name)
+    format_commands(commands, url, base_path, site_directory_name, proxy, burp)
     print_commands(commands)
-    write_commands(commands, base_path, site_directory_name)
+    if not dont:
+        write_commands(commands, base_path, site_directory_name)
     log.info(f"All done. Check the folder {base_path} for created files.")
 
 
@@ -116,9 +136,14 @@ def main(url, output):
 @click.option("-o", "--output", prompt=True,
               type=click.Path(file_okay=False, dir_okay=True, resolve_path=True),
               help="Full path to pentest folder.")
-def cli(verbocity, url, output):
+@click.option("-p", "--proxy", "proxy", help="If a proxy is required, set it with this option")
+@click.option("-b", "--burp", "burp", is_flag=True,
+              help="Use burp")
+@click.option("-d", "--dont", "dont", is_flag=True,
+              help="Don't make any changes, just print out the commands")
+def cli(verbocity, url, output, proxy, dont, burp):
     set_logging_level(verbocity)
-    main(url, output)
+    main(url, output, proxy, dont, burp)
 
 
 def set_logging_level(verbocity):

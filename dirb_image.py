@@ -20,7 +20,11 @@ def main(args):
     LOG.info("Running dirb for {}".format(args.url))
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
-    command = "dirb {url} /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-small.txt -S".format(url=args.url)
+    if args.proxy:
+        command = ("dirb {url} /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-small.txt"\
+                   " -S -p {proxy}").format(url=args.url, proxy=args.proxy)
+    else:
+        command = "dirb {url} /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-small.txt -S".format(url=args.url)
     html_path = os.path.join(args.output, "dirb_{}.html".format(domain))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
@@ -41,6 +45,8 @@ def parse_args(args):
     parser.add_argument('output', help="where to store results")
     parser.add_argument("-s", "--screenshot",
                         help="full path to where the screenshot will be saved.")
+    parser.add_argument("-p", "--proxy",
+                        help="Proxy")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:

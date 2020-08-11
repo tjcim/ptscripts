@@ -5,7 +5,8 @@ USAGE: python web_nmap_image.py <output_dir> <input_file> [-s <screenshot direct
 """
 import os
 import logging
-import argparse
+
+import click
 
 from utils import utils, logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
@@ -14,45 +15,61 @@ from utils import run_commands
 LOG = logging.getLogger("ptscripts.web_nmap_image")
 
 
-def main(args):
-    LOG.info("Running nmap")
-    os.makedirs(args.output, exist_ok=True)
-    output = os.path.join(args.output, "nmap_sT_common_{}".format(args.input))
-    command = """nmap -sT -oA {output} {input_file}""".format(
-        output=output, input_file=args.input)
+def main(output, url, no_screenshot, proxy):
+    os.makedirs(output, exist_ok=True)
+    output_dir = output
+    output = os.path.join(output, "nmap_sT_common_{}".format(url))
+    if proxy:
+        command = """nmap -sT --proxy-type socks5h --proxy {proxy} -oA {output} {url}""".format(
+            output=output, url=url, proxy=proxy)
+    else:
+        command = """nmap -sT -oA {output} {url}""".format(
+            output=output, url=url)
     LOG.info("Running the command: {}".format(command))
-    file_name = "nmap_sT_common_{}.html".format(args.input)
-    html_path = os.path.join(args.output, file_name)
+    file_name = "nmap_sT_common_{}.html".format(url)
+    html_path = os.path.join(output_dir, file_name)
     LOG.info("Saving output to: {}".format(html_path))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
-    if html_output and args.screenshot:
-        utils.selenium_image(html_output, args.screenshot)
+    if html_output and not no_screenshot:
+        screenshot_path = os.path.join(output_dir, "screenshots")
+        LOG.info("Creating a screenshot of the output and saving it to {}".format(screenshot_path))
+        utils.dir_exists(screenshot_path, True)
+        utils.selenium_image(html_output, screenshot_path)
     if not html_output:
         LOG.error("Didn't receive a response from running the command.")
 
 
-def parse_args(args):
-    parser = argparse.ArgumentParser(
-        parents=[utils.parent_argparser()],
-        description='Capture fierce data and image.',
-    )
-    parser.add_argument('output', help="full path to where the results will be saved.")
-    parser.add_argument('input', help="full path to list of ips.")
-    parser.add_argument("-s", "--screenshot",
-                        help="full path to where the screenshot will be saved.")
-    args = parser.parse_args(args)
-    logger = logging.getLogger("ptscripts")
-    if args.quiet:
-        logger.setLevel('ERROR')
-    elif args.verbose:
-        logger.setLevel('DEBUG')
-        logger.debug("Logger set to debug.")
+@click.command()
+@click.option("-v", "--verbose", "verbocity", flag_value="verbose",
+              help="-v Will show DEBUG messages.")
+@click.option("-q", "--quiet", "verbocity", flag_value="quiet",
+              help="-q Will show only ERROR messages.")
+@click.option("-o", "--output", prompt=True,
+              type=click.Path(file_okay=False, dir_okay=True, resolve_path=True),
+              help="Full path to pentest folder.")
+@click.option("-u", "--url-hostname", "url", prompt=True, help="Hostname to be checked.")
+@click.option("-n", "--no-screenshot", is_flag=True, help="Do not save a screenshot")
+@click.option("-p", "--proxy", help="Use a proxy to perform requests.")
+def cli(verbocity, output, url, no_screenshot, proxy):
+    set_logging_level(verbocity)
+    main(output, url, no_screenshot, proxy)
+
+
+def set_logging_level(verbocity):
+    if verbocity == "verbose":
+        log.setLevel("DEBUG")
+        log.debug("Setting logging level to DEBUG")
+    elif verbocity == "quiet":
+        log.setLevel("ERROR")
+        log.error("Setting logging level to ERROR")
     else:
-        logger.setLevel('INFO')
-    return args
+        log.setLevel("INFO")
+        log.info("Setting logging level to INFO")
+
+
+log = logging.getLogger("ptscripts.http_methods")
 
 
 if __name__ == "__main__":
-    import sys
-    main(parse_args(sys.argv[1:]))
+    cli()  # pylint:disable=no-value-for-parameter

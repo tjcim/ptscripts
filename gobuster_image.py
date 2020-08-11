@@ -1,7 +1,7 @@
 """
-Run whatweb save data and create images of the results
+Run gobuster save data and create images of the results
 
-USAGE: python whatweb_image.py <url> <output_dir> [-s <screenshot directory>]
+USAGE: python gobuster_image.py <url> <output_dir> [-s <screenshot directory>]
 """
 import os
 import logging
@@ -13,28 +13,22 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.whatweb_image")
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
+LOG = logging.getLogger("ptscripts.dirb_image")
+COMMAND = "gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url}"
+PROXY_COMMAND = "gobuster dir -p {proxy} -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url}"
 
 
 def main(args):
-    LOG.info("Running whatweb for {}".format(args.url))
-    if args.proxy:
-        # command = 'whatweb -v -a 3 --proxy {proxy} --user-agent "{ua}" {url}'.format(
-        #     ua=USER_AGENT, url=args.url, proxy=args.proxy)
-        command = ['whatweb', '-v', '-a', '3', '--proxy', args.proxy, '--user-agent',
-                   '"' + USER_AGENT + '"', args.url]
-    else:
-        # command = 'whatweb -v -a 3 --user-agent "{ua}" {url}'.format(ua=USER_AGENT, url=args.url)
-        command = ['whatweb', '-v', '-a', '3', '--user-agent', '"' + USER_AGENT + '"', args.url]
-    LOG.info(command)
+    LOG.info("Running gobuster for {}".format(args.url))
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
-    html_path = os.path.join(args.output, "whatweb_{}.html".format(domain))
-    text_output = run_commands.bash_command(command, split=False)
+    if args.proxy:
+        command = PROXY_COMMAND.format(url=args.url, proxy=args.proxy)
+    else:
+        command = COMMAND.format(url=args.url)
+    html_path = os.path.join(args.output, "gobuster_{}.html".format(domain))
+    text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
-    # text_output = run_commands.bash_command(command_string, split=False)
-    # html_output = run_commands.create_html_file(text_output, command_string, html_path)
     if html_output and args.screenshot:
         LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
         utils.dir_exists(args.screenshot, True)
@@ -46,13 +40,14 @@ def main(args):
 def parse_args(args):
     parser = argparse.ArgumentParser(
         parents=[utils.parent_argparser()],
-        description='Capture whatweb data and image.',
+        description='Capture gobuster data and image.',
     )
     parser.add_argument('url', help="url to be tested")
     parser.add_argument('output', help="where to store results")
     parser.add_argument("-s", "--screenshot",
                         help="full path to where the screenshot will be saved.")
-    parser.add_argument("-p", "--proxy", help="Proxy")
+    parser.add_argument("-p", "--proxy",
+                        help="Proxy")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
