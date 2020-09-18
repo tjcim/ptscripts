@@ -141,9 +141,13 @@ def cli(verbocity, js_file, semgrep_config):
     eslint_exe = which("eslint")
     if eslint_exe:
         eslint_files(eslint_exe, beautified_dir, eslintrc_path)
+    else:
+        log.warn("Could not find eslint in PATH. Eslint will not be run.")
     semgrep_exe = which("semgrep")
     if semgrep_exe:
         semgrep_files(semgrep_exe, semgrep_config, beautified_dir)
+    else:
+        log.warn("Could not find semgrep in PATH. Semgrep will not be run.")
 
 
 if __name__ == "__main__":
