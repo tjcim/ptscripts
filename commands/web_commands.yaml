@@ -47,11 +47,6 @@
   proxy: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path} -p {proxy}"
 
 -
-  name: uniscan
-  command: "python {scripts_path}/uniscan_image.py {url} {pentest_path} -s {pentest_path}/screenshots"
-  proxy: ""
-
--
   name: iframe
   command: "python {scripts_path}/iframe.py {url} {pentest_path} -s {pentest_path}/screenshots"
   proxy: ""
