@@ -14,10 +14,10 @@ from utils import run_commands
 
 
 log = logging.getLogger("ptscripts.web_nikto")
-NIKTO_COMMAND = "/opt/nikto/program/nikto.pl -C all -maxtime 1h -nointeractive "\
+NIKTO_COMMAND = "nikto -C all -maxtime 1h -nointeractive "\
     "-useragent 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"\
     " Chrome/40.0.2214.85 Safari/537.36' -ask auto -o {output} -host {domain} -port {port}{root}{ssl}"
-NIKTO_PROXY_COMMAND = "/opt/nikto/program/nikto.pl -C all -maxtime 1h -nointeractive "\
+NIKTO_PROXY_COMMAND = "nikto -C all -maxtime 1h -nointeractive "\
     "-useragent 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"\
     " Chrome/40.0.2214.85 Safari/537.36' -ask auto -o {output} -host {domain} -port {port}{root}"\
     " -nossl -useproxy http://{proxy}/"

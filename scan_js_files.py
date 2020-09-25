@@ -36,6 +36,8 @@ def download_file(url, directory):
     file_path = os.path.join(directory, local_filename)
     log.info(f"Downloading {url} to {file_path}")
     with requests.get(url, stream=True) as r:
+        if requests.status_codes != 200:
+            log.warn(f"Received {str(requests.status_codes)} for {url}")
         r.raise_for_status()
         with open(file_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
@@ -68,10 +70,10 @@ def download_js_files(js_file, download_dir):
     Downloads each JS file listed in `js_file`.
     """
     create_dir(download_dir)
-    urls = []
+    urls = set()
     with open(js_file, 'r') as f:
         for line in f:
-            urls.append(line.strip())
+            urls.add(line.strip())
     log.info(f"Downloading {len(urls)} files")
     js_files = []
     for url in urls:
@@ -119,7 +121,6 @@ def semgrep_files(semgrep_exe, semgrep_config, beautified_dir):
     res = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print("\n" + res.stdout.decode())
     log.info("Finished running semgrep")
-
 
 
 @click.command()

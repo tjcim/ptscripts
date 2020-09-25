@@ -4,6 +4,7 @@ Run testssl save data and create images of the results
 USAGE: python mtestssl.py <output_dir> --url <url>|--csv <csv>|--txt <txt> [-s <screenshot directory>]
 """
 import os
+import sys
 import logging
 from urllib.parse import urlparse  # pylint: disable=no-name-in-module,import-error
 
@@ -30,9 +31,9 @@ def run_testssl(url, output, no_screenshot, proxy):
         LOG.info("CSV file already exists, deleting it.")
         os.remove(csv_output)
     if proxy:
-        command = f"/opt/testssl/testssl.sh --warnings off --csvfile {csv_output} --proxy {proxy} {url}"
+        command = f"testssl --warnings off --csvfile {csv_output} --proxy {proxy} {url}"
     else:
-        command = f"/opt/testssl/testssl.sh --warnings off --csvfile {csv_output} {url}"
+        command = f"testssl --warnings off --csvfile {csv_output} {url}"
     LOG.info('Running command: {}'.format(command))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)

@@ -13,6 +13,7 @@ import requests
 from PIL import Image
 from selenium import webdriver  # pylint: disable=import-error
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 # from ptscripts import config
 from utils import logging_config  # noqa pylint: disable=unused-import
@@ -235,7 +236,9 @@ def selenium_image(html_file, ss_path, x=800, y=600, cropx=0, cropy=0, sleep=1, 
         return
     options = Options()
     options.headless = True
-    driver = webdriver.Firefox(options=options)
+    cap = DesiredCapabilities().FIREFOX
+    cap["marionette"] = False
+    driver = webdriver.Firefox(capabilities=cap, options=options, executable_path="/usr/local/bin/geckodriver")
     LOG.info("opening file {}".format(html_file))
     driver.get("file://" + html_file)
     driver.set_window_size(800, 800)
