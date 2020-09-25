@@ -35,12 +35,11 @@ def download_file(url, directory):
     local_filename = url.split('/')[-1]
     file_path = os.path.join(directory, local_filename)
     log.info(f"Downloading {url} to {file_path}")
-    with requests.get(url, stream=True) as r:
-        if requests.status_codes != 200:
-            log.warn(f"Received {str(requests.status_codes)} for {url}")
-        r.raise_for_status()
+    resp = requests.get(url, stream=True)
+    if resp.status_code != 200:
+        log.warning(f"Received {str(resp.status_code)} for {url}")
         with open(file_path, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
+            for chunk in resp.iter_content(chunk_size=8192):
                 f.write(chunk)
     return file_path
 
@@ -143,12 +142,12 @@ def cli(verbocity, js_file, semgrep_config):
     if eslint_exe:
         eslint_files(eslint_exe, beautified_dir, eslintrc_path)
     else:
-        log.warn("Could not find eslint in PATH. Eslint will not be run.")
+        log.warning("Could not find eslint in PATH. Eslint will not be run.")
     semgrep_exe = which("semgrep")
     if semgrep_exe:
         semgrep_files(semgrep_exe, semgrep_config, beautified_dir)
     else:
-        log.warn("Could not find semgrep in PATH. Semgrep will not be run.")
+        log.warning("Could not find semgrep in PATH. Semgrep will not be run.")
 
 
 if __name__ == "__main__":
