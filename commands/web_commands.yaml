@@ -6,52 +6,52 @@
 ---
 -
   name: wafw00f
-  command: "python {scripts_path}/wafw00f_image.py -u {url} -o {pentest_path}"
-  proxy: "python {scripts_path}/wafw00f_image.py -p {proxy} -u {url} -o {pentest_path}"
-  burp: "python {scripts_path}/wafw00f_image.py -p 127.0.0.1:8080 -u {url} -o {pentest_path}"
+  command: "python {scripts_path}/wafw00f_image.py -u {url} -o {pentest_path} -n"
+  proxy: "python {scripts_path}/wafw00f_image.py -p {proxy} -u {url} -o {pentest_path} -n"
+  burp: "python {scripts_path}/wafw00f_image.py -p 127.0.0.1:8080 -u {url} -o {pentest_path} -n"
   description: "Runs wafw00f, saves output to an html file and then takes an image."
 
 -
   name: nmap_st_common
-  command: "python {scripts_path}/web_nmap_image.py -o {pentest_path} -u {netloc}"
-  proxy: "python {scripts_path}/web_nmap_image.py -o {pentest_path} -u {netloc} -p {proxy}"
+  command: "python {scripts_path}/web_nmap_image.py -o {pentest_path} -u {netloc} -n"
+  proxy: "python {scripts_path}/web_nmap_image.py -o {pentest_path} -u {netloc} -p {proxy} -n"
   description: "FAST - Runs nmap with -sT on common ports. Saves output and takes an image."
 
 -
   name: whatweb
-  command: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -s {pentest_path}/screenshots"
-  proxy: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -s {pentest_path}/screenshots -p {proxy}"
-  burp: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -s {pentest_path}/screenshots -p 127.0.0.1:8080"
+  command: "python {scripts_path}/whatweb_image.py {url} {pentest_path}"
+  proxy: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -p {proxy}"
+  burp: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -p 127.0.0.1:8080"
 
 -
   name: http_methods
-  command: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url}"
-  proxy: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -p {proxy}"
-  burp: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -p 127.0.0.1:8080"
+  command: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -n"
+  proxy: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -p {proxy} -n"
+  burp: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -p 127.0.0.1:8080 -n"
 
 -
   name: gobuster
-  command: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -s {pentest_path}/screenshots"
-  proxy: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -s {pentest_path}/screenshots -p {proxy}"
-  burp: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -s {pentest_path}/screenshots -p 127.0.0.1:8080"
+  command: "python {scripts_path}/gobuster_image.py {url} {pentest_path}"
+  proxy: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -p {proxy}"
+  burp: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -p 127.0.0.1:8080"
 
 -
   name: nikto
-  command: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -s {pentest_path}/screenshots"
-  proxy: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -s {pentest_path}/screenshots -p {proxy}"
-  burp: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -s {pentest_path}/screenshots -p 127.0.0.1:8080"
+  command: "python {scripts_path}/mnikto.py --url {url} {pentest_path}"
+  proxy: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -p {proxy}"
+  burp: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -p 127.0.0.1:8080"
 
 -
   name: testssl
-  command: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path}"
-  proxy: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path} -p {proxy}"
+  command: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path} -n"
+  proxy: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path} -p {proxy} -n"
 
 -
   name: iframe
-  command: "python {scripts_path}/iframe.py {url} {pentest_path} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/iframe.py {url} {pentest_path}"
   proxy: ""
 
 -
   name: validate TRACE
-  command: "python {scripts_path}/validate_trace_image.py {url} {pentest_path} -s {pentest_path}/screenshots"
+  command: "python {scripts_path}/validate_trace_image.py {url} {pentest_path}"
   proxy: ""
