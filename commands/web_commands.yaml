@@ -55,3 +55,7 @@
   name: validate TRACE
   command: "python {scripts_path}/validate_trace_image.py {url} {pentest_path}"
   proxy: ""
+
+-
+  name: headers
+  command: "python {scripts_path}/security_headers.py -u {url} -o {pentest_path}"
