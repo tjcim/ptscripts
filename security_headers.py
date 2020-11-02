@@ -73,7 +73,8 @@ logging.basicConfig(
     format="{asctime} [{levelname}] {message}",
     style="{", datefmt="%H:%M:%S",
 )
-log = logging.getLogger()
+
+log = logging.getLogger("ptscripts.security_headers")
 
 if __name__ == "__main__":
     cli()  # pylint:disable=no-value-for-parameter

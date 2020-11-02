@@ -18,7 +18,7 @@ LOG = logging.getLogger("ptscripts.validate_trace_image")
 
 def main(args):
     LOG.info("Running curl for {}".format(args.url))
-    command = "curl --insecure -X TRACE {url}".format(url=args.url)
+    command = "curl -s --insecure -X TRACE {url}".format(url=args.url)
     netloc = urlparse(args.url).netloc
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "validate_trace_{}.html".format(domain))
