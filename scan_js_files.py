@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 """
+Performs a security scan against a list of JavaScript files.
+
+    The script will download the JavaScript files. It will use jsbeautifier to
+    fix up the files. It will then scan them with eslint and finally semgrep.
+
+    It will create two directories in the same folder where the text file is placed
+    The two directories will be downloads and beautified.
+
+Usage:
+    Create a text file with the URLs of all the JavaScript files that should be scanned.
+
+    python scan_js_files.py -f /path/to/list/of/urls
 """
 import os
 import json
@@ -16,7 +28,7 @@ logging.basicConfig(
     format="{asctime} [{levelname}] {message}",
     style="{", datefmt="%H:%M:%S",
 )
-log = logging.getLogger()
+log = logging.getLogger("ptscripts.scan_js_files")
 
 
 def set_logging_level(verbocity):
@@ -38,6 +50,8 @@ def download_file(url, directory):
     resp = requests.get(url, stream=True)
     if resp.status_code != 200:
         log.warning(f"Received {str(resp.status_code)} for {url}")
+        return
+    else:
         with open(file_path, 'wb') as f:
             for chunk in resp.iter_content(chunk_size=8192):
                 f.write(chunk)
@@ -76,7 +90,11 @@ def download_js_files(js_file, download_dir):
     log.info(f"Downloading {len(urls)} files")
     js_files = []
     for url in urls:
-        js_files.append(download_file(url, download_dir))
+        js_path = download_file(url, download_dir)
+        if js_path:
+            js_files.append(js_path)
+        else:
+            log.warn(f"I was unable to download {url}")
     log.info("All files downloaded.")
     return download_dir
 
