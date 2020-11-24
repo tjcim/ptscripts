@@ -31,7 +31,6 @@ def run_nikto(url_dict, output_dir, proxy, screenshot=False):
         command_text = NIKTO_PROXY_COMMAND
     else:
         command_text = NIKTO_COMMAND
-    log.info(command_text)
     command = command_text.format(domain=url_dict['domain'], port=url_dict['port'],
                                   root=url_dict['root'], ssl=url_dict['ssl'], output=csv_path,
                                   proxy=proxy)
