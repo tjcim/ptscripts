@@ -32,7 +32,14 @@ X-Frame-Options and X-XSS-Protection can be covered by a Content-Security-Policy
                  """)
 
 
-def process_headers(res):
+def get_headers(url):
+    res = requests.get(url)
+    if res.status_code != 200:
+        log.warning(f"{RED}We received a status code of {res.status_code}{RESET}")
+    return res.headers
+
+
+def process_headers(headers):
     present_headers = []
     missing_headers = []
     for header in HEADERS:
@@ -43,9 +50,9 @@ def process_headers(res):
             "file_output": "",
             "value": "",
         }
-        if header in res.headers:
+        if header in headers:
             data["present"] = True
-            data["value"] = res.headers[header]
+            data["value"] = headers[header]
             data["bash_output"] = f"{GREEN}FOUND {header}: {data['value']}{RESET}"
             data["file_output"] = f"FOUND {header}: {data['value']}"
             present_headers.append(data)
@@ -63,7 +70,7 @@ def csp_logic(present_headers, missing_headers):
     xxp = [header for header in missing_headers if header["name"] == "X-XSS-Protection"]
     if csp:
         # Content-Security-Policy can cover the absence of X-Frame-Options
-        # as long as the CSP is defined with a frame-src, child-src, or default-src
+        # as long as the CSP is defined with a frame-src, frame-ancestors, child-src, or default-src
         # that is restrictive.
         if xfo:
             log.info((f"{WHITE}"
@@ -86,7 +93,8 @@ def csp_logic(present_headers, missing_headers):
 def main(url, output):
     log.info("*" * 25)
     log.info(f"Running security_headers for {url}")
-    present_headers, missing_headers = process_headers(requests.get(url))
+    headers = get_headers(url)
+    present_headers, missing_headers = process_headers(headers)
     csp_logic(present_headers, missing_headers)
     write_results(output, present_headers, missing_headers)
 
