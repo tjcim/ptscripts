@@ -3,7 +3,7 @@
 Performs a security scan against a list of JavaScript files.
 
     The script will download the JavaScript files. It will use jsbeautifier to
-    fix up the files. It will then scan them with eslint and finally semgrep.
+    fix up the files. It will then scan them with semgrep.
 
     It will create two directories in the same folder where the text file is placed
     The two directories will be downloads and beautified.
@@ -14,7 +14,7 @@ Usage:
     python scan_js_files.py -f /path/to/list/of/urls
 """
 import os
-import json
+# import json
 import pathlib
 import logging
 import subprocess
@@ -50,18 +50,17 @@ def download_file(url, directory):
     resp = requests.get(url, stream=True)
     if resp.status_code != 200:
         log.warning(f"Received {str(resp.status_code)} for {url}")
-        return
-    else:
-        with open(file_path, 'wb') as f:
-            for chunk in resp.iter_content(chunk_size=8192):
-                f.write(chunk)
+        return None
+    with open(file_path, 'wb') as f:
+        for chunk in resp.iter_content(chunk_size=8192):
+            f.write(chunk)
     return file_path
 
 
 def which(program):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-    fpath, fname = os.path.split(program)
+    fpath, _ = os.path.split(program)
     if fpath:
         if is_exe(program):
             return program
@@ -94,7 +93,7 @@ def download_js_files(js_file, download_dir):
         if js_path:
             js_files.append(js_path)
         else:
-            log.warn(f"I was unable to download {url}")
+            log.warning(f"I was unable to download {url}")
     log.info("All files downloaded.")
     return download_dir
 
@@ -117,24 +116,9 @@ def beautify_js_files(download_dir, beautified_dir):
     return beautified_dir
 
 
-def eslint_files(eslint_exe, beautified_dir, eslintrc_path):
-    log.info(f"Running eslint against: {beautified_dir}")
-    data = {
-        "env": {
-            "browser": True
-        }
-    }
-    with open(eslintrc_path, 'w') as f:
-        json.dump(data, f)
-    command = f"eslint {beautified_dir}"
-    res = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    print("\n" + res.stdout.decode())
-    log.info("Finished running eslint")
-
-
-def semgrep_files(semgrep_exe, semgrep_config, beautified_dir):
+def semgrep_files(semgrep_config, beautified_dir):
     log.info(f"Running semgrep against: {beautified_dir}")
-    command = f'semgrep --config {semgrep_config} {beautified_dir}'
+    command = f'semgrep {semgrep_config} {beautified_dir}'
     res = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print("\n" + res.stdout.decode())
     log.info("Finished running semgrep")
@@ -147,25 +131,15 @@ def semgrep_files(semgrep_exe, semgrep_config, beautified_dir):
               help="-q Will show only ERROR messages.")
 @click.option("-f", "--file", "js_file", prompt=True,
               help="Full path to the text file that contains the list of JS files to download and scan.")
-@click.option("-s", "--semgrep-config", default="https://semgrep.dev/p/r2c-security-audit")
+@click.option("-s", "--semgrep-config", default='--config p/r2c-security-audit --config p/xss --config p/command-injection --config p/headless-browser --config p/jwt --config p/secrets')
 def cli(verbocity, js_file, semgrep_config):
     set_logging_level(verbocity)
     base_dir = pathlib.Path(js_file).parent.resolve()
     download_dir = os.path.join(base_dir, "downloads")
     beautified_dir = os.path.join(base_dir, "beautified")
-    eslintrc_path = os.path.join(base_dir, ".eslintrc.json")
     download_js_files(js_file, download_dir)
     beautified_dir = beautify_js_files(download_dir, beautified_dir)
-    eslint_exe = which("eslint")
-    if eslint_exe:
-        eslint_files(eslint_exe, beautified_dir, eslintrc_path)
-    else:
-        log.warning("Could not find eslint in PATH. Eslint will not be run.")
-    semgrep_exe = which("semgrep")
-    if semgrep_exe:
-        semgrep_files(semgrep_exe, semgrep_config, beautified_dir)
-    else:
-        log.warning("Could not find semgrep in PATH. Semgrep will not be run.")
+    semgrep_files(semgrep_config, beautified_dir)
 
 
 if __name__ == "__main__":
