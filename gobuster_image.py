@@ -26,6 +26,7 @@ def main(args):
         command = PROXY_COMMAND.format(url=args.url, proxy=args.proxy)
     else:
         command = COMMAND.format(url=args.url)
+    LOG.info(f"Running command: {command}")
     html_path = os.path.join(args.output, "gobuster_{}.html".format(domain))
     text_output = run_commands.bash_command(command)
     html_output = run_commands.create_html_file(text_output, command, html_path)
