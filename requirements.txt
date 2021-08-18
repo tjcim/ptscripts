@@ -42,7 +42,7 @@ requests==2.25.1
 ruamel.yaml==0.16.10
 ruamel.yaml.clib==0.2.2
 selenium==3.141.0
-semgrep==0.43.0
+semgrep==0.48.0
 six==1.15.0
 soupsieve==2.2.1
 toml==0.10.2
