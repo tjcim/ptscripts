@@ -26,7 +26,7 @@ nessrest==0.40
 netifaces==0.10.9
 olefile==0.46
 packaging==20.9
-Pillow==8.1.2
+Pillow==9.0.0
 pluggy==0.13.1
 py==1.10.0
 pylint==2.7.2
