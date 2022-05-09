@@ -119,6 +119,7 @@ def beautify_js_files(download_dir, beautified_dir):
 def semgrep_files(semgrep_config, beautified_dir):
     log.info(f"Running semgrep against: {beautified_dir}")
     command = f'semgrep {semgrep_config} {beautified_dir}'
+    log.info(f"Running command: {command}")
     res = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print("\n" + res.stdout.decode())
     log.info("Finished running semgrep")
