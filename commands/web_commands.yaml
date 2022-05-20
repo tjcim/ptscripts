@@ -31,7 +31,7 @@
 
 -
   name: gobuster
-  command: "python {scripts_path}/gobuster_image.py {url} {pentest_path}"
+  command: "python {scripts_path}/gobuster_image.py -b {url} {pentest_path}"
   proxy: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -p {proxy}"
   burp: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -p 127.0.0.1:8080"
 

@@ -32,7 +32,7 @@ def main(args):
     domain = netloc.split(":")[0]
     html_path = os.path.join(args.output, "whatweb_{}.html".format(domain))
     text_output = run_commands.bash_command(command, split=False)
-    html_output = run_commands.create_html_file(text_output, command, html_path)
+    html_output = run_commands.create_html_file(text_output, "".join(command), html_path)
     # text_output = run_commands.bash_command(command_string, split=False)
     # html_output = run_commands.create_html_file(text_output, command_string, html_path)
     if html_output and args.screenshot:

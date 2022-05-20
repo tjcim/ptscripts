@@ -15,7 +15,7 @@ from utils import logging_config  # noqa pylint: disable=unused-import
 from utils import run_commands
 
 
-LOG = logging.getLogger("ptscripts.dirb_image")
+LOG = logging.getLogger("ptscripts.gobuster_image")
 COMMAND = "gobuster -q dir -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url} -o gobuster_{domain}.txt"
 PROXY_COMMAND = "gobuster dir -p {proxy} -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url}"
 PROXIES = {
@@ -24,8 +24,8 @@ PROXIES = {
 }
 
 
-def read_gobuster_output(url, output_path):
-    """Returns a set of URLs that were found"""
+def read_gobuster_output(url: str, output_path: str) -> set :
+    """Returns a set of URLs that were found."""
     regex = re.compile(r"^(\/.*?) .*\(Status: ([0-9]{3})\).*\[Size: [0-9]+\](?: \[--> (.*)\])?$")
     results = set(())
     with open(output_path, "r") as file_pointer:
@@ -36,8 +36,7 @@ def read_gobuster_output(url, output_path):
         if matches:
             path, status, redirect_url = matches.groups()
             if redirect_url and redirect_url.startswith("/"):
-                redirect_url = urljoin(url, redirect_url)
-                results.add(redirect_url)
+                results.add(urljoin(url, redirect_url))
             elif redirect_url:
                 results.add(redirect_url)
             else:
@@ -45,11 +44,13 @@ def read_gobuster_output(url, output_path):
     return results
 
 
-def proxy_results(url, output_path):
-    # read the output file and build list of paths
+def proxy_results(url: str, output_path: str) -> None :
+    """Does a GET request using a proxy on each URL found by gobuster."""
     results = read_gobuster_output(url, output_path)
+    LOG.info("Proxying found URLs in Burp")
     for item in results:
-        requests.get(item, proxy=PROXIES)
+        LOG.info(f"Requesting: {item}")
+        _ = requests.get(item, proxies=PROXIES, verify=False)
 
 
 def main(args):
@@ -63,15 +64,15 @@ def main(args):
     LOG.info(f"Running command: {command}")
     html_path = os.path.join(args.output, "gobuster_{}.html".format(domain))
     txt_path = os.path.join(args.output, f"gobuster_{domain}.txt")
-    text_output = run_commands.bash_command(command)
-    html_output = run_commands.create_html_file(text_output, command, html_path)
-    if html_output and args.screenshot:
-        LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
-        utils.dir_exists(args.screenshot, True)
-        utils.selenium_image(html_output, args.screenshot)
-    if not html_output:
-        LOG.error("Didn't receive a response from running the command.")
-
+    if not args.no_scan:
+        text_output = run_commands.bash_command(command)
+        html_output = run_commands.create_html_file(text_output, command, html_path)
+        if html_output and args.screenshot:
+            LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
+            utils.dir_exists(args.screenshot, True)
+            utils.selenium_image(html_output, args.screenshot)
+        if not html_output:
+            LOG.error("Didn't receive a response from running the command.")
     if args.burp:
         proxy_results(args.url, txt_path)
 
@@ -88,6 +89,7 @@ def parse_args(args):
     parser.add_argument("-p", "--proxy",
                         help="Proxy")
     parser.add_argument("-b", "--burp", action="store_true", help="Once done, proxy all found URLs through burp.")
+    parser.add_argument("-n", "--no-scan", action="store_true", help="Don't scan")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
