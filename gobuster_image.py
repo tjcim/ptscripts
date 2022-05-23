@@ -17,6 +17,7 @@ from utils import run_commands
 
 LOG = logging.getLogger("ptscripts.gobuster_image")
 COMMAND = "gobuster -q dir -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url} -o gobuster_{domain}.txt"
+EXC_COMMAND = "gobuster -q dir --exclude-length {exclude} -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url} -o gobuster_{domain}.txt"
 PROXY_COMMAND = "gobuster dir -p {proxy} -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url}"
 PROXIES = {
     "http": "127.0.0.1:8080",
@@ -59,6 +60,8 @@ def main(args):
     domain = netloc.split(":")[0]
     if args.proxy:
         command = PROXY_COMMAND.format(url=args.url, proxy=args.proxy)
+    elif args.exclude:
+        command = EXC_COMMAND.format(url=args.url, domain=domain, exclude=args.exclude)
     else:
         command = COMMAND.format(url=args.url, domain=domain)
     LOG.info(f"Running command: {command}")
@@ -90,6 +93,7 @@ def parse_args(args):
                         help="Proxy")
     parser.add_argument("-b", "--burp", action="store_true", help="Once done, proxy all found URLs through burp.")
     parser.add_argument("-n", "--no-scan", action="store_true", help="Don't scan")
+    parser.add_argument("-x", "--exclude", help="Exclude responses with this length")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
