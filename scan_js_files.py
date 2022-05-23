@@ -121,7 +121,7 @@ def semgrep_files(semgrep_config, beautified_dir):
     file_paths = [f for f in os.listdir(beautified_dir) if os.path.isfile(os.path.join(beautified_dir, f))]
     for file_path in file_paths:
         full_path = os.path.join(beautified_dir, file_path)
-        command = f"""semgrep scan --verbose --config p/r2c-security-audit --config p/xss \
+        command = f"""semgrep scan --config p/r2c-security-audit --config p/xss \
 --config p/command-injection --config p/headless-browser --config p/jwt \
 --config p/secrets --timeout 0 --timeout-threshold 0 --max-target-bytes 0 {full_path}"""
         log.info(f"Running command: {command}")
