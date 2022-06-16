@@ -46,6 +46,9 @@ def set_logging_level(verbocity):
 def download_file(url, directory):
     local_filename = url.split('/')[-1]
     file_path = os.path.join(directory, local_filename)
+    if os.path.isfile(file_path):
+        log.info(f"Not downloading {url} as file {file_path} already exists.")
+        return file_path
     log.info(f"Downloading {url} to {file_path}")
     resp = requests.get(url, stream=True)
     if resp.status_code != 200:
@@ -85,6 +88,8 @@ def download_js_files(js_file, download_dir):
     urls = set()
     with open(js_file, 'r') as f:
         for line in f:
+            if "?" in line:
+                line = line.split("?")[0]
             urls.add(line.strip())
     log.info(f"Downloading {len(urls)} files")
     js_files = []
@@ -108,6 +113,9 @@ def beautify_js_files(download_dir, beautified_dir):
         if not in_file.suffix == '.js':
             continue
         out_path = os.path.join(beautified_dir, in_file.name)
+        if os.path.isfile(out_path):
+            log.info(f"Not beautifying {in_file} because file {out_path} already exists.")
+            continue
         with open(in_file, 'r') as f:
             res = jsbeautifier.beautify_file(in_file, opts)
         with open(out_path, 'w') as f:
@@ -116,16 +124,22 @@ def beautify_js_files(download_dir, beautified_dir):
     return beautified_dir
 
 
-def semgrep_files(semgrep_config, beautified_dir):
+def semgrep_files(semgrep_config, beautified_dir, results_dir):
     log.info(f"Running semgrep against: {beautified_dir}")
+    create_dir(results_dir)
     file_paths = [f for f in os.listdir(beautified_dir) if os.path.isfile(os.path.join(beautified_dir, f))]
     for file_path in file_paths:
         full_path = os.path.join(beautified_dir, file_path)
+        file_name, extension = os.path.splitext(file_path)
+        results_path = os.path.join(results_dir, f"semgrep_results_{file_name}.txt")
         command = f"""semgrep scan --config p/r2c-security-audit --config p/xss \
 --config p/command-injection --config p/headless-browser --config p/jwt \
 --config p/secrets --timeout 0 --timeout-threshold 0 --max-target-bytes 0 {full_path}"""
         log.info(f"Running command: {command}")
         res = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = res.stdout.decode()
+        with open(results_path, "w") as f:
+            f.write(output)
         print("\n" + res.stdout.decode())
     log.info("Finished running semgrep")
 
@@ -143,9 +157,10 @@ def cli(verbocity, js_file, semgrep_config):
     base_dir = pathlib.Path(js_file).parent.resolve()
     download_dir = os.path.join(base_dir, "downloads")
     beautified_dir = os.path.join(base_dir, "beautified")
+    results_dir = os.path.join(base_dir, "results")
     download_js_files(js_file, download_dir)
     beautified_dir = beautify_js_files(download_dir, beautified_dir)
-    semgrep_files(semgrep_config, beautified_dir)
+    semgrep_files(semgrep_config, beautified_dir, results_dir)
 
 
 if __name__ == "__main__":
