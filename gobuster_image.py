@@ -18,6 +18,7 @@ from utils import run_commands
 LOG = logging.getLogger("ptscripts.gobuster_image")
 COMMAND = "gobuster -q dir -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url} -o gobuster_{domain}.txt"
 EXC_COMMAND = "gobuster -q dir --exclude-length {exclude} -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url} -o gobuster_{domain}.txt"
+CODE_COMMAND = "gobuster -q dir  --status-codes-blacklist {exclude_code},404 -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url} -o gobuster_{domain}.txt"
 PROXY_COMMAND = "gobuster dir -p {proxy} -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -u {url}"
 PROXIES = {
     "http": "127.0.0.1:8080",
@@ -62,13 +63,15 @@ def main(args):
         command = PROXY_COMMAND.format(url=args.url, proxy=args.proxy)
     elif args.exclude:
         command = EXC_COMMAND.format(url=args.url, domain=domain, exclude=args.exclude)
+    elif args.exclude_code:
+        command = CODE_COMMAND.format(url=args.url, domain=domain, exclude_code=args.exclude_code)
     else:
         command = COMMAND.format(url=args.url, domain=domain)
     LOG.info(f"Running command: {command}")
     html_path = os.path.join(args.output, "gobuster_{}.html".format(domain))
     txt_path = os.path.join(args.output, f"gobuster_{domain}.txt")
     if not args.no_scan:
-        text_output = run_commands.bash_command(command)
+        text_output = run_commands.bash_command(command, True)
         html_output = run_commands.create_html_file(text_output, command, html_path)
         if html_output and args.screenshot:
             LOG.info("Creating a screenshot of the output and saving it to {}".format(args.screenshot))
@@ -94,6 +97,7 @@ def parse_args(args):
     parser.add_argument("-b", "--burp", action="store_true", help="Once done, proxy all found URLs through burp.")
     parser.add_argument("-n", "--no-scan", action="store_true", help="Don't scan")
     parser.add_argument("-x", "--exclude", help="Exclude responses with this length")
+    parser.add_argument("-y", "--exclude-code", help="Exclude responses with this code (plus 404)")
     args = parser.parse_args(args)
     logger = logging.getLogger("ptscripts")
     if args.quiet:
