@@ -95,7 +95,6 @@ def main(output, url, no_screenshot, proxy):
     print_o("Running http_methods.py")
     print_o(f"Testing {url} against a list of potentially dangerous HTTP Methods.")
     print_o(f"Methods we are testing: {', '.join(METHODS)}")
-    print_o(f"Saving any content received from these methods to {output}/http_methods/")
     if proxy:
         print_o(f"Using proxy: {proxy}")
     print_o("*" * 20)
@@ -140,6 +139,7 @@ def main(output, url, no_screenshot, proxy):
     else:
         print_o(f"Done. No methods need further investigation.")
     print_o("*" * 20)
+    print_o(f"Saving any content received from these methods to {output}/http_methods/")
     http_output_path = os.path.join(methods_folder, "http_methods.html")
     render_output("http_methods.py", command, http_output_path)
     if not no_screenshot:

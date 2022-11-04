@@ -49,7 +49,7 @@ def download_file(url, directory):
     if os.path.isfile(file_path):
         log.info(f"Not downloading {url} as file {file_path} already exists.")
         return file_path
-    log.info(f"Downloading {url} to {file_path}")
+    log.info(f"Downloading {url}")
     resp = requests.get(url, stream=True)
     if resp.status_code != 200:
         log.warning(f"Received {str(resp.status_code)} for {url}")

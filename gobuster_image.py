@@ -52,7 +52,10 @@ def proxy_results(url: str, output_path: str) -> None :
     LOG.info("Proxying found URLs in Burp")
     for item in results:
         LOG.info(f"Requesting: {item}")
-        _ = requests.get(item, proxies=PROXIES, verify=False)
+        try:
+            _ = requests.get(item, proxies=PROXIES, verify=False)
+        except Exception:
+            continue
 
 
 def main(args):
