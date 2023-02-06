@@ -62,7 +62,7 @@
 
 -
   name: feroxbuster
-  command: "feroxbuster -u \"{url}\""
+  command: "feroxbuster -u \"{url}\" --replay-proxy 127.0.0.1:8080"
 
 -
   name: nuclei
