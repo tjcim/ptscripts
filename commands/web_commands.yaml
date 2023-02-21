@@ -67,3 +67,7 @@
 -
   name: nuclei
   command: "nuclei -u '{url}'"
+
+-
+  name: curl
+  command: "curl -I {url}"
