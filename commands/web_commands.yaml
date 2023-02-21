@@ -59,3 +59,11 @@
 -
   name: headers
   command: "python {scripts_path}/security_headers.py -u {url} -o {pentest_path}"
+
+-
+  name: feroxbuster
+  command: "feroxbuster -u \"{url}\" --replay-proxy 127.0.0.1:8080"
+
+-
+  name: nuclei
+  command: "nuclei -u \"{url}\""

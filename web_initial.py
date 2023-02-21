@@ -109,20 +109,26 @@ def create_dirs(url, output):
     return base_path, site_directory_name
 
 
-def main(url, output, proxy, dont, burp):
-    if dont:
-        log.info("Not making any changes, just printing the formatted results.")
-        site_directory_name = urlparse(url).netloc.split(":")[0]
-        base_path = os.path.join(output, site_directory_name)
+def main(url, output, proxy, dont, burp, text_file):
+    if text_file:
+        with open(text_file, "r") as f:
+            urls = f.read().splitlines()
     else:
-        base_path, site_directory_name = create_dirs(url, output)
-        create_checklists(base_path)
-    commands_file = os.path.join(SCRIPT_DIR, "commands/web_commands.yaml")
-    commands = load_commands(commands_file)
-    format_commands(commands, url, base_path, site_directory_name, proxy, burp)
-    print_commands(commands)
-    if not dont:
-        write_commands(commands, base_path, site_directory_name)
+        urls = [url]
+    for url in urls:
+        if dont:
+            log.info("Not making any changes, just printing the formatted results.")
+            site_directory_name = urlparse(url).netloc.split(":")[0]
+            base_path = os.path.join(output, site_directory_name)
+        else:
+            base_path, site_directory_name = create_dirs(url, output)
+            create_checklists(base_path)
+        commands_file = os.path.join(SCRIPT_DIR, "commands/web_commands.yaml")
+        commands = load_commands(commands_file)
+        format_commands(commands, url, base_path, site_directory_name, proxy, burp)
+        print_commands(commands)
+        if not dont:
+            write_commands(commands, base_path, site_directory_name)
     log.info(f"All done. Check the folder {base_path} for created files.")
 
 
@@ -131,7 +137,7 @@ def main(url, output, proxy, dont, burp):
               help="-v Will show DEBUG messages.")
 @click.option("-q", "--quiet", "verbocity", flag_value="quiet",
               help="-q Will show only ERROR messages.")
-@click.option("-u", "--url", "url", prompt=True,
+@click.option("-u", "--url", "url",
               help="Full url for the web application including virtual directories and port.")
 @click.option("-o", "--output", prompt=True,
               type=click.Path(file_okay=False, dir_okay=True, resolve_path=True),
@@ -141,9 +147,10 @@ def main(url, output, proxy, dont, burp):
               help="Use burp")
 @click.option("-d", "--dont", "dont", is_flag=True,
               help="Don't make any changes, just print out the commands")
-def cli(verbocity, url, output, proxy, dont, burp):
+@click.option("-t", "--text", "text_file", type=click.Path(file_okay=True, dir_okay=False, resolve_path=True), help="Use a text file of URLs")
+def cli(verbocity, url, output, proxy, dont, burp, text_file):
     set_logging_level(verbocity)
-    main(url, output, proxy, dont, burp)
+    main(url, output, proxy, dont, burp, text_file)
 
 
 def set_logging_level(verbocity):
