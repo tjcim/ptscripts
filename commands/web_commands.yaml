@@ -1,14 +1,14 @@
 # Available variables
 # {scripts_path}
-# {url}
+# '{url}'
 # {pentest_path}
 # {proxy}
 ---
 -
   name: wafw00f
-  command: "python {scripts_path}/wafw00f_image.py -u {url} -o {pentest_path} -n"
-  proxy: "python {scripts_path}/wafw00f_image.py -p {proxy} -u {url} -o {pentest_path} -n"
-  burp: "python {scripts_path}/wafw00f_image.py -p 127.0.0.1:8080 -u {url} -o {pentest_path} -n"
+  command: "python {scripts_path}/wafw00f_image.py -u '{url}' -o {pentest_path} -n"
+  proxy: "python {scripts_path}/wafw00f_image.py -p {proxy} -u '{url}' -o {pentest_path} -n"
+  burp: "python {scripts_path}/wafw00f_image.py -p 127.0.0.1:8080 -u '{url}' -o {pentest_path} -n"
   description: "Runs wafw00f, saves output to an html file and then takes an image."
 
 -
@@ -19,51 +19,51 @@
 
 -
   name: whatweb
-  command: "python {scripts_path}/whatweb_image.py {url} {pentest_path}"
-  proxy: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -p {proxy}"
-  burp: "python {scripts_path}/whatweb_image.py {url} {pentest_path} -p 127.0.0.1:8080"
+  command: "python {scripts_path}/whatweb_image.py '{url}' {pentest_path}"
+  proxy: "python {scripts_path}/whatweb_image.py '{url}' {pentest_path} -p {proxy}"
+  burp: "python {scripts_path}/whatweb_image.py '{url}' {pentest_path} -p 127.0.0.1:8080"
 
 -
   name: http_methods
-  command: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -n"
-  proxy: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -p {proxy} -n"
-  burp: "python {scripts_path}/http_methods.py -o {pentest_path} -u {url} -p 127.0.0.1:8080 -n"
+  command: "python {scripts_path}/http_methods.py -o {pentest_path} -u '{url}' -n"
+  proxy: "python {scripts_path}/http_methods.py -o {pentest_path} -u '{url}' -p {proxy} -n"
+  burp: "python {scripts_path}/http_methods.py -o {pentest_path} -u '{url}' -p 127.0.0.1:8080 -n"
 
 -
   name: gobuster
-  command: "python {scripts_path}/gobuster_image.py -b {url} {pentest_path}"
-  proxy: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -p {proxy}"
-  burp: "python {scripts_path}/gobuster_image.py {url} {pentest_path} -p 127.0.0.1:8080"
+  command: "python {scripts_path}/gobuster_image.py -b '{url}' {pentest_path}"
+  proxy: "python {scripts_path}/gobuster_image.py '{url}' {pentest_path} -p {proxy}"
+  burp: "python {scripts_path}/gobuster_image.py '{url}' {pentest_path} -p 127.0.0.1:8080"
 
 -
   name: nikto
-  command: "python {scripts_path}/mnikto.py --url {url} {pentest_path}"
-  proxy: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -p {proxy}"
-  burp: "python {scripts_path}/mnikto.py --url {url} {pentest_path} -p 127.0.0.1:8080"
+  command: "python {scripts_path}/mnikto.py --url '{url}' {pentest_path}"
+  proxy: "python {scripts_path}/mnikto.py --url '{url}' {pentest_path} -p {proxy}"
+  burp: "python {scripts_path}/mnikto.py --url '{url}' {pentest_path} -p 127.0.0.1:8080"
 
 -
   name: testssl
-  command: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path} -n"
-  proxy: "python {scripts_path}/mtestssl.py -u {url} -o {pentest_path} -p {proxy} -n"
+  command: "python {scripts_path}/mtestssl.py -u '{url}' -o {pentest_path} -n"
+  proxy: "python {scripts_path}/mtestssl.py -u '{url}' -o {pentest_path} -p {proxy} -n"
 
 -
   name: iframe
-  command: "python {scripts_path}/iframe.py {url} {pentest_path}"
+  command: "python {scripts_path}/iframe.py '{url}' {pentest_path}"
   proxy: ""
 
 -
   name: validate TRACE
-  command: "python {scripts_path}/validate_trace_image.py {url} {pentest_path}"
+  command: "python {scripts_path}/validate_trace_image.py '{url}' {pentest_path}"
   proxy: ""
 
 -
   name: headers
-  command: "python {scripts_path}/security_headers.py -u {url} -o {pentest_path}"
+  command: "python {scripts_path}/security_headers.py -u '{url}' -o {pentest_path}"
 
 -
   name: feroxbuster
-  command: "feroxbuster -u \"{url}\" --replay-proxy 127.0.0.1:8080"
+  command: "feroxbuster -u '{url}' --replay-proxy 127.0.0.1:8080"
 
 -
   name: nuclei
-  command: "nuclei -u \"{url}\""
+  command: "nuclei -u '{url}'"
