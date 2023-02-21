@@ -5,6 +5,7 @@ USAGE: python security_headers.py <url> <output_dir>
 """
 import os
 import logging
+import urllib3
 
 import click
 import requests
@@ -17,6 +18,7 @@ GREEN = "\033[0;32m"
 RED = "\033[0;31m"
 WHITE = "\033[1;37m"
 RESET = "\033[0m"
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def write_results(output, present_headers, missing_headers):
@@ -33,7 +35,7 @@ X-Frame-Options and X-XSS-Protection can be covered by a Content-Security-Policy
 
 
 def get_headers(url):
-    res = requests.get(url)
+    res = requests.get(url, verify=False)
     if res.status_code != 200:
         log.warning(f"{RED}We received a status code of {res.status_code}{RESET}")
     return res.headers

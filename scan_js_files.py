@@ -50,7 +50,11 @@ def download_file(url, directory):
         log.info(f"Not downloading {url} as file {file_path} already exists.")
         return file_path
     log.info(f"Downloading {url}")
-    resp = requests.get(url, stream=True)
+    try:
+        resp = requests.get(url, stream=True)
+    except Exception as e:
+        log.error(f"Error downloading file: {e}")
+        return None
     if resp.status_code != 200:
         log.warning(f"Received {str(resp.status_code)} for {url}")
         return None
